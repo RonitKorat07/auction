@@ -34,6 +34,7 @@ const Display = () => {
   
 
   return (
+
     <div className="h-auto bg-[#202626] flex justify-center items-center pt-20 w-full absolute">
     <div className="container mx-auto px-4 py-8 flex justify-center w-full">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 w-full max-w-6xl mx-auto">

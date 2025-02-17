@@ -33,7 +33,7 @@ const Navbar = () => {
 
           {/* Navigation Links */}
           <div className="hidden md:flex items-center space-x-8">
-            {['/', '/players', '/teams', '/auction'].map((path, index) => (
+            {['/', '/players', '/team', '/auction'].map((path, index) => (
               <motion.div
                 key={path}
                 initial={{ opacity: 0, x: -50 }}

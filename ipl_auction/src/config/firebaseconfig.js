@@ -1,22 +1,22 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getFirestore } from "firebase/firestore";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+// firebaseConfig.js or a similar file
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+
+// Your Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCtarzDxhNy0-S5QYelVKjXNHQtcbB0R3A",
-  authDomain: "circketauction.firebaseapp.com",
-  projectId: "circketauction",
-  storageBucket: "circketauction.firebasestorage.app",
-  messagingSenderId: "549898113773",
-  appId: "1:549898113773:web:4ce8857a8c4581ade9b2e4",
-  measurementId: "G-866KN2N2V6"
+  apiKey: "AIzaSyDWa9eTD4YKd8rSesf_DCPjav3ujjes69g",
+  authDomain: "auction-e4ba4.firebaseapp.com",
+  databaseURL: "https://auction-e4ba4-default-rtdb.firebaseio.com",
+  projectId: "auction-e4ba4",
+  storageBucket: "auction-e4ba4.firebasestorage.app",
+  messagingSenderId: "915884332048",
+  appId: "1:915884332048:web:6712f942b7c8a392272695",
+  measurementId: "G-YCYXJ6FZ6X"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
- export const db = getFirestore(app);
+
+// Export the Firestore database
+export const db = getFirestore(app);
