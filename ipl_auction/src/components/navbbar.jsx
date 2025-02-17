@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 const Navbar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <motion.nav 
       initial={{ opacity: 0 }}
@@ -98,6 +100,7 @@ const Navbar = () => {
             className="md:hidden text-white"
             whileHover={{ scale: 1.1, rotate: 180 }}
             whileTap={{ scale: 0.9 }}
+            onClick={() => setIsOpen(!isOpen)}
             transition={{ type: "spring", stiffness: 200 }}
           >
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -105,8 +108,32 @@ const Navbar = () => {
             </svg>
           </motion.button>
 
+          
+
         </div>
       </div>
+      {isOpen && (
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className="md:hidden bg-[#202626] w-full absolute top-20 left-0 right-0 shadow-lg border-t border-white/20"
+        >
+          <div className="flex flex-col items-center space-y-4 py-4">
+            {['/', '/players', '/teams', '/auction', '/login', '/Registration'].map((path) => (
+              <Link 
+                key={path} 
+                to={path} 
+                style={{color:"white"}}
+                className="text-white text-lg hover:text-gray-300"
+                onClick={() => setIsOpen(false)}
+              >
+                {path === '/' ? 'Home' : path.slice(1).charAt(0).toUpperCase() + path.slice(2)}
+              </Link>
+            ))}
+          </div>
+        </motion.div>
+      )}
     </motion.nav>
   );
 };
