@@ -6,10 +6,10 @@ function App() {
     <>
     <div className="min-h-screen bg-gray-100 w-full">
       <Navbar/>
-<Outlet/>
+      <Outlet/>
     </div>
                     
-                    </>
+    </>
   );
 }
 
