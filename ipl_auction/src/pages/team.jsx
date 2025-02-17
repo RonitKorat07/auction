@@ -24,7 +24,7 @@ const Team = () => {
   ];
 
   return (
-    <div className="h-auto absolute w-full bg-gray-900">
+    <div className="h-auto absolute w-full bg-[#202626]">
       <main className="pt-24 pb-16 px-4">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl font-bold text-gray-100 mb-8 flex items-center justify-center">
@@ -35,7 +35,7 @@ const Team = () => {
             {teams.sort((a, b) => a.name.localeCompare(b.name)).map((team) => (
               <div
                 key={team.id}
-                className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-lg overflow-hidden transform transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/20 border border-gray-700/50"
+                className="bg-[#202626] from-gray-800 to-gray-900 rounded-xl shadow-lg overflow-hidden transform transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/20 border border-gray-700/50"
               >
                 <div className="p-6 relative group">
                   <div
@@ -74,7 +74,7 @@ const Team = () => {
         </div>
 
          {/* Sponsors Section */}
-         <div className="max-w-7xl mx-auto mt-20 mb-16 bg-gray-800 rounded-2xl p-8">
+         <div className="max-w-7xl mx-auto mt-20 mb-16 bg-[#202626] rounded-2xl p-8 border border-gray-700/50">
           <h2 className="text-3xl font-bold text-gray-100 mb-12 flex items-center justify-center">
             <i className="fas fa-handshake text-blue-400 mr-3"></i>
             Our Trusted Sponsors
