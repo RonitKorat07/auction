@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '../config/firebaseconfig';
 import { collection, getDocs } from 'firebase/firestore';
+import { FaHandshake } from "react-icons/fa6";
+
 
 const Team = () => {
   const [teams, setTeams] = useState([]);
@@ -76,7 +78,7 @@ const Team = () => {
          {/* Sponsors Section */}
          <div className="max-w-7xl mx-auto mt-20 mb-16 bg-[#202626] rounded-2xl p-8 border border-gray-700/50">
           <h2 className="text-3xl font-bold text-gray-100 mb-12 flex items-center justify-center">
-            <i className="fas fa-handshake text-blue-400 mr-3"></i>
+          <FaHandshake  className="fas fa-handshake text-blue-400 mr-3"/>
             Our Trusted Sponsors
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8">
