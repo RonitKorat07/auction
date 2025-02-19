@@ -137,6 +137,7 @@ const Display = () => {
               <h1 className=" absolute text-[30px] lg:text-[50px] md:text-[40px] top-0 text-gray-200 font-serif">IPL PLAYERS</h1>
             </div>
 
+
             {/* Players Table */}
             <div className="rounded-xl overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-700">
