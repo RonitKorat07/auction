@@ -26,7 +26,7 @@ const Team = () => {
   ];
 
   return (
-    <div className="h-auto absolute w-full bg-[#202626]">
+    <div className="h-auto relative w-full bg-[#202626]">
       <main className="pt-24 pb-16 px-4">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl font-bold text-gray-100 mb-8 flex items-center justify-center">

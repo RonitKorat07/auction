@@ -8,6 +8,7 @@ import Login from '../src/pages/login.jsx'
 import Display from '../src/pages/display.jsx'
 import RegistrationForm from '../src/pages/ragestration.jsx'
 import Team from './pages/team.jsx'
+import Footer from './components/footer.jsx'
 
 const router = createBrowserRouter([
   {
@@ -16,7 +17,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <Landingpage />
+        element: <><Landingpage /><Footer/></>
       },
       {
         path: '/login',
@@ -28,11 +29,11 @@ const router = createBrowserRouter([
       },
       {
         path: '/players',
-        element: <Display />
+        element: <><Display /><Footer/></>
       },
       {
         path: '/team',
-        element: <Team />
+        element: <><Team/><Footer/></>
       }
     ]
   }
