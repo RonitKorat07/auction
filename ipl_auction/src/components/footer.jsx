@@ -1,5 +1,7 @@
 // Footer.tsx
 import React, { useState } from 'react';
+import { FaHandshake } from "react-icons/fa6";
+
 
 const Footer = () => {
   const [email, setEmail] = useState('');
@@ -13,11 +15,42 @@ const Footer = () => {
     }
   };
 
+  const sponsors = [
+    { name: 'Tata Motors', logo: 'https://seeklogo.com/images/T/TATA-logo-B17191F4CA-seeklogo.com.png' },
+    { name: 'Adidas', logo: 'https://images.seeklogo.com/logo-png/30/1/jio-logo-png_seeklogo-305444.png' },
+    { name: 'CEAT Tyres', logo: 'https://images.seeklogo.com/logo-png/2/1/ceat-tyres-logo-png_seeklogo-27738.png' },
+    { name: 'Dream11', logo: 'https://seeklogo.com/images/D/dream11-logo-A5D7BB9B54-seeklogo.com.png' },
+  ];
+
   return (
     <div>
       {/* Main Footer */}
       <footer className="bg-[#1a1e1e] text-white z-50">
-        <div className="max-w-7xl mx-auto px-4 py-12">
+
+       <div className="max-w-7xl mx-auto px-4 py-4">
+
+                 {/* Sponsors Section */}
+                 <div className="max-w-7xl mx-auto mt-20 mb-16 bg-[#202626] rounded-2xl p-8 border border-gray-700/50">
+                  <h2 className="text-3xl font-bold text-gray-100 mb-12 flex items-center justify-center">
+                  <FaHandshake  className="fas fa-handshake text-blue-400 mr-3"/>
+                    Our Trusted Sponsors
+                  </h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8">
+                    {sponsors.map((sponsor, index) => (
+                      <div
+                        key={index}
+                        className="bg-white rounded-lg p-6 flex items-center justify-center border border-gray-200 shadow-md hover:scale-105 hover:opacity-80 transform transition-all duration-300"
+                      >
+                        <img
+                          src={sponsor.logo}
+                          alt={`${sponsor.name} logo`}
+                          className="w-20 h-20 object-contain"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
           {/* Top Section with Logo and Newsletter */}
           <div className="flex flex-col md:flex-row justify-between items-start mb-12">
             <div className="mb-8 md:mb-0">
