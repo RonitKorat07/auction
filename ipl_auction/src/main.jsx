@@ -13,6 +13,7 @@ import Footer from './components/footer.jsx'
 
 import { store } from './store/store.js'
 import { Provider } from 'react-redux'
+import PlayerProfile from './pages/playerprofilepage.jsx'
 
 
 const router = createBrowserRouter([
@@ -39,6 +40,11 @@ const router = createBrowserRouter([
       {
         path: '/team',
         element: <><Team/><Footer/></>
+      }
+      ,
+      {
+        path: '/playerprofile/:id',
+        element: <><PlayerProfile/><Footer/></>
       }
     ]
   }

@@ -1,7 +1,7 @@
 // Footer.tsx
 import React, { useState } from 'react';
 
-const Footer= () => {
+const Footer = () => {
   const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
 
@@ -32,17 +32,19 @@ const Footer= () => {
             </div>
             <div className="w-full md:w-96">
               <h3 className="text-xl font-semibold mb-4">Subscribe to Our Newsletter</h3>
-              <form onSubmit={handleSubscribe} className="flex gap-2">
+              <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2">                
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="flex-1 px-4 py-2 rounded-button text-gray-300 bg-[#2a3131] border-none"
+                  className="flex-1 px-4 py-2 rounded-lg text-gray-300 bg-[#2a3131] border-none focus:ring-2 focus:ring-blue-500"
+                  aria-label="Email address"
+                  required
                 />
                 <button
                   type="submit"
-                  className="!rounded-button bg-[#37474f] hover:bg-[#455a64] text-white px-6 py-2 font-semibold whitespace-nowrap"
+                  className="rounded-lg bg-[#37474f] hover:bg-[#455a64] text-white px-6 py-2 font-semibold transition-all w-full sm:w-auto"
                 >
                   Subscribe
                 </button>

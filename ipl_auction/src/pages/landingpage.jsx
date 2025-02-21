@@ -54,7 +54,7 @@ export const Landingpage = () => {
               teams.map((team) => (
                 <motion.div
                   key={team.id}
-                  className="flex flex-col items-center justify-center rounded-2xl min-w-[280px] sm:min-w-[250px] md:min-w-[220px] h-[300px] shadow-lg p-6 bg-gray-800 snap-start"
+                  className="flex flex-col items-center justify-center rounded-2xl min-w-[280px] sm:min-w-[250px] md:min-w-[220px] h-[300px] shadow-lg p-6 bg-[rgb(0,0,0,0.1)] snap-start border border-gray-700/50"
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.5, ease: 'easeOut' }}
