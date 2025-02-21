@@ -1,29 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { db } from '../config/firebaseconfig';
-import { collection, getDocs } from 'firebase/firestore';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchTeam } from '../store/teamslice'; 
 import { FaHandshake } from "react-icons/fa6";
 
 
 const Team = () => {
-  const [teams, setTeams] = useState([]);
+  const dispatch = useDispatch();
+  
+  // Get team data and loading state from Redux store
+  const {teams} = useSelector((state) => state.team);
 
   useEffect(() => {
-    const fetchTeams = async () => {
-      const teamCollection = collection(db, 'teams');
-      const teamSnapshot = await getDocs(teamCollection);
-      const teamList = teamSnapshot.docs.map((doc) => doc.data());
-      setTeams(teamList);
-    };
+    dispatch(fetchTeam());
+  }, [dispatch]);
 
-    fetchTeams();
-  }, []);
-
-  const sponsors = [
-    { name: 'Tata Motors', logo: 'https://seeklogo.com/images/T/TATA-logo-B17191F4CA-seeklogo.com.png' },
-    { name: 'Adidas', logo: 'https://images.seeklogo.com/logo-png/30/1/jio-logo-png_seeklogo-305444.png' },
-    { name: 'CEAT Tyres', logo: 'https://images.seeklogo.com/logo-png/2/1/ceat-tyres-logo-png_seeklogo-27738.png' },
-    { name: 'Dream11', logo: 'https://seeklogo.com/images/D/dream11-logo-A5D7BB9B54-seeklogo.com.png' },
-  ];
 
   return (
     <div className="h-auto relative w-full bg-[#202626]">
@@ -34,7 +24,7 @@ const Team = () => {
             Cricket Teams
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {teams.sort((a, b) => a.name.localeCompare(b.name)).map((team) => (
+            {teams.slice().sort((a, b) => a.name.localeCompare(b.name)).map((team) => (
               <div
                 key={team.id}
                 className="bg-[#202626] from-gray-800 to-gray-900 rounded-xl shadow-lg overflow-hidden transform transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/20 border border-gray-700/50"
@@ -75,27 +65,6 @@ const Team = () => {
           </div>
         </div>
 
-         {/* Sponsors Section */}
-         <div className="max-w-7xl mx-auto mt-20 mb-16 bg-[#202626] rounded-2xl p-8 border border-gray-700/50">
-          <h2 className="text-3xl font-bold text-gray-100 mb-12 flex items-center justify-center">
-          <FaHandshake  className="fas fa-handshake text-blue-400 mr-3"/>
-            Our Trusted Sponsors
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8">
-            {sponsors.map((sponsor, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-lg p-6 flex items-center justify-center border border-gray-200 shadow-md hover:scale-105 hover:opacity-80 transform transition-all duration-300"
-              >
-                <img
-                  src={sponsor.logo}
-                  alt={`${sponsor.name} logo`}
-                  className="w-20 h-20 object-contain"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
       </main>
     </div>
   );
