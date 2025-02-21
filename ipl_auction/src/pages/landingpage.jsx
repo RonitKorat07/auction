@@ -105,6 +105,7 @@ export const Landingpage = () => {
                 <motion.div
                   key={team.id}
                   className="flex flex-col items-center justify-center rounded-2xl w-[280px] h-[320px] bg-gray-800 p-6 snap-start"
+
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.5, ease: 'easeOut' }}
