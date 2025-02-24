@@ -9,6 +9,13 @@ import Display from '../src/pages/display.jsx'
 import RegistrationForm from '../src/pages/ragestration.jsx'
 import Team from './pages/team.jsx'
 
+import Footer from './components/footer.jsx'
+
+import { store } from './store/store.js'
+import { Provider } from 'react-redux'
+import PlayerProfile from './pages/playerprofilepage.jsx'
+
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -16,7 +23,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <Landingpage />
+        element: <><Landingpage /><Footer/></>
       },
       {
         path: '/login',
@@ -28,11 +35,16 @@ const router = createBrowserRouter([
       },
       {
         path: '/players',
-        element: <Display />
+        element: <><Display /><Footer/></>
       },
       {
         path: '/team',
-        element: <Team />
+        element: <><Team/><Footer/></>
+      }
+      ,
+      {
+        path: '/playerprofile/:id',
+        element: <><PlayerProfile/><Footer/></>
       }
     ]
   }
@@ -40,6 +52,8 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
+     <Provider store={store}>
     <RouterProvider router={router} />
+    </Provider>
   </StrictMode>
 )

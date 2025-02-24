@@ -42,7 +42,6 @@ const Login = () => {
           />
         </motion.div>
 
-        {/* Login form */}
         <div className="w-full md:w-1/2 flex flex-col items-center mt-10">
           <motion.h2 
             initial={{ y: -20 }}
