@@ -1,17 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation(); // Get current path
+  const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0 });
+
+  useEffect(() => {
+    // Find the active link element
+    const activeLink = document.querySelector(".nav-link.active");
+    if (activeLink) {
+      const { offsetLeft, offsetWidth } = activeLink;
+      setUnderlineStyle({ left: offsetLeft, width: offsetWidth });
+    }
+  }, [location.pathname]); // Update on route change
 
   return (
     <motion.nav
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
-      className="bg-[#202626] fixed top-0 left-0 right-0 w-full z-50 h-20"
+      className="bg-[#202626] fixed top-0 left-0 right-0 w-full z-50 h-20 shadow-lg"
     >
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-20">
@@ -31,36 +41,26 @@ const Navbar = () => {
           </motion.div>
 
           {/* Navigation Links */}
-          <div className="hidden md:flex items-center space-x-8">
-            {["/", "/players", "/team", "/auction"].map((path, index) => (
-              <motion.div
+          <div className="hidden md:flex items-center space-x-8 relative">
+            {["/", "/players", "/team", "/auction"].map((path) => (
+              <Link
                 key={path}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1, type: "spring", stiffness: 100 }}
-                className="relative group"
+                to={path}
+                className={`nav-link text-white hover:text-gray-300 transition-colors duration-300 ${
+                  location.pathname === path ? "active" : ""
+                }`}
               >
-                <Link
-                  to={path}
-                  className="text-white hover:text-gray-300 transition-colors duration-300"
-                >
-                  {path === "/"
-                    ? "Home"
-                    : path.slice(1).charAt(0).toUpperCase() + path.slice(2)}
-                </Link>
-
-                {/* Underline Animation for Active Link */}
-                {location.pathname === path && (
-                  <motion.div
-                    layoutId="underline"
-                    className="absolute left-0 bottom-[-4px] w-full h-[3px] bg-blue-500"
-                    initial={{ width: 0 }}
-                    animate={{ width: "100%" }}
-                    transition={{ type: "spring", stiffness: 200 }}
-                  />
-                )}
-              </motion.div>
+                {path === "/" ? "Home" : path.slice(1).charAt(0).toUpperCase() + path.slice(2)}
+              </Link>
             ))}
+
+            {/* Underline Animation */}
+            <motion.div
+              className="absolute bottom-[-4px] h-[3px] bg-blue-500"
+              initial={{ width: 0 }}
+              animate={{ left: underlineStyle.left, width: underlineStyle.width }}
+              transition={{ type: "spring", stiffness: 300 }}
+            />
           </div>
 
           {/* Auth Buttons */}
@@ -70,7 +70,7 @@ const Navbar = () => {
                 to="/login"
                 className={`px-4 py-2 ${
                   location.pathname === "/login"
-                    ? "bg-red-500 text-white rounded-lg"
+                    ? "bg-blue-500 text-white rounded-lg"
                     : "text-white hover:text-gray-300"
                 }`}
               >
