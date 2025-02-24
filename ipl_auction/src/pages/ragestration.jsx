@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
 
-const Login = () => {
+
+const RegistrationForm = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -128,7 +127,7 @@ const Login = () => {
               type="submit"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="w-full py-3 px-6 bg-black text-white font-bold rounded-lg shadow-lg hover:bg-white/90 transition-all duration-300"
+              className="w-full py-3 px-6 bg-black text-white font-bold rounded-lg shadow-lg hover: transition-all duration-300"
             >
               Register
             </motion.button>
@@ -140,4 +139,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default RegistrationForm;

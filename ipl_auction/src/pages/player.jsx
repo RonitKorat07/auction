@@ -5,7 +5,7 @@ import { fetchPlayers } from '../store/playerslice';
 import React, { useState } from "react";
 import { Link } from 'react-router-dom';
 
-const Display = () => {
+const Player = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [sortField, setSortField] = useState("id");
@@ -164,4 +164,4 @@ const Display = () => {
   );
 };
 
-export default Display;
+export default Player;

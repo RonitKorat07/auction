@@ -3,9 +3,9 @@ import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import './index.css'
 import App from './App.jsx'
-import { Landingpage } from '../src/pages/landingpage'
+import { Homepage } from './pages/homepage.jsx'
 import Login from '../src/pages/login.jsx'
-import Display from '../src/pages/display.jsx'
+import Player from './pages/player.jsx'
 import RegistrationForm from '../src/pages/ragestration.jsx'
 import Team from './pages/team.jsx'
 
@@ -23,7 +23,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <><Landingpage /><Footer/></>
+        element: <><Homepage /><Footer /></>
       },
       {
         path: '/login',
@@ -35,16 +35,16 @@ const router = createBrowserRouter([
       },
       {
         path: '/players',
-        element: <><Display /><Footer/></>
+        element: <><Player /><Footer /></>
       },
       {
         path: '/team',
-        element: <><Team/><Footer/></>
+        element: <><Team /><Footer /></>
       }
       ,
       {
         path: '/playerprofile/:id',
-        element: <><PlayerProfile/><Footer/></>
+        element: <><PlayerProfile /><Footer /></>
       }
     ]
   }
@@ -52,8 +52,8 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-     <Provider store={store}>
-    <RouterProvider router={router} />
+    <Provider store={store}>
+      <RouterProvider router={router} />
     </Provider>
   </StrictMode>
 )
