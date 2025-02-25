@@ -14,7 +14,9 @@ import Footer from './components/footer.jsx'
 import { store } from './store/store.js'
 import { Provider } from 'react-redux'
 import PlayerProfile from './pages/playerprofilepage.jsx'
+import Auction from './pages/auction.jsx'
 import Teamprofile from './pages/teamprofilepage.jsx'
+
 
 
 const router = createBrowserRouter([
@@ -50,6 +52,11 @@ const router = createBrowserRouter([
       {
         path: '/teamprofile/:id',
         element: <><Teamprofile /><Footer /></>
+      }
+      ,
+      {
+        path: '/auction',
+        element: <><Auction /><Footer /></>
       }
     ]
   }
