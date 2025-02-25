@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
 const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    role: 'user',
   });
 
   const handleSubmit = (e) => {
@@ -22,7 +22,7 @@ const Login = () => {
   };
 
   return (
-    <div className=" w-screen bg-[#202626] flex items-center justify-center md:h-screen lg:h-screen">
+    <div className="w-screen bg-[#202626] flex items-center justify-center md:h-screen lg:h-screen">
       <motion.div 
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -65,7 +65,7 @@ const Login = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transform transition-all duration-300 placeholder-white/50"
+                className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent placeholder-white/50"
                 placeholder="Enter your email"
                 required
               />
@@ -83,10 +83,30 @@ const Login = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transform transition-all duration-300 placeholder-white/50"
+                className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent placeholder-white/50"
                 placeholder="Enter your password"
                 required
               />
+            </motion.div>
+
+            {/* Role Dropdown */}
+            <motion.div 
+              className="space-y-2"
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.35 }}
+            >
+              <label className="text-white block font-semibold">Role</label>
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-lg bg-[#303A3A] border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent placeholder-white/50"
+              >
+                <option value="admin" className="bg-[#404A4A] text-white">Admin</option>
+                <option value="team" className="bg-[#404A4A] text-white">Team</option>
+                <option value="user" className="bg-[#404A4A] text-white">User</option>
+              </select>
             </motion.div>
 
             <motion.button
@@ -105,12 +125,9 @@ const Login = () => {
             >
               <p className="text-white/80 text-center mt-6">
                 Don't have an account? {' '}
-                <Link
-                to="/Registration"
-                style={{color : "Highlight"}}
-              >
-                Register
-              </Link>
+                <Link to="/Registration" style={{color : "Highlight"}}>
+                  Register
+                </Link>
               </p>
             </motion.div>
           </form>

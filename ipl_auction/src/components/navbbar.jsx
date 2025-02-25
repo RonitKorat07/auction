@@ -81,7 +81,7 @@ const Navbar = () => {
               <Link
                 to="/Registration"
                 className={`px-4 py-2 bg-white text-[#202626] rounded ${
-                  location.pathname === "/Registration" ? "border-2 border-red-500" : ""
+                  location.pathname === "/Registration" ? "border-2 border-blue-500" : ""
                 }`}
               >
                 Register
