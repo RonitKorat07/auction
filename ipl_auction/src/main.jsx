@@ -15,6 +15,8 @@ import { store } from './store/store.js'
 import { Provider } from 'react-redux'
 import PlayerProfile from './pages/playerprofilepage.jsx'
 import Auction from './pages/auction.jsx'
+import Teamprofile from './pages/teamprofilepage.jsx'
+
 
 
 const router = createBrowserRouter([
@@ -46,6 +48,10 @@ const router = createBrowserRouter([
       {
         path: '/playerprofile/:id',
         element: <><PlayerProfile /><Footer /></>
+      },
+      {
+        path: '/teamprofile/:id',
+        element: <><Teamprofile /><Footer /></>
       }
       ,
       {
