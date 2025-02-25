@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
-const Login = () => {
+
+const RegistrationForm = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -42,7 +42,7 @@ const Login = () => {
           />
         </motion.div>
 
-        <div className="w-full md:w-1/2 flex flex-col items-center mt-10">
+        <div className="w-full md:w-1/2 flex flex-col items-center pt-[6.35rem]">
           <motion.h2 
             initial={{ y: -20 }}
             animate={{ y: 0 }}
@@ -128,10 +128,22 @@ const Login = () => {
               type="submit"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="w-full py-3 px-6 bg-black text-white font-bold rounded-lg shadow-lg hover:bg-white/90 transition-all duration-300"
+              className="w-full py-3 px-6 bg-black text-white font-bold rounded-lg shadow-lg hover: transition-all duration-300"
             >
               Register
             </motion.button>
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              <p className="text-white/80 text-center ">
+                Do you have an account? {' '}
+                <Link to="/login" style={{color : "Highlight"}}>
+                  Login
+                </Link>
+              </p>
+            </motion.div>
           </form>
 
         </div>
@@ -140,4 +152,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default RegistrationForm;
