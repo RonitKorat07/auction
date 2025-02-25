@@ -18,6 +18,7 @@ import Auction from './pages/auction.jsx'
 import Teamprofile from './pages/teamprofilepage.jsx'
 
 
+
 const router = createBrowserRouter([
   {
     path: '/',
