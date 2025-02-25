@@ -101,7 +101,7 @@ const Login = () => {
                 name="role"
                 value={formData.role}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg bg-[#303A3A] border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent placeholder-white/50"
+                className="w-full px-4 py-3 rounded-lg bg-[#303A3A] border border-white/20 text-white focus:outline-none focus:border-transparent placeholder-white/50"
               >
                 <option value="admin" className="bg-[#404A4A] text-white">Admin</option>
                 <option value="team" className="bg-[#404A4A] text-white">Team</option>
