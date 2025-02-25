@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 
 const RegistrationForm = () => {
@@ -41,7 +42,7 @@ const RegistrationForm = () => {
           />
         </motion.div>
 
-        <div className="w-full md:w-1/2 flex flex-col items-center mt-10">
+        <div className="w-full md:w-1/2 flex flex-col items-center pt-[6.35rem]">
           <motion.h2 
             initial={{ y: -20 }}
             animate={{ y: 0 }}
@@ -131,6 +132,18 @@ const RegistrationForm = () => {
             >
               Register
             </motion.button>
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              <p className="text-white/80 text-center ">
+                Do you have an account? {' '}
+                <Link to="/login" style={{color : "Highlight"}}>
+                  Login
+                </Link>
+              </p>
+            </motion.div>
           </form>
 
         </div>
