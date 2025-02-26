@@ -5,10 +5,11 @@ import { FaHandshake } from "react-icons/fa6";
 import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Link } from "react-router-dom";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const Team = () => {
+const Teammm = () => {
   const dispatch = useDispatch();
   const mainRef = useRef(null);
   const teamCardsRef = useRef([]);
@@ -143,18 +144,22 @@ const Team = () => {
                       className="w-16 h-2 mx-auto mb-4 rounded-full transition-all duration-500 group-hover:w-24"
                       style={{ backgroundColor: team.color }}
                     ></div>
-                    <button
+                    <Link to={`/teamprofile/${team.id}`} className="text-white font-bold hover:text-gray-300 p-2 transition-colors">
+                       <button
                       className="w-full py-2 text-white rounded-full whitespace-nowrap transition-all duration-500 hover:shadow-lg relative overflow-hidden group"
                       style={{
                         backgroundColor: team.color,
-                        transform: "translateZ(0)",
+                        transform: 'translateZ(0)',
                       }}
+                      
                     >
-                      <span className="relative z-10 group-hover:text-white transition-colors duration-300">
-                        View Details
-                      </span>
-                      <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500"></div>
-                    </button>
+                            View Details
+                            <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500"></div>
+                            </button>
+
+                          </Link>
+                      
+                      
                   </div>
                 </div>
               ))}
@@ -165,4 +170,4 @@ const Team = () => {
   );
 };
 
-export default Team;
+export default Teammm;

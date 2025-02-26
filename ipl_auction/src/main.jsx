@@ -16,6 +16,10 @@ import { Provider } from 'react-redux'
 import PlayerProfile from './pages/playerprofilepage.jsx'
 import Auction from './pages/auction.jsx'
 import Teamprofile from './pages/teamprofilepage.jsx'
+import Dashboard from './admin/Dashboard.jsx'
+import PlayerList from './admin/players.jsx'
+import Teammm from './admin/team.jsx'
+import Adminauction from './pages/auction.jsx'
 
 
 
@@ -57,6 +61,32 @@ const router = createBrowserRouter([
       {
         path: '/auction',
         element: <><Auction /><Footer /></>
+      }
+      ,
+      {
+        path: '/admin',
+        element: <><App/></>,
+        children: [
+          {
+            path: '/admin',
+            element: <><Dashboard /><Footer /></>
+          },
+          ,
+      {
+        path: '/admin/players',
+        element: <><PlayerList /><Footer /></>
+      },
+      {
+        path: '/admin/team',
+        element: <><Teammm /><Footer /></>
+      }
+      ,
+      
+      {
+        path: '/admin/auction',
+        element: <><Adminauction /><Footer /></>
+      }
+         ]
       }
     ]
   }

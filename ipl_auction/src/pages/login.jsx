@@ -45,7 +45,7 @@ const Login = () => {
 
         // ✅ Navigate based on role
         if (userRole === "admin") {
-          navigate("/auction");
+          navigate("/admin");
         } else if (userRole === "team") {
           navigate("/team-dashboard");
         } else {
