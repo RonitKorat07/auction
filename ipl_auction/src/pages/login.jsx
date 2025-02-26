@@ -1,17 +1,69 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link,useNavigate  } from 'react-router-dom';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../config/firebaseconfig';
 
 const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    role: 'user',
+    role: '',
   });
 
-  const handleSubmit = (e) => {
+  const [error, setError] = useState(""); // Error state
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
+    setError(""); // Reset error before validation
+
+    if (!formData.email || !formData.password || !formData.role) {
+      setError("❌ Please fill all fields!");
+      return;
+    }
+
+    const auth = getAuth();
+    try {
+      // ✅ Authenticate user
+      const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      const user = userCredential.user;
+
+      // ✅ Fetch user role from Firestore
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        const userRole = userDoc.data().role;
+        
+        // ✅ Role-based authentication check
+        if (userRole !== formData.role) {
+          setError("❌ Incorrect role selected!");
+          return;
+        }
+
+        console.log("✅ Login Successful:", user.email, "Role:", userRole);
+
+        // ✅ Navigate based on role
+        if (userRole === "admin") {
+          navigate("/admin");
+        } else if (userRole === "team") {
+          navigate("/team-dashboard");
+        } else {
+          navigate("/");
+        }
+      } else {
+        setError("❌ User not found in Firestore!");
+      }
+    } catch (error) {
+      // ✅ Handle Firebase Errors
+      if (error.code === "auth/user-not-found") {
+        setError("❌ No user found with this email!");
+      } else if (error.code === "auth/wrong-password") {
+        setError("❌ Incorrect password!");
+      } else {
+        setError(`❌ ${error.message}`);
+      }
+    }
   };
 
   const handleChange = (e) => {
@@ -101,8 +153,9 @@ const Login = () => {
                 name="role"
                 value={formData.role}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg bg-[#303A3A] border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent placeholder-white/50"
+                className="w-full px-4 py-3 rounded-lg bg-[#303A3A] border border-white/20 text-white focus:outline-none focus:border-transparent placeholder-white/50"
               >
+                <option value="select" className="bg-[#404A4A] text-white">select</option>
                 <option value="admin" className="bg-[#404A4A] text-white">Admin</option>
                 <option value="team" className="bg-[#404A4A] text-white">Team</option>
                 <option value="user" className="bg-[#404A4A] text-white">User</option>
