@@ -1,11 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
+import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation(); // Get current path
   const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0 });
+  const [user, setUser] = useState(null); // Store user authentication state
+
+  useEffect(() => {
+    // Track user authentication state
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe(); // Cleanup on unmount
+  }, []);
 
   useEffect(() => {
     // Find the active link element
@@ -15,6 +27,17 @@ const Navbar = () => {
       setUnderlineStyle({ left: offsetLeft, width: offsetWidth });
     }
   }, [location.pathname]); // Update on route change
+
+  // Logout function
+  const handleLogout = async () => {
+    const auth = getAuth();
+    try {
+      await signOut(auth);
+      console.log("✅ User logged out");
+    } catch (error) {
+      console.error("❌ Logout Error:", error.message);
+    }
+  };
 
   return (
     <motion.nav
@@ -65,28 +88,42 @@ const Navbar = () => {
 
           {/* Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <motion.div whileHover={{ scale: 1.1 }}>
-              <Link
-                to="/login"
-                className={`px-4 py-2 ${
-                  location.pathname === "/login"
-                    ? "bg-blue-500 text-white rounded-lg"
-                    : "text-white hover:text-gray-300"
-                }`}
+            {user ? (
+              // Show Logout Button if Logged In
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow-lg"
+                onClick={handleLogout}
               >
-                Login
-              </Link>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.05 }}>
-              <Link
-                to="/Registration"
-                className={`px-4 py-2 bg-white text-[#202626] rounded ${
-                  location.pathname === "/Registration" ? "border-2 border-blue-500" : ""
-                }`}
-              >
-                Register
-              </Link>
-            </motion.div>
+                Logout
+              </motion.button>
+            ) : (
+              // Show Login and Register buttons if NOT logged in
+              <>
+                <motion.div whileHover={{ scale: 1.1 }}>
+                  <Link
+                    to="/login"
+                    className={`px-4 py-2 ${
+                      location.pathname === "/login"
+                        ? "bg-blue-500 text-white rounded-lg"
+                        : "text-white hover:text-gray-300"
+                    }`}
+                  >
+                    Login
+                  </Link>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }}>
+                  <Link
+                    to="/Registration"
+                    className={`px-4 py-2 bg-white text-[#202626] rounded ${
+                      location.pathname === "/Registration" ? "border-2 border-blue-500" : ""
+                    }`}
+                  >
+                    Register
+                  </Link>
+                </motion.div>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -113,7 +150,7 @@ const Navbar = () => {
           className="md:hidden bg-[#202626] w-full absolute top-20 left-0 right-0 shadow-lg border-t border-white/20"
         >
           <div className="flex flex-col items-center space-y-4 py-4">
-            {["/", "/players", "/team", "/auction", "/login", "/Registration"].map((path) => (
+            {["/", "/players", "/team", "/auction"].map((path) => (
               <Link
                 key={path}
                 to={path}
@@ -123,6 +160,36 @@ const Navbar = () => {
                 {path === "/" ? "Home" : path.slice(1).charAt(0).toUpperCase() + path.slice(2)}
               </Link>
             ))}
+
+            {/* Mobile Logout Button */}
+            {user ? (
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setIsOpen(false);
+                }}
+                className="text-red-500 text-lg hover:text-red-400"
+              >
+                Logout
+              </button>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="text-white text-lg hover:text-gray-300"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/Registration"
+                  className="text-white text-lg hover:text-gray-300"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Register
+                </Link>
+              </>
+            )}
           </div>
         </motion.div>
       )}

@@ -1,18 +1,43 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
-
+import { Link, useNavigate } from 'react-router-dom';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '../config/firebaseconfig';
 
 const RegistrationForm = () => {
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    confirmPassword: ''
   });
 
-  const handleSubmit = (e) => {
+
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
+    setError(""); // Reset error before validation
+
+
+    const auth = getAuth();
+    try {
+      // Register the user
+      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      const user = userCredential.user;
+
+      // Store user role in Firestore
+      await setDoc(doc(db, 'users', user.uid), {
+        email: user.email,
+        role: "user"  // Hardcoded role
+      });
+
+      navigate("/login");
+    } catch (error) {
+      console.log(error)
+    }
   };
+
 
   const handleChange = (e) => {
     setFormData({
@@ -52,24 +77,7 @@ const RegistrationForm = () => {
           </motion.h2>
           
           <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-sm px-4 md:px-0">
-            <motion.div 
-              className="space-y-2"
-              initial={{ x: 50, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.1 }}
-            >
-              <label className="text-white block font-semibold">Username</label>
-              <input
-                type="text"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transform transition-all duration-300 placeholder-white/50"
-                placeholder="Enter your username"
-                required
-              />
-            </motion.div>
-
+          
             <motion.div 
               className="space-y-2"
               initial={{ x: 50, opacity: 0 }}
