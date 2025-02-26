@@ -125,6 +125,7 @@ const Navbar = () => {
                   location.pathname === link.value ? "active" : ""
                 }`}
               >
+
                 {link.key}
               </Link>
             ))}
@@ -133,13 +134,17 @@ const Navbar = () => {
             <motion.div
               className="absolute bottom-[-4px] h-[3px] bg-blue-500"
               initial={{ width: 0 }}
-              animate={{ left: underlineStyle.left, width: underlineStyle.width }}
+              animate={{
+                left: underlineStyle.left,
+                width: underlineStyle.width,
+              }}
               transition={{ type: "spring", stiffness: 300 }}
             />
           </div>
 
           {/* Auth & Role Display */}
           <div className="hidden md:flex items-center space-x-4">
+
             {userRole ? (
               <>
                 <p className="text-white font-bold">Role: {userRole}</p>
@@ -188,12 +193,23 @@ const Navbar = () => {
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsOpen(!isOpen)}
           >
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
             </svg>
           </motion.button>
         </div>
       </div>
+
     </motion.nav>
   );
 };
