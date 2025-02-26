@@ -66,37 +66,37 @@ const Teamprofile = () => {
             alt="Team Logo"
             className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 mb-4 sm:mb-6"
           />
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-[#E8EAF6] text-center">
             {selectedteam?.name}
           </h1>
-        </div>  
+        </div>
       </div>
 
       {/* Quick Stats */}
       <div className="container mx-auto px-4 -mt-12 sm:-mt-16 relative z-20">
-        <div className="bg-[rgb(32,38,38)] rounded-lg shadow-lg shadow-blue-500/10 p-4 md:p-6 lg:p-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8 hover:shadow-blue-500/100 transition delay-150 duration-300 ease-in-out">
+        <div className="bg-[#202626] rounded-lg shadow-lg shadow-[#0047AB]/10 p-4 md:p-6 lg:p-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8 hover:shadow-[#0047AB]/100 transition delay-150 duration-300 ease-in-out border border-[#0047AB] ">
           <div className="text-center">
-            <p className="text-gray-400 text-sm">Home Venue</p>
-            <p className="text-lg sm:text-xl md:text-2xl font-bold text-white">
+            <p className="text-[#B0E0E6] text-sm">Home Venue</p>
+            <p className="text-lg sm:text-xl md:text-2xl font-bold text-[#E8EAF6]">
               {selectedteam.homeVenue}
             </p>
           </div>
           <div className="text-center">
-            <p className="text-gray-400 text-sm">Coach</p>
-            <p className="text-lg sm:text-xl md:text-2xl font-bold text-white">
+            <p className="text-[#B0E0E6] text-sm">Coach</p>
+            <p className="text-lg sm:text-xl md:text-2xl font-bold text-[#E8EAF6]">
               {selectedteam.coach}
             </p>
           </div>
           <div className="text-center">
-            <p className="text-gray-400 text-sm">Owner</p>
-            <p className="text-lg sm:text-xl md:text-2xl font-bold text-white">
-             {selectedteam.owner}
+            <p className="text-[#B0E0E6] text-sm">Owner</p>
+            <p className="text-lg sm:text-xl md:text-2xl font-bold text-[#E8EAF6]">
+              {selectedteam.owner}
             </p>
           </div>
-         
+
           <div className="text-center">
-            <p className="text-gray-400 text-sm">Team Budget</p>
-            <p className="text-lg sm:text-xl md:text-2xl font-bold text-white">
+            <p className="text-[#B0E0E6] text-sm">Team Budget</p>
+            <p className="text-lg sm:text-xl md:text-2xl font-bold text-[#E8EAF6]">
               {selectedteam.budget}
             </p>
           </div>
@@ -105,7 +105,7 @@ const Teamprofile = () => {
 
       {/* Squad Section */}
       <div className="container mx-auto px-4 py-8 md:py-12 lg:py-16">
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-900 mb-4 md:mb-8">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#0047AB] mb-4 md:mb-8">
           Squad
         </h2>
         <div className="flex flex-wrap gap-2 md:gap-4 mb-4 md:mb-8">
@@ -113,8 +113,8 @@ const Teamprofile = () => {
             onClick={() => setSelectedRole("All")}
             className={`px-4 py-2 text-sm sm:text-base rounded-button ${
               selectedRole === "All"
-                ? "bg-blue-900 text-white"
-                : "bg-gray-200"
+                ? "bg-[#0047AB] text-[#E8EAF6]"
+                : "bg-[#B0E0E6]"
             }`}
           >
             All
@@ -123,8 +123,8 @@ const Teamprofile = () => {
             onClick={() => setSelectedRole("Batsman")}
             className={`px-4 py-2 text-sm sm:text-base rounded-button ${
               selectedRole === "Batsman"
-                ? "bg-blue-900 text-white"
-                : "bg-gray-200"
+                ? "bg-[#0047AB] text-[#E8EAF6]"
+                : "bg-[#B0E0E6]"
             }`}
           >
             Batsmen
@@ -133,8 +133,8 @@ const Teamprofile = () => {
             onClick={() => setSelectedRole("Bowler")}
             className={`px-4 py-2 text-sm sm:text-base rounded-button ${
               selectedRole === "Bowler"
-                ? "bg-blue-900 text-white"
-                : "bg-gray-200"
+                ? "bg-[#0047AB] text-[#E8EAF6]"
+                : "bg-[#B0E0E6]"
             }`}
           >
             Bowlers
@@ -143,8 +143,8 @@ const Teamprofile = () => {
             onClick={() => setSelectedRole("All-rounder")}
             className={`px-4 py-2 text-sm sm:text-base rounded-button ${
               selectedRole === "All-rounder"
-                ? "bg-blue-900 text-white"
-                : "bg-gray-200"
+                ? "bg-[#0047AB] text-[#E8EAF6]"
+                : "bg-[#B0E0E6]"
             }`}
           >
             All-rounders
@@ -154,7 +154,7 @@ const Teamprofile = () => {
           {filteredPlayers.map((player, index) => (
             <div
               key={index}
-              className="bg-[#202626]-500/50 rounded-lg shadow-lg shadow-black-500/100 overflow-hidden"
+              className="bg-[#202626] rounded-lg shadow-lg shadow-black/100 overflow-hidden"
             >
               <img
                 src={player.image}
@@ -162,18 +162,18 @@ const Teamprofile = () => {
                 className="w-full h-48 sm:h-56 md:h-64 object-cover"
               />
               <div className="p-4 sm:p-6">
-                <h3 className="text-lg sm:text-xl font-bold text-blue-900">
+                <h3 className="text-lg sm:text-xl font-bold text-[#0047AB]">
                   {player.name}
                 </h3>
                 <div className="flex justify-between items-center mt-2">
-                  <span className="text-gray-600 text-sm sm:text-base">
+                  <span className="text-[#B0E0E6] text-sm sm:text-base">
                     {player.role}
                   </span>
-                  <span className="text-gray-600 text-sm sm:text-base">
+                  <span className="text-[#B0E0E6] text-sm sm:text-base">
                     #{player.number}
                   </span>
                 </div>
-                <p className="text-gray-600 mt-2 text-sm sm:text-base">
+                <p className="text-[#B0E0E6] mt-2 text-sm sm:text-base">
                   {player.nationality}
                 </p>
               </div>
