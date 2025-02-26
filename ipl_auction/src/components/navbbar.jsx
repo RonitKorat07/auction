@@ -1,32 +1,88 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../config/firebaseconfig"; // Ensure correct path
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const location = useLocation(); // Get current path
+  const location = useLocation();
   const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0 });
-  const [user, setUser] = useState(null); // Store user authentication state
+  const [user, setUser] = useState(null);
+  const [userRole, setUserRole] = useState(localStorage.getItem("userRole") || "");
+  const [links, setLinks] = useState([]);
+  const navigate = useNavigate();
+
+  // Fetch user role from Firestore
+  const fetchUserRole = async (uid) => {
+    try {
+      const userDoc = await getDoc(doc(db, "users", uid));
+      if (userDoc.exists()) {
+        const role = userDoc.data().role;
+        setUserRole(role);
+        localStorage.setItem("userRole", role);
+      } else {
+        console.log("❌ No such user in Firestore!");
+        setUserRole("");
+        localStorage.removeItem("userRole");
+      }
+    } catch (error) {
+      console.error("❌ Error fetching role:", error);
+      setUserRole("");
+      localStorage.removeItem("userRole");
+    }
+  };
 
   useEffect(() => {
-    // Track user authentication state
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        fetchUserRole(currentUser.uid);
+      } else {
+        setUserRole("");
+        localStorage.removeItem("userRole");
+      }
     });
 
-    return () => unsubscribe(); // Cleanup on unmount
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
-    // Find the active link element
+    // Update navigation links based on role
+    if (userRole === "user") {
+      setLinks([
+        { key: "Home", value: "/" },
+        { key: "Players", value: "/players" },
+        { key: "Team", value: "/team" },
+        { key: "Auction", value: "/auction" },
+      ]);
+    } else if (userRole === "admin") {
+      setLinks([
+        { key: "Home", value: "/admin" },
+        { key: "Players", value: "/admin/players" },
+        { key: "Team", value: "/admin/team" },
+        { key: "Auction", value: "/admin/auction" },
+      ]);
+    } else {
+      setLinks([
+        { key: "Home", value: "/" },
+        { key: "Players", value: "/players" },
+        { key: "Team", value: "/team" },
+        { key: "Auction", value: "/auction" },
+      ]);
+    }
+  }, [userRole]);
+
+  useEffect(() => {
+    // Update underline for active link
     const activeLink = document.querySelector(".nav-link.active");
     if (activeLink) {
       const { offsetLeft, offsetWidth } = activeLink;
       setUnderlineStyle({ left: offsetLeft, width: offsetWidth });
     }
-  }, [location.pathname]); // Update on route change
+  }, [location.pathname]);
 
   // Logout function
   const handleLogout = async () => {
@@ -34,6 +90,10 @@ const Navbar = () => {
     try {
       await signOut(auth);
       console.log("✅ User logged out");
+      setUserRole("");
+      localStorage.removeItem("userRole");
+      setUnderlineStyle({ left: 0, width: 0 }); // Reset underline on logout
+      navigate("/login");
     } catch (error) {
       console.error("❌ Logout Error:", error.message);
     }
@@ -49,31 +109,23 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <motion.div
-            className="flex items-center"
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
+          <motion.div className="flex items-center" whileTap={{ scale: 0.95 }}>
             <Link to="/">
-              <img
-                src="../src/assets/cricklogo.png"
-                alt="IPL Logo"
-                className="h-20 w-auto"
-              />
+              <img src="../src/assets/cricklogo.png" alt="Logo" className="h-20 w-auto" />
             </Link>
           </motion.div>
 
           {/* Navigation Links */}
           <div className="hidden md:flex items-center space-x-8 relative">
-            {["/", "/players", "/team", "/auction"].map((path) => (
+            {links.map((link) => (
               <Link
-                key={path}
-                to={path}
+                key={link.value}
+                to={link.value}
                 className={`nav-link text-white hover:text-gray-300 transition-colors duration-300 ${
-                  location.pathname === path ? "active" : ""
+                  location.pathname === link.value ? "active" : ""
                 }`}
               >
-                {path === "/" ? "Home" : path.slice(1).charAt(0).toUpperCase() + path.slice(2)}
+                {link.key}
               </Link>
             ))}
 
@@ -86,23 +138,25 @@ const Navbar = () => {
             />
           </div>
 
-          {/* Auth Buttons */}
+          {/* Auth & Role Display */}
           <div className="hidden md:flex items-center space-x-4">
-            {user ? (
-              // Show Logout Button if Logged In
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow-lg"
-                onClick={handleLogout}
-              >
-                Logout
-              </motion.button>
+            {userRole ? (
+              <>
+                <p className="text-white font-bold">Role: {userRole}</p>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow-lg"
+                  onClick={handleLogout}
+                >
+                  Logout
+                </motion.button>
+              </>
             ) : (
-              // Show Login and Register buttons if NOT logged in
               <>
                 <motion.div whileHover={{ scale: 1.1 }}>
                   <Link
                     to="/login"
+                    onClick={() => setUnderlineStyle({ left: 0, width: 0 })}
                     className={`px-4 py-2 ${
                       location.pathname === "/login"
                         ? "bg-blue-500 text-white rounded-lg"
@@ -115,6 +169,7 @@ const Navbar = () => {
                 <motion.div whileHover={{ scale: 1.05 }}>
                   <Link
                     to="/Registration"
+                    onClick={() => setUnderlineStyle({ left: 0, width: 0 })}
                     className={`px-4 py-2 bg-white text-[#202626] rounded ${
                       location.pathname === "/Registration" ? "border-2 border-blue-500" : ""
                     }`}
@@ -132,7 +187,6 @@ const Navbar = () => {
             whileHover={{ scale: 1.1, rotate: 180 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsOpen(!isOpen)}
-            transition={{ type: "spring", stiffness: 200 }}
           >
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -140,59 +194,6 @@ const Navbar = () => {
           </motion.button>
         </div>
       </div>
-
-      {/* Mobile Menu */}
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="md:hidden bg-[#202626] w-full absolute top-20 left-0 right-0 shadow-lg border-t border-white/20"
-        >
-          <div className="flex flex-col items-center space-y-4 py-4">
-            {["/", "/players", "/team", "/auction"].map((path) => (
-              <Link
-                key={path}
-                to={path}
-                className="text-white text-lg hover:text-gray-300"
-                onClick={() => setIsOpen(false)}
-              >
-                {path === "/" ? "Home" : path.slice(1).charAt(0).toUpperCase() + path.slice(2)}
-              </Link>
-            ))}
-
-            {/* Mobile Logout Button */}
-            {user ? (
-              <button
-                onClick={() => {
-                  handleLogout();
-                  setIsOpen(false);
-                }}
-                className="text-red-500 text-lg hover:text-red-400"
-              >
-                Logout
-              </button>
-            ) : (
-              <>
-                <Link
-                  to="/login"
-                  className="text-white text-lg hover:text-gray-300"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/Registration"
-                  className="text-white text-lg hover:text-gray-300"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Register
-                </Link>
-              </>
-            )}
-          </div>
-        </motion.div>
-      )}
     </motion.nav>
   );
 };

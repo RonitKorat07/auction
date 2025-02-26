@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
 import { FaGavel, FaClock, FaUserAlt, FaCalendar, FaRunning, FaGlobe, FaTag, FaHistory, FaShoppingCart, FaShieldAlt, FaWallet, FaUsers, FaPuzzlePiece } from 'react-icons/fa';
 
-const Auction = () => {
+const Adminauction = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedTeam, setSelectedTeam] = useState(null);
   const statsChartRef = useRef(null);
@@ -234,4 +234,4 @@ const Auction = () => {
   );
 };
 
-export default Auction;
+export default Adminauction;
