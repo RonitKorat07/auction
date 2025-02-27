@@ -7,11 +7,19 @@ const Teamprofile = () => {
   const [selectedRole, setSelectedRole] = useState("All");
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { teams } = useSelector((state) => state.team);
+  const { teams, loading, error } = useSelector((state) => state.team);
+  const [selectedteam, setSelectedTeam] = useState(null);
 
   useEffect(() => {
     dispatch(fetchTeam());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (teams.length > 0) {
+      const team = teams.find((team) => team.id.toString() === id);
+      setSelectedTeam(team);
+    }
+  }, [teams, id]);
 
   const players = [
     {
@@ -45,7 +53,29 @@ const Teamprofile = () => {
       ? players
       : players.filter((player) => player.role === selectedRole);
 
-  const selectedteam = teams.find((team) => team.id.toString() === id);
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#202626] flex justify-center items-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#202626] flex justify-center items-center">
+        <p className="text-red-500 text-lg">Error loading team data: {error}</p>
+      </div>
+    );
+  }
+
+  if (!selectedteam) {
+    return (
+      <div className="min-h-screen bg-[#202626] flex justify-center items-center">
+        <p className="text-white text-lg">Team not found.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#202626]">
@@ -62,12 +92,12 @@ const Teamprofile = () => {
         </div>
         <div className="relative z-10 container mx-auto px-4 h-full flex flex-col items-center justify-center">
           <img
-            src={selectedteam?.logo}
+            src={selectedteam.logo}
             alt="Team Logo"
             className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 mb-4 sm:mb-6"
           />
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-[#E8EAF6] text-center">
-            {selectedteam?.name}
+            {selectedteam.name}
           </h1>
         </div>
       </div>
@@ -79,18 +109,21 @@ const Teamprofile = () => {
             <p className="text-[#B0E0E6] text-sm">Home Venue</p>
             <p className="text-lg sm:text-xl md:text-2xl font-bold text-[#E8EAF6]">
               {selectedteam?.homeVenue?.name}
+
             </p>
           </div>
           <div className="text-center">
             <p className="text-[#B0E0E6] text-sm">Coach</p>
             <p className="text-lg sm:text-xl md:text-2xl font-bold text-[#E8EAF6]">
               {selectedteam?.coach}
+
             </p>
           </div>
           <div className="text-center">
             <p className="text-[#B0E0E6] text-sm">Owner</p>
             <p className="text-lg sm:text-xl md:text-2xl font-bold text-[#E8EAF6]">
               {selectedteam?.owner}
+
             </p>
           </div>
 

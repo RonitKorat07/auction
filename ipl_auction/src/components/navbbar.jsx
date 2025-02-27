@@ -194,6 +194,7 @@ const Navbar = () => {
           </div>
 
           {/* Mobile Menu Button */}
+          
           <motion.button
             className="md:hidden text-white"
             whileHover={{ scale: 1.1, rotate: 180 }}
@@ -215,8 +216,61 @@ const Navbar = () => {
             </svg>
           </motion.button>
         </div>
+        
       </div>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className="md:hidden bg-[#202626] w-full absolute top-20 left-0 right-0 shadow-lg border-t border-white/20"
+        >
+          <div className="flex flex-col items-center space-y-4 py-4">
+          {links.map((link) => (
+              <Link
+                key={link.value}
+                to={link.value}
+                className={`nav-link text-white hover:text-gray-300 transition-colors duration-300 ${
+                  location.pathname === link.value ? "active" : ""
+                }`}
+              >
 
+                {link.key}
+              </Link>
+            ))}
+
+            {/* Mobile Logout Button */}
+            {user ? (
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setIsOpen(false);
+                }}
+                className="text-red-500 text-lg hover:text-red-400"
+              >
+                Logout
+              </button>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="text-white text-lg hover:text-gray-300"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/Registration"
+                  className="text-white text-lg hover:text-gray-300"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Register
+                </Link>
+              </>
+            )}
+          </div>
+        </motion.div>
+      )}
     </motion.nav>
   );
 };
