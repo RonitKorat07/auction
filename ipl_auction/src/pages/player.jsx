@@ -182,7 +182,7 @@ const PlayerList = () => {
                             className="text-[#0047AB] hover:text-[#B0E0E6] p-2 transition-colors"
                             title="View Player"
                           >
-                            <FaEye />
+                            <FaEye className="h-6 w-6"/>
                           </Link>
                         </div>
                       </td>

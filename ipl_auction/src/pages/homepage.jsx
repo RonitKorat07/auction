@@ -231,7 +231,7 @@ export const Homepage = () => {
               teams.map((team, index) => (
                 <motion.div
                   key={team.id}
-                  className="team-card flex flex-col items-center justify-center rounded-2xl w-[280px] h-[320px] bg-gray-800 p-6 snap-start mt-30 border border-[#0047AB] hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/20 "
+                  className="team-card  flex flex-col items-center justify-center rounded-2xl w-[280px] h-[320px] bg-gray-800 p-6 snap-start mt-30  border border-[#0047AB] hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/20  transition-transform duration-100  "
                   initial={{ opacity: 0, y: 0 }}
                   whileInView={{ opacity: 1, y: -100 }}
                   transition={{ duration: 0.8, delay: index * 0.025 }}
