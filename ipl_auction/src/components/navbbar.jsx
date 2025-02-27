@@ -65,7 +65,14 @@ const Navbar = () => {
         { key: "Team", value: "/admin/team" },
         { key: "Auction", value: "/admin/auction" },
       ]);
-    } else {
+    } else if (userRole === "team") {
+      setLinks([
+        { key: "Home", value: "/teamdashboard" },
+        { key: "Players", value: "/players" },
+        { key: "Team", value: "/team" },
+        { key: "Auction", value: "/auction" },
+      ]);
+    }else {
       setLinks([
         { key: "Home", value: "/" },
         { key: "Players", value: "/players" },
