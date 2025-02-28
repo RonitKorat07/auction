@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -11,8 +12,6 @@ import { FaArrowRight } from "react-icons/fa";
 gsap.registerPlugin(ScrollTrigger);
 
 const Dashboard = () => {
-  const bgRef = useRef(null);
-  const adminTagRef = useRef(null);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -175,7 +174,7 @@ const Dashboard = () => {
               Players List
             </h1>
             <Link
-              to={"/players"}
+              to={"/admin/players"}
               className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-500 text-white px-4 sm:px-5 py-2 text-sm sm:text-base rounded-lg hover:bg-blue-700 transition"
             >
               View All <FaArrowRight className="ml-1 sm:ml-2" />
@@ -195,7 +194,7 @@ const Dashboard = () => {
                   initial={{ opacity: 0, y: 100 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: index * 0.2 }}
-                  className="player-card flex flex-col items-center justify-center rounded-2xl bg-gray-800 p-6"
+                  className="player-card flex flex-col items-center justify-center rounded-2xl bg-gray-800 p-6 border border-[#0047AB]"
                 >
                   <img
                     src={player.image}
@@ -231,7 +230,7 @@ const Dashboard = () => {
               Team List
             </h1>
             <Link
-              to={"/teams"}
+              to={"/admin/teampage"}
               className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-500 text-white px-4 sm:px-5 py-2 text-sm sm:text-base rounded-lg hover:bg-blue-700 transition"
             >
               See more <FaArrowRight className="ml-1 sm:ml-2" />
@@ -249,10 +248,10 @@ const Dashboard = () => {
               teams.map((team, index) => (
                 <motion.div
                   key={team.id}
-                  className="team-card flex flex-col items-center justify-center rounded-2xl w-[280px] h-[320px] bg-gray-800 p-6 snap-start mt-30"
+                  className="team-card flex flex-col items-center justify-center rounded-2xl w-[280px] h-[320px] bg-gray-800 p-6 snap-start mt-30 border border-[#0047AB] hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/20 "
                   initial={{ opacity: 0, y: 0 }}
                   whileInView={{ opacity: 1, y: -100 }}
-                  transition={{ duration: 0.8, delay: index * 0.2 }}
+                  transition={{ duration: 0.8, delay: index * 0.05 }}
                 >
                   <div className="w-45 h-45 flex items-center justify-center mb-4">
                     <img
@@ -262,7 +261,7 @@ const Dashboard = () => {
                     />
                   </div>
                   <h3
-                    className="text-lg font-bold text-center text-white px-2 w-full"
+                    className="text-lg font-bold text-center text-white px-2 w-full "
                     style={{ color: team.color }}
                   >
                     {team.name}
