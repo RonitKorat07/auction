@@ -213,7 +213,7 @@ export const Homepage = () => {
               IPL Teams
             </h1>
             <button
-              onClick={() => handleNavigate("/team")}
+              onClick={() => handleNavigate("/teampage")}
               className="flex items-center gap-2 bg-[#0047AB] text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
             >
               See More <FaArrowRight />

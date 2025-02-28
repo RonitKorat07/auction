@@ -191,7 +191,7 @@ const PlayerList = () => {
                             <FaEye />
                           </Link>
                           <button
-                            className="text-[#0047AB] hover:text-[#B0E0E6] p-2 transition-colors"
+                            className="text-[#008000] hover:text-[#B0E0E6] p-2 transition-colors"
                             title="Edit Player"
                           >
                             <FaEdit />
