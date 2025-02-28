@@ -10,7 +10,9 @@ const Navbar = () => {
   const location = useLocation();
   const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0 });
   const [user, setUser] = useState(null);
-  const [userRole, setUserRole] = useState(localStorage.getItem("userRole") || "");
+  const [userRole, setUserRole] = useState(
+    localStorage.getItem("userRole") || ""
+  );
   const [links, setLinks] = useState([]);
   const navigate = useNavigate();
 
@@ -55,21 +57,28 @@ const Navbar = () => {
       setLinks([
         { key: "Home", value: "/" },
         { key: "Players", value: "/players" },
-        { key: "Team", value: "/team" },
+        { key: "Team", value: "/teampage" },
         { key: "Auction", value: "/auction" },
       ]);
     } else if (userRole === "admin") {
       setLinks([
         { key: "Home", value: "/admin" },
         { key: "Players", value: "/admin/players" },
-        { key: "Team", value: "/admin/team" },
+        { key: "Team", value: "/admin/teampage" },
         { key: "Auction", value: "/admin/auction" },
+      ]);
+    } else if (userRole === "team") {
+      setLinks([
+        { key: "Home", value: "/team" },
+        { key: "Players", value: "/team/players" },
+        { key: "Squad", value: "/team/squad" },
+        { key: "Auction", value: "/team/auction" },
       ]);
     } else {
       setLinks([
         { key: "Home", value: "/" },
         { key: "Players", value: "/players" },
-        { key: "Team", value: "/team" },
+        { key: "Team", value: "/teampage" },
         { key: "Auction", value: "/auction" },
       ]);
     }
@@ -125,7 +134,11 @@ const Navbar = () => {
           {/* Logo */}
           <motion.div className="flex items-center" whileTap={{ scale: 0.95 }}>
             <Link to="/">
-              <img src="../src/assets/cricklogo.png" alt="Logo" className="h-20 w-auto" />
+              <img
+                src="../src/assets/cricklogo.png"
+                alt="Logo"
+                className="h-20 w-auto"
+              />
             </Link>
           </motion.div>
 
@@ -139,7 +152,6 @@ const Navbar = () => {
                   location.pathname === link.value ? "active" : ""
                 }`}
               >
-
                 {link.key}
               </Link>
             ))}
@@ -158,7 +170,6 @@ const Navbar = () => {
 
           {/* Auth & Role Display */}
           <div className="hidden md:flex items-center space-x-4">
-
             {userRole ? (
               <>
                 <p className="text-white font-bold">Role: {userRole}</p>
@@ -190,7 +201,9 @@ const Navbar = () => {
                     to="/Registration"
                     onClick={() => setUnderlineStyle({ left: 0, width: 0 })}
                     className={`px-4 py-2 bg-white text-[#202626] rounded ${
-                      location.pathname === "/Registration" ? "border-2 border-blue-500" : ""
+                      location.pathname === "/Registration"
+                        ? "border-2 border-blue-500"
+                        : ""
                     }`}
                   >
                     Register
@@ -201,7 +214,7 @@ const Navbar = () => {
           </div>
 
           {/* Mobile Menu Button */}
-          
+
           <motion.button
             className="md:hidden text-white"
             whileHover={{ scale: 1.1, rotate: 180 }}
@@ -223,7 +236,6 @@ const Navbar = () => {
             </svg>
           </motion.button>
         </div>
-        
       </div>
       {isOpen && (
         <motion.div
@@ -233,7 +245,7 @@ const Navbar = () => {
           className="md:hidden bg-[#202626] w-full absolute top-20 left-0 right-0 shadow-lg border-t border-white/20"
         >
           <div className="flex flex-col items-center space-y-4 py-4">
-          {links.map((link) => (
+            {links.map((link) => (
               <Link
                 key={link.value}
                 to={link.value}
@@ -241,7 +253,6 @@ const Navbar = () => {
                   location.pathname === link.value ? "active" : ""
                 }`}
               >
-
                 {link.key}
               </Link>
             ))}

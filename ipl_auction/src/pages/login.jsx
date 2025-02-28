@@ -1,23 +1,23 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Link,useNavigate  } from 'react-router-dom';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../config/firebaseconfig';
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../config/firebaseconfig";
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    role: '',
+    email: "",
+    password: "",
+    role: "",
   });
 
-  const [error, setError] = useState(""); // Error state
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(""); // Reset error before validation
+    setError("");
 
     if (!formData.email || !formData.password || !formData.role) {
       setError("❌ Please fill all fields!");
@@ -26,16 +26,17 @@ const Login = () => {
 
     const auth = getAuth();
     try {
-      // ✅ Authenticate user
-      const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
       const user = userCredential.user;
 
-      // ✅ Fetch user role from Firestore
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (userDoc.exists()) {
         const userRole = userDoc.data().role;
-        
-        // ✅ Role-based authentication check
+
         if (userRole !== formData.role) {
           setError("❌ Incorrect role selected!");
           return;
@@ -43,11 +44,10 @@ const Login = () => {
 
         console.log("✅ Login Successful:", user.email, "Role:", userRole);
 
-        // ✅ Navigate based on role
         if (userRole === "admin") {
           navigate("/admin");
         } else if (userRole === "team") {
-          navigate("/team-dashboard");
+          navigate("/team");
         } else {
           navigate("/");
         }
@@ -55,7 +55,6 @@ const Login = () => {
         setError("❌ User not found in Firestore!");
       }
     } catch (error) {
-      // ✅ Handle Firebase Errors
       if (error.code === "auth/user-not-found") {
         setError("❌ No user found with this email!");
       } else if (error.code === "auth/wrong-password") {
@@ -69,13 +68,13 @@ const Login = () => {
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   return (
     <div className="w-screen bg-[#202626] flex items-center justify-center md:h-screen lg:h-screen">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
@@ -96,16 +95,19 @@ const Login = () => {
 
         {/* Login form */}
         <div className="w-full md:w-1/2 flex flex-col items-center">
-          <motion.h2 
+          <motion.h2
             initial={{ y: -20 }}
             animate={{ y: 0 }}
             className="text-3xl md:text-4xl font-bold text-center mb-8 text-white tracking-wider"
           >
-             Auction Watch
+            Auction Watch
           </motion.h2>
-          
-          <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-sm px-4 md:px-0">
-            <motion.div 
+
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-6 w-full max-w-sm px-4 md:px-0"
+          >
+            <motion.div
               className="space-y-2"
               initial={{ x: 50, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
@@ -123,7 +125,7 @@ const Login = () => {
               />
             </motion.div>
 
-            <motion.div 
+            <motion.div
               className="space-y-2"
               initial={{ x: 50, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
@@ -142,7 +144,7 @@ const Login = () => {
             </motion.div>
 
             {/* Role Dropdown */}
-            <motion.div 
+            <motion.div
               className="space-y-2"
               initial={{ x: 50, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
@@ -155,10 +157,18 @@ const Login = () => {
                 onChange={handleChange}
                 className="w-full px-4 py-3 rounded-lg bg-[#303A3A] border border-white/20 text-white focus:outline-none focus:border-transparent placeholder-white/50"
               >
-                <option value="select" className="bg-[#404A4A] text-white">select</option>
-                <option value="admin" className="bg-[#404A4A] text-white">Admin</option>
-                <option value="team" className="bg-[#404A4A] text-white">Team</option>
-                <option value="user" className="bg-[#404A4A] text-white">User</option>
+                <option value="select" className="bg-[#404A4A] text-white">
+                  select
+                </option>
+                <option value="admin" className="bg-[#404A4A] text-white">
+                  Admin
+                </option>
+                <option value="team" className="bg-[#404A4A] text-white">
+                  Team
+                </option>
+                <option value="user" className="bg-[#404A4A] text-white">
+                  User
+                </option>
               </select>
             </motion.div>
 
@@ -177,8 +187,8 @@ const Login = () => {
               transition={{ delay: 0.4 }}
             >
               <p className="text-white/80 text-center mt-6">
-                Don't have an account? {' '}
-                <Link to="/Registration" style={{color : "Highlight"}}>
+                Don't have an account?{" "}
+                <Link to="/Registration" style={{ color: "Highlight" }}>
                   Register
                 </Link>
               </p>
