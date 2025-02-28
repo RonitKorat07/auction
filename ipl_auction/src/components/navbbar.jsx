@@ -76,6 +76,20 @@ const Navbar = () => {
   }, [userRole]);
 
   useEffect(() => {
+    // Set default underline style to Home
+    const defaultActiveLink = links.find(link => link.value === "/");
+    if (defaultActiveLink) {
+      const activeLink = document.querySelector(".nav-link.active");
+      if (activeLink) {
+        const { offsetLeft, offsetWidth } = activeLink;
+        setUnderlineStyle({ left: offsetLeft, width: offsetWidth });
+      } else {
+        setUnderlineStyle({ left: 0, width: 0 }); // Default to Home
+      }
+    }
+  }, [links]);
+
+  useEffect(() => {
     // Update underline for active link
     const activeLink = document.querySelector(".nav-link.active");
     if (activeLink) {
