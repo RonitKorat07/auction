@@ -109,31 +109,31 @@ const Teamprofile = () => {
           <div className="text-center">
             <p className="text-[#B0E0E6] text-sm">Home Venue</p>
             <p className="text-lg sm:text-xl md:text-2xl font-bold text-[#E8EAF6]">
-              {typeof selectedteam.homeVenue === "object"
-                ? selectedteam.homeVenue.name || "N/A"
-                : selectedteam.homeVenue || "N/A"}
+
+              {selectedteam?.homeVenue?.name}
+
             </p>
           </div>
           <div className="text-center">
             <p className="text-[#B0E0E6] text-sm">Coach</p>
             <p className="text-lg sm:text-xl md:text-2xl font-bold text-[#E8EAF6]">
-              {typeof selectedteam.coach === "object"
-                ? selectedteam.coach.name || "N/A"
-                : selectedteam.coach || "N/A"}
+
+              {selectedteam?.coach}
+
             </p>
           </div>
           <div className="text-center">
             <p className="text-[#B0E0E6] text-sm">Owner</p>
             <p className="text-lg sm:text-xl md:text-2xl font-bold text-[#E8EAF6]">
-              {typeof selectedteam.owner === "object"
-                ? selectedteam.owner.name || "N/A"
-                : selectedteam.owner || "N/A"}
+
+              {selectedteam?.owner}
+
             </p>
           </div>
           <div className="text-center">
             <p className="text-[#B0E0E6] text-sm">Team Budget</p>
             <p className="text-lg sm:text-xl md:text-2xl font-bold text-[#E8EAF6]">
-              {selectedteam.budget || "N/A"}
+              {selectedteam?.budget}
             </p>
           </div>
         </div>

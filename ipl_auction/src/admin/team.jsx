@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTeam } from "../store/teamslice";
-import { FaHandshake } from "react-icons/fa6";
+
 import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const Teammm = () => {
+const Adminteam = () => {
   const dispatch = useDispatch();
   const mainRef = useRef(null);
   const teamCardsRef = useRef([]);
@@ -105,7 +105,7 @@ const Teammm = () => {
                 <div
                   key={team.id}
                   ref={(el) => (teamCardsRef.current[index] = el)}
-                  className="bg-[#202626] from-gray-800 to-gray-900 rounded-xl shadow-lg overflow-hidden transform transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/20 border border-gray-700/50"
+                  className="bg-[#202626] from-gray-800 to-gray-900 rounded-xl shadow-lg overflow-hidden transform transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/20 border border-[#0047AB]"
                 >
                   <div className="p-6 relative group">
                     <div className="absolute top-2 left-2 right-2 flex justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -144,22 +144,21 @@ const Teammm = () => {
                       className="w-16 h-2 mx-auto mb-4 rounded-full transition-all duration-500 group-hover:w-24"
                       style={{ backgroundColor: team.color }}
                     ></div>
-                    <Link to={`/teamprofile/${team.id}`} className="text-white font-bold hover:text-gray-300 p-2 transition-colors">
-                       <button
-                      className="w-full py-2 text-white rounded-full whitespace-nowrap transition-all duration-500 hover:shadow-lg relative overflow-hidden group"
-                      style={{
-                        backgroundColor: team.color,
-                        transform: 'translateZ(0)',
-                      }}
-                      
+                    <Link
+                      to={`/team_profile/${team.id}`}
+                      className="text-white font-bold hover:text-gray-300 p-2 transition-colors"
                     >
-                            View Details
-                            <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500"></div>
-                            </button>
-
-                          </Link>
-                      
-                      
+                      <button
+                        className="w-full py-2 text-white rounded-full whitespace-nowrap transition-all duration-500 hover:shadow-lg relative overflow-hidden group"
+                        style={{
+                          backgroundColor: team.color,
+                          transform: "translateZ(0)",
+                        }}
+                      >
+                        View Details
+                        <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500"></div>
+                      </button>
+                    </Link>
                   </div>
                 </div>
               ))}
@@ -170,4 +169,4 @@ const Teammm = () => {
   );
 };
 
-export default Teammm;
+export default Adminteam;

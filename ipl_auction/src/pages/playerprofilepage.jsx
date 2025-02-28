@@ -67,7 +67,7 @@ const PlayerProfile = () => {
             </div>
             <div className="space-y-4">
               <div className="bg-[#2A3131] p-4 rounded-lg border border-[#0047AB]">
-                <h3 className="text-lg font-semibold mb-3 text-[#0047AB]">
+                <h3 className="text-lg font-semibold mb-3 text-blue-300">
                   Player Info
                 </h3>
                 <div className="space-y-2">
@@ -185,7 +185,7 @@ const PlayerProfile = () => {
 
             {/* Stats Table */}
             <div className="bg-[#2A3131] p-6 rounded-lg border border-[#0047AB]">
-              <h3 className="text-xl font-semibold mb-6 text-[#0047AB]">
+              <h3 className="text-xl font-semibold mb-6 text-blue-300">
                 {selectedFormat.toUpperCase()} Statistics
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -193,7 +193,7 @@ const PlayerProfile = () => {
                 <div className="bg-[#1E2424] p-6 rounded-lg shadow-lg border border-[#0047AB]">
                   <div className="flex items-center mb-4">
                     <i className="fas fa-baseball-bat-ball text-3xl text-[#0047AB] mr-3"></i>
-                    <h4 className="text-lg font-semibold text-[#0047AB]">
+                    <h4 className="text-lg font-semibold text-blue-300">
                       Batting
                     </h4>
                   </div>
@@ -230,7 +230,7 @@ const PlayerProfile = () => {
                 <div className="bg-[#1E2424] p-6 rounded-lg shadow-lg border border-[#0047AB]">
                   <div className="flex items-center mb-4">
                     <i className="fas fa-baseball text-3xl text-[#0047AB] mr-3"></i>
-                    <h4 className="text-lg font-semibold text-[#0047AB]">
+                    <h4 className="text-lg font-semibold text-blue-300">
                       Bowling
                     </h4>
                   </div>
