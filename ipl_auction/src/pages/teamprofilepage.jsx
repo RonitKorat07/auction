@@ -21,6 +21,7 @@ const Teamprofile = () => {
     }
   }, [teams, id]);
 
+
   const players = [
     {
       name: "Rohit Sharma",
@@ -92,7 +93,7 @@ const Teamprofile = () => {
         </div>
         <div className="relative z-10 container mx-auto px-4 h-full flex flex-col items-center justify-center">
           <img
-            src={selectedteam.logo}
+            src={selectedteam?.logo}
             alt="Team Logo"
             className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 mb-4 sm:mb-6"
           />
@@ -108,6 +109,7 @@ const Teamprofile = () => {
           <div className="text-center">
             <p className="text-[#B0E0E6] text-sm">Home Venue</p>
             <p className="text-lg sm:text-xl md:text-2xl font-bold text-[#E8EAF6]">
+
               {selectedteam?.homeVenue?.name}
 
             </p>
@@ -115,6 +117,7 @@ const Teamprofile = () => {
           <div className="text-center">
             <p className="text-[#B0E0E6] text-sm">Coach</p>
             <p className="text-lg sm:text-xl md:text-2xl font-bold text-[#E8EAF6]">
+
               {selectedteam?.coach}
 
             </p>
@@ -122,11 +125,11 @@ const Teamprofile = () => {
           <div className="text-center">
             <p className="text-[#B0E0E6] text-sm">Owner</p>
             <p className="text-lg sm:text-xl md:text-2xl font-bold text-[#E8EAF6]">
+
               {selectedteam?.owner}
 
             </p>
           </div>
-
           <div className="text-center">
             <p className="text-[#B0E0E6] text-sm">Team Budget</p>
             <p className="text-lg sm:text-xl md:text-2xl font-bold text-[#E8EAF6]">
