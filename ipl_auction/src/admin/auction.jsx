@@ -1,145 +1,64 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchPlayers } from "../store/playerslice";
+import {
+  fetchAuctions,
+  createAuction,
+  updateAuctionStatus,
+} from "../store/auctionslice"; // Import Redux actions
+import { db } from "../config/firebaseconfig";
+import { collection, addDoc } from "firebase/firestore";
 
 const Adminauction = () => {
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState("live");
-  const [showCreateModal, setShowCreateModal] = useState(false);
   const [showPlayerModal, setShowPlayerModal] = useState(false);
   const [selectedPlayers, setSelectedPlayers] = useState([]);
+  const dispatch = useDispatch();
 
-  const players = [
-    {
-      id: 1,
-      name: "Mitchell Starc",
-      role: "Bowler",
-      basePrice: "$200,000",
-      image:
-        "https://public.readdy.ai/ai/img_res/284a6c97bfae6d5bcd0f423fb26cd005.jpg",
-    },
-    {
-      id: 2,
-      name: "Ben Stokes",
-      role: "All-rounder",
-      basePrice: "$250,000",
-      image:
-        "https://public.readdy.ai/ai/img_res/ddd07055bf9047ca4e0d3519073fa777.jpg",
-    },
-  ];
+  // Fetch players and auctions from Redux store
+  const { players, loading: playersLoading } = useSelector(
+    (state) => state.player
+  );
+  const { auctions, loading: auctionsLoading } = useSelector(
+    (state) => state.auction
+  );
 
-  const [auctions, setAuctions] = useState([
-    {
-      id: 1,
-      name: "IPL 2025 Mega Auction",
-      date: "2025-02-28",
-      time: "04:44 PM",
-      totalBids: 156,
-      isLive: true,
-      status: "live",
-      players: ["Virat Kohli", "Steve Smith", "Kane Williamson", "Babar Azam"],
-    },
-    {
-      id: 2,
-      name: "Big Bash League Player Draft",
-      date: "2025-02-28",
-      time: "05:30 PM",
-      totalBids: 89,
-      isLive: true,
-      status: "live",
-      players: [
-        "David Warner",
-        "Mitchell Starc",
-        "Glenn Maxwell",
-        "Pat Cummins",
-      ],
-    },
-    {
-      id: 3,
-      name: "Caribbean Premier League Auction",
-      date: "2025-02-28",
-      time: "06:15 PM",
-      totalBids: 124,
-      isLive: true,
-      status: "live",
-      players: [
-        "Chris Gayle",
-        "Andre Russell",
-        "Kieron Pollard",
-        "Dwayne Bravo",
-      ],
-    },
-    {
-      id: 4,
-      name: "The Hundred Draft 2025",
-      date: "2025-03-15",
-      time: "02:00 PM",
-      totalBids: 0,
-      isLive: false,
-      status: "upcoming",
-      players: ["Jos Buttler", "Ben Stokes", "Joe Root", "Eoin Morgan"],
-    },
-    {
-      id: 5,
-      name: "PSL 2025 Draft",
-      date: "2025-03-20",
-      time: "03:30 PM",
-      totalBids: 0,
-      isLive: false,
-      status: "upcoming",
-      players: [
-        "Shaheen Afridi",
-        "Mohammad Rizwan",
-        "Shadab Khan",
-        "Fakhar Zaman",
-      ],
-    },
-    {
-      id: 6,
-      name: "T20 Global League Auction 2024",
-      date: "2024-12-15",
-      time: "01:00 PM",
-      totalBids: 245,
-      isLive: false,
-      status: "completed",
-      players: [
-        "Rohit Sharma",
-        "AB de Villiers",
-        "Mitchell Marsh",
-        "Trent Boult",
-      ],
-    },
-  ]);
+  useEffect(() => {
+    dispatch(fetchPlayers());
+    dispatch(fetchAuctions()); // Fetch auctions on component mount
+  }, [dispatch]);
 
   const [formData, setFormData] = useState({
     name: "",
     date: "",
     time: "",
-    playerList: "",
   });
 
-  const handleCreateAuction = (e) => {
+  // Handle creating a new auction
+  const handleCreateAuction = async (e) => {
     e.preventDefault();
+
     const newAuction = {
-      id: auctions.length + 1,
-      name: formData.name,
+      auctionName: formData.name,
       date: formData.date,
       time: formData.time,
-      totalBids: 0,
-      isLive: false,
+      selectedPlayers: selectedPlayers.map((player) => player.id),
+      teams: [],
+      Players: [],
       status: "upcoming",
-      players: formData.playerList
-        .split("\n")
-        .filter((player) => player.trim() !== ""),
+      isLive: false,
     };
-    setAuctions([...auctions, newAuction]);
+
+    dispatch(createAuction(newAuction)); // Dispatch createAuction action
     setShowModal(false);
-    setFormData({ name: "", date: "", time: "", playerList: "" });
+    setFormData({ name: "", date: "", time: "" });
+    setSelectedPlayers([]);
   };
 
+  // Handle starting an auction
   const handleStartAuction = (id) => {
-    const updatedAuctions = auctions.map((auction) =>
-      auction.id === id ? { ...auction, status: "live", isLive: true } : auction
-    );
-    setAuctions(updatedAuctions);
+    dispatch(updateAuctionStatus({ id, status: "live" })); // Dispatch updateAuctionStatus action
   };
 
   const handlePlayerSelection = (player) => {
@@ -151,7 +70,7 @@ const Adminauction = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#202626] text-[#E8EAF6] pt-25 md:pt-25">
+    <div className="min-h-screen bg-[#202626] text-[#E8EAF6] pt-20 md:pt-25">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-8">
@@ -160,8 +79,7 @@ const Adminauction = () => {
             onClick={() => setShowModal(true)}
             className="mt-4 md:mt-0 bg-[#0047AB] hover:bg-[#003A8C] px-4 py-2 rounded text-white font-semibold"
           >
-            <i className="fas fa-plus mr-2"></i>
-            Create Auction
+            <i className="fas fa-plus mr-2"></i> Create Auction
           </button>
         </div>
 
@@ -171,9 +89,7 @@ const Adminauction = () => {
             <button
               key={tab}
               className={`pb-2 px-2 font-medium ${
-                activeTab === tab
-                  ? "text-[#0047AB] border-b-2 border-[#0047AB]"
-                  : "text-[#B0E0E6] hover:text-[#E8EAF6]"
+                activeTab === tab ? "text-[#0047AB] border-b-2 border-[#0047AB]" : "text-[#B0E0E6] hover:text-[#E8EAF6]"
               }`}
               onClick={() => setActiveTab(tab)}
             >
@@ -184,53 +100,45 @@ const Adminauction = () => {
 
         {/* Auction Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {auctions
-            .filter((auction) => auction.status === activeTab)
-            .map((auction) => (
-              <div
-                key={auction.id}
-                className="bg-[#202626] rounded-lg p-4 md:p-6 border border-[#B0E0E6]"
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-lg md:text-xl font-semibold">
-                    {auction.name}
-                  </h3>
-                  {auction.isLive && (
-                    <span className="bg-[#FF4500]/20 text-[#FF4500] px-2 py-1 rounded-full text-xs font-medium">
-                      <i className="fas fa-circle text-xs mr-1"></i>
-                      Live
-                    </span>
-                  )}
+          {auctionsLoading ? (
+            <p>Loading auctions...</p>
+          ) : (
+            auctions
+              ?.filter((auction) => auction.status === activeTab)
+              ?.map((auction) => (
+                <div key={auction.id} className="bg-[#202626] rounded-lg p-4 md:p-6 border border-[#B0E0E6]">
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-lg md:text-xl font-semibold">{auction.auctionName}</h3>
+                    {auction.isLive && (
+                      <span className="bg-[#FF4500]/20 text-[#FF4500] px-2 py-1 rounded-full text-xs font-medium">
+                        <i className="fas fa-circle text-xs mr-1"></i> Live
+                      </span>
+                    )}
+                  </div>
+                  <div className="space-y-1 mb-4">
+                    <p className="text-[#B0E0E6]">{auction.date}</p>
+                    <p className="text-[#B0E0E6]">{auction.time}</p>
+                    <p className="text-[#B0E0E6]">{auction.bidHistory?.length || 0} Total Bids</p>
+                    <p className="text-[#B0E0E6]">{auction.selectedPlayers?.length || 0} Players Selected</p>
+                  </div>
+                  <div className="space-y-2">
+                    {auction.status === "upcoming" && (
+                      <button
+                        onClick={() => handleStartAuction(auction.id)}
+                        className="w-full bg-[#0047AB] hover:bg-[#003A8C] py-2 rounded text-white font-semibold"
+                      >
+                        <i className="fas fa-play mr-2"></i> Start Auction
+                      </button>
+                    )}
+                    {auction.status === "live" && (
+                      <button className="w-full bg-[#0047AB] hover:bg-[#003A8C] py-2 rounded text-white font-semibold">
+                        <i className="fas fa-eye mr-2"></i> View Auction
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <div className="space-y-1 mb-4">
-                  <p className="text-[#B0E0E6]">{auction.date}</p>
-                  <p className="text-[#B0E0E6]">{auction.time}</p>
-                  <p className="text-[#B0E0E6]">
-                    {auction.totalBids} Total Bids
-                  </p>
-                  <p className="text-[#B0E0E6]">
-                    {selectedPlayers.length} Players Selected
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  {auction.status === "upcoming" && (
-                    <button
-                      onClick={() => handleStartAuction(auction.id)}
-                      className="w-full bg-[#0047AB] hover:bg-[#003A8C] py-2 rounded text-white font-semibold"
-                    >
-                      <i className="fas fa-play mr-2"></i>
-                      Start Auction
-                    </button>
-                  )}
-                  {auction.status === "live" && (
-                    <button className="w-full bg-[#0047AB] hover:bg-[#003A8C] py-2 rounded text-white font-semibold ">
-                      <i className="fas fa-eye mr-2"></i>
-                      View Auction
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
+              ))
+          )}
         </div>
 
         {/* Create Auction Modal */}
@@ -238,7 +146,7 @@ const Adminauction = () => {
           <div className="fixed inset-0 bg-[rgb(0,0,0,0.5)] bg-opacity-50 flex items-center justify-center p-4 z-2">
             <div className="bg-[#202626] rounded-lg p-6 w-full max-w-md">
               <h2 className="text-2xl font-bold mb-4">Create New Auction</h2>
-              <div className="space-y-4">
+              <form onSubmit={handleCreateAuction}>
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     Auction Name
@@ -250,6 +158,7 @@ const Adminauction = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
+                    required
                   />
                 </div>
                 <div>
@@ -261,6 +170,7 @@ const Adminauction = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, date: e.target.value })
                     }
+                    required
                   />
                 </div>
                 <div>
@@ -272,9 +182,11 @@ const Adminauction = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, time: e.target.value })
                     }
+                    required
                   />
                 </div>
                 <button
+                  type="button"
                   className="w-full bg-[#0047AB] hover:bg-[#003A8C] text-white py-2 rounded-lg transition-colors mt-4"
                   onClick={() => setShowPlayerModal(true)}
                 >
@@ -282,27 +194,34 @@ const Adminauction = () => {
                 </button>
                 <div className="flex space-x-4 mt-6">
                   <button
+                    type="button"
                     className="flex-1 bg-[#B0E0E6] hover:bg-[#A0C4C8] text-white py-2 rounded-lg transition-colors"
                     onClick={() => setShowModal(false)}
                   >
                     Cancel
                   </button>
                   <button
+                    type="submit"
                     className="flex-1 bg-[#0047AB] hover:bg-[#003A8C] text-white py-2 rounded-lg transition-colors"
-                    onClick={handleCreateAuction}
                   >
                     Create
                   </button>
                 </div>
-              </div>
+              </form>
             </div>
           </div>
         )}
 
         {/* Player Selection Modal */}
         {showPlayerModal && (
-          <div className="fixed inset-0 bg-[rgb(0,0,0,0.5)] bg-opacity-50 flex items-center justify-center p-4 z-2">
-            <div className="bg-[#202626] rounded-lg p-6 w-full max-w-2xl">
+          <div
+            className="fixed inset-0 bg-[rgb(0,0,0,0.5)] bg-opacity-50 flex items-center justify-center p-4 z-2 mt-20 "
+            onClick={() => setShowPlayerModal(false)}
+          >
+            <div
+              className="bg-[#202626] rounded-lg p-6 w-full max-w-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center gap-4">
                   <h2 className="text-2xl font-bold">Select Players</h2>
@@ -351,11 +270,11 @@ const Adminauction = () => {
                     />
                     <div className="ml-4 flex-1">
                       <h3 className="font-medium">{player.name}</h3>
-                      <p className="text-sm text-[#B0E0E6]">{player.role}</p>
+                      <p className="text-sm text-[#B0E0E6]">{player.player_role}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm text-[#B0E0E6]">Base Price</p>
-                      <p className="font-medium">{player.basePrice}</p>
+                      <p className="font-medium">{(player.auction_detail.base_price)/100000}L</p>
                     </div>
                     <input
                       type="checkbox"
