@@ -235,7 +235,7 @@ const Adminauction = () => {
 
         {/* Create Auction Modal */}
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-[rgb(0,0,0,0.5)] bg-opacity-50 flex items-center justify-center p-4 z-2">
             <div className="bg-[#202626] rounded-lg p-6 w-full max-w-md">
               <h2 className="text-2xl font-bold mb-4">Create New Auction</h2>
               <div className="space-y-4">
@@ -301,7 +301,7 @@ const Adminauction = () => {
 
         {/* Player Selection Modal */}
         {showPlayerModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-[rgb(0,0,0,0.5)] bg-opacity-50 flex items-center justify-center p-4 z-2">
             <div className="bg-[#202626] rounded-lg p-6 w-full max-w-2xl">
               <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center gap-4">
