@@ -18,11 +18,11 @@ import Auction from "./pages/auction.jsx";
 import Teamprofile from "./pages/teamprofilepage.jsx";
 import Dashboard from "./admin/Dashboard.jsx";
 import PlayerList from "./admin/players.jsx";
-import Teammm from "./admin/team.jsx";
-import Adminauction from "./pages/auction.jsx";
+
 import Teamdashboard from "./team/teamdashboard.jsx";
 import Squad from "./team/squad.jsx";
 import Adminteam from "./admin/team.jsx";
+import Adminauction from "./admin/auction.jsx";
 
 const router = createBrowserRouter([
   {

@@ -63,7 +63,7 @@ const Teamdashboard = () => {
                 <div>
                   <p className="text-sm">Remaining Budget</p>
                   <p className="text-2xl font-bold">
-                    ${(team.remainingBudget / 1000000).toFixed(1)}M
+                    ₹{(team.remainingBudget / 1000000).toFixed(1)}CR
                   </p>
                 </div>
                 <div>
