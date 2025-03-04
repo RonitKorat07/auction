@@ -1,19 +1,32 @@
+
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FaTrophy, FaChartLine, FaUsers } from "react-icons/fa";
 import { fetchTeamemail } from "../store/teamslice"; // Adjust the import path
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth"; // Add onAuthStateChanged
 import { FaMapMarkerAlt, FaCalendar, FaRulerCombined } from "react-icons/fa";
+
 const Teamdashboard = () => {
   const dispatch = useDispatch();
   const { teams, loading, error } = useSelector((state) => state.team);
   const [activeTab, setActiveTab] = useState("batsmen");
+  const [userEmail, setUserEmail] = useState(null); // Track user email
 
-  // Get the logged-in user's email
-  const auth = getAuth();
-  const userEmail = auth.currentUser?.email;
+  // Get the logged-in user's email using onAuthStateChanged
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserEmail(user.email); // Set user email
+      } else {
+        setUserEmail(null); // No user logged in
+      }
+    });
 
-  // Fetch team data when the component mounts
+    return () => unsubscribe(); // Cleanup on unmount
+  }, []);
+
+  // Fetch team data when the userEmail changes
   useEffect(() => {
     if (userEmail) {
       dispatch(fetchTeamemail(userEmail)); // Pass the email to fetchTeam
@@ -84,7 +97,6 @@ const Teamdashboard = () => {
           <div
             className="bg-[#202626] rounded-lg  p-6 md:p-8 border text-center"
             style={{ borderColor: team.color || "#0047AB" }}
-            // Dynamic border color with fallback
           >
             <h2 className="text-2xl font-bold mb-6 text-[#E8EAF6]">
               Ownership Details
@@ -133,7 +145,7 @@ const Teamdashboard = () => {
                   <span
                     key={index}
                     className="px-3 py-1 bg-[#202626] rounded-full text-xs text-[#B0E0E6] border"
-                    style={{ borderColor: team.color || "#0047AB" }} // Dynamic border color
+                    style={{ borderColor: team.color || "#0047AB" }}
                   >
                     {director}
                   </span>
@@ -145,7 +157,7 @@ const Teamdashboard = () => {
           {/* Home Venue */}
           <div
             className="bg-[#202626] rounded-lg shadow-lg p-6 md:p-8 border text-center"
-            style={{ borderColor: team.color || "#0047AB" }} // Dynamic border color
+            style={{ borderColor: team.color || "#0047AB" }}
           >
             <h2 className="text-2xl font-bold mb-6 text-[#E8EAF6]">
               Home Venue
@@ -199,7 +211,7 @@ const Teamdashboard = () => {
                   <span
                     key={index}
                     className="px-3 py-1 bg-[#202626] rounded-full text-xs text-[#B0E0E6] border"
-                    style={{ borderColor: team.color || "#0047AB" }} // Dynamic border color
+                    style={{ borderColor: team.color || "#0047AB" }}
                   >
                     <i className="fas fa-parking mr-1"></i> {facility}
                   </span>
@@ -219,7 +231,7 @@ const Teamdashboard = () => {
               <div
                 key={index}
                 className="bg-[#202626] rounded-lg shadow-lg overflow-hidden border"
-                style={{ borderColor: team.color || "#0047AB" }} // Dynamic border color
+                style={{ borderColor: team.color || "#0047AB" }}
               >
                 <img
                   src={player.image}
@@ -253,7 +265,7 @@ const Teamdashboard = () => {
               <div
                 key={index}
                 className="rounded-lg overflow-hidden shadow-lg border"
-                style={{ borderColor: team.color || "#0047AB" }} // Dynamic border color
+                style={{ borderColor: team.color || "#0047AB" }}
               >
                 <img
                   src={image}
@@ -285,7 +297,7 @@ const Teamdashboard = () => {
                     backgroundColor:
                       activeTab === tab.toLowerCase() ? team.color : "",
                     borderColor: team.color || "#0047AB",
-                  }} // Dynamic background and border color
+                  }}
                 >
                   {tab}
                 </button>
@@ -297,7 +309,7 @@ const Teamdashboard = () => {
               <div
                 key={index}
                 className="bg-[#202626] rounded-lg shadow-lg overflow-hidden border"
-                style={{ borderColor: team.color || "#0047AB" }} // Dynamic border color
+                style={{ borderColor: team.color || "#0047AB" }}
               >
                 <img
                   src={player.image}

@@ -10,7 +10,7 @@ import { db } from "../config/firebaseconfig";
 import { collection, addDoc } from "firebase/firestore";
 import { Link } from "react-router-dom";
 
-const Adminauction = () => {
+const Auctionlist = () => {
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState("live");
   const [showPlayerModal, setShowPlayerModal] = useState(false);
@@ -36,39 +36,9 @@ const Adminauction = () => {
     time: "",
   });
 
-  // Handle creating a new auction
-  const handleCreateAuction = async (e) => {
-    e.preventDefault();
+  
 
-    const newAuction = {
-      auctionName: formData.name,
-      date: formData.date,
-      time: formData.time,
-      selectedPlayers: selectedPlayers.map((player) => player.id),
-      teams: [],
-      Players: [],
-      status: "upcoming",
-      isLive: false,
-    };
-
-    dispatch(createAuction(newAuction)); // Dispatch createAuction action
-    setShowModal(false);
-    setFormData({ name: "", date: "", time: "" });
-    setSelectedPlayers([]);
-  };
-
-  // Handle starting an auction
-  const handleStartAuction = (id) => {
-    dispatch(updateAuctionStatus({ id, status: "live" })); // Dispatch updateAuctionStatus action
-  };
-
-  const handlePlayerSelection = (player) => {
-    if (selectedPlayers.some((p) => p.id === player.id)) {
-      setSelectedPlayers(selectedPlayers.filter((p) => p.id !== player.id));
-    } else {
-      setSelectedPlayers([...selectedPlayers, player]);
-    }
-  };
+ 
 
   return (
     <div className="min-h-screen bg-[#202626] text-[#E8EAF6] pt-20 md:pt-25">
@@ -76,12 +46,7 @@ const Adminauction = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold">Auctions</h1>
-          <button
-            onClick={() => setShowModal(true)}
-            className="mt-4 md:mt-0 bg-[#0047AB] hover:bg-[#003A8C] px-4 py-2 rounded text-white font-semibold"
-          >
-            <i className="fas fa-plus mr-2"></i> Create Auction
-          </button>
+        
         </div>
 
         {/* Tabs */}
@@ -123,16 +88,9 @@ const Adminauction = () => {
                     <p className="text-[#B0E0E6]">{auction.selectedPlayers?.length || 0} Players Selected</p>
                   </div>
                   <div className="space-y-2">
-                    {auction.status === "upcoming" && (
-                      <button
-                        onClick={() => handleStartAuction(auction.id)}
-                        className="w-full bg-[#0047AB] hover:bg-[#003A8C] py-2 rounded text-white font-semibold"
-                      >
-                        <i className="fas fa-play mr-2"></i> Start Auction
-                      </button>
-                    )}
+                  
                     {auction.status === "live" && (
-                     <Link to = "/admin/auction/auctionhandel">
+                     <Link to = "/auctionpage">
                       <button className="w-full bg-[#0047AB] hover:bg-[#003A8C] py-2 rounded text-white font-semibold">
                         <i className="fas fa-eye mr-2"></i> View Auction
                       </button>
@@ -307,4 +265,4 @@ const Adminauction = () => {
   );
 };
 
-export default Adminauction;
+export default Auctionlist;

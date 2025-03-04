@@ -1,13 +1,13 @@
-
 import React, { useState, useEffect } from "react";
 import {
+  FaGavel,
   FaShieldAlt,
   FaWallet,
   FaUsers,
   FaPuzzlePiece,
 } from "react-icons/fa";
 
-const Auction = () => {
+const Auctionhandel = () => {
   const [currentBid, setCurrentBid] = useState(165000000);
   const [showBidModal, setShowBidModal] = useState(false);
   const [timeLeft, setTimeLeft] = useState(30);
@@ -27,7 +27,21 @@ const Auction = () => {
     return () => clearInterval(timer);
   }, []);
 
-  
+  const handleStartAuction = () => {
+    setAuctionStatus("running");
+  };
+
+  const handlePauseAuction = () => {
+    setAuctionStatus("paused");
+  };
+
+  const handleEndAuction = () => {
+    setAuctionStatus("ended");
+  };
+
+  const handleBreak = () => {
+    // Logic for break
+  };
 
   const teams = [
     {
@@ -55,87 +69,42 @@ const Auction = () => {
       slotsLeft: 5,
     },
     {
-      id: 1,
-      name: "IPL 2025 Mega Auction",
-      date: "2025-02-28",
-      time: "04:44 PM",
-      totalBids: 156,
-      isLive: true,
-      status: "live",
-      players: ["Virat Kohli", "Steve Smith", "Kane Williamson", "Babar Azam"],
+      name: "Rajasthan Royals",
+      budget: "₹61.1 Cr",
+      playersBought: 10,
+      slotsLeft: 15,
     },
     {
-      id: 2,
-      name: "Big Bash League Player Draft",
-      date: "2025-02-28",
-      time: "05:30 PM",
-      totalBids: 89,
-      isLive: true,
-      status: "live",
-      players: [
-        "David Warner",
-        "Mitchell Starc",
-        "Glenn Maxwell",
-        "Pat Cummins",
-      ],
+      name: "Kolkata Knights",
+      budget: "4.2M USD",
+      playersBought: 16,
+      slotsLeft: 9,
     },
     {
-      id: 3,
-      name: "Caribbean Premier League Auction",
-      date: "2025-02-28",
-      time: "06:15 PM",
-      totalBids: 124,
-      isLive: true,
-      status: "live",
-      players: [
-        "Chris Gayle",
-        "Andre Russell",
-        "Kieron Pollard",
-        "Dwayne Bravo",
-      ],
+      name: "Punjab Kings",
+      budget: "5.5M USD",
+      playersBought: 14,
+      slotsLeft: 11,
     },
     {
-      id: 4,
-      name: "The Hundred Draft 2025",
-      date: "2025-03-15",
-      time: "02:00 PM",
-      totalBids: 0,
-      isLive: false,
-      status: "upcoming",
-      players: ["Jos Buttler", "Ben Stokes", "Joe Root", "Eoin Morgan"],
+      name: "Sunrisers Hyderabad",
+      budget: "3.9M USD",
+      playersBought: 17,
+      slotsLeft: 8,
     },
     {
-      id: 5,
-      name: "PSL 2025 Draft",
-      date: "2025-03-20",
-      time: "03:30 PM",
-      totalBids: 0,
-      isLive: false,
-      status: "upcoming",
-      players: [
-        "Shaheen Afridi",
-        "Mohammad Rizwan",
-        "Shadab Khan",
-        "Fakhar Zaman",
-      ],
+      name: "Gujarat Titans",
+      budget: "4.8M USD",
+      playersBought: 13,
+      slotsLeft: 12,
     },
     {
-      id: 6,
-      name: "T20 Global League Auction 2024",
-      date: "2024-12-15",
-      time: "01:00 PM",
-      totalBids: 245,
-      isLive: false,
-      status: "completed",
-      players: [
-        "Rohit Sharma",
-        "AB de Villiers",
-        "Mitchell Marsh",
-        "Trent Boult",
-      ],
+      name: "Lucknow Giants",
+      budget: "4.1M USD",
+      playersBought: 19,
+      slotsLeft: 6,
     },
-  ]);
-
+  ];
 
   const recentPurchases = [
     {
@@ -161,6 +130,39 @@ const Auction = () => {
   return (
     <div className="min-h-screen bg-[#202626] w-full">
       <main className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-25">
+      {/*AUCTION CONTROL*/}
+      <div className="mb-8 bg-[#2C2F32] rounded-lg shadow-lg p-6 border border-[#0047AB]">
+          <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
+            <FaGavel className="text-[#0047AB]" />
+            Auction Controls
+          </h3>
+          <div className="flex flex-wrap gap-4">
+            <button
+              onClick={handleStartAuction}
+              className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 flex items-center justify-center"
+              disabled={auctionStatus === "running"}
+            >
+              Start Auction
+            </button>
+            <button
+              onClick={handlePauseAuction}
+              className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 flex items-center justify-center"
+              disabled={auctionStatus !== "running"}
+            >
+              Pause Auction
+            </button>
+            <button
+              onClick={handleEndAuction}
+              className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 flex items-center justify-center"
+              disabled={auctionStatus === "ended"}
+            >
+              End Auction
+            </button>
+           
+          </div>
+        </div>
+
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Middle Column - Player Profile */}
           <div className="lg:col-span-8 w-full h-full">
@@ -356,8 +358,8 @@ const Auction = () => {
                 </div>
               </div>
             ))}
+          </div>
         </div>
-
       </main>
 
       {/* Bid Confirmation Modal */}
@@ -385,9 +387,8 @@ const Auction = () => {
           </div>
         </div>
       )}
-
     </div>
   );
 };
 
-export default Auction;
+export default Auctionhandel;

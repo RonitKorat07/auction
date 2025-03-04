@@ -23,8 +23,11 @@ import Teamdashboard from "./team/teamdashboard.jsx";
 import Squad from "./team/squad.jsx";
 import Adminteam from "./admin/team.jsx";
 import Adminauction from "./admin/auction.jsx";
+
 import Teamauction from "./team/Teamauction.jsx";
 import Teamjoinauction from "./team/joinauction.jsx";
+import Auctionhandel from "./admin/auctionhandel.jsx";
+import Auctionlist from "./pages/auctionlist.jsx";
 
 const router = createBrowserRouter([
   {
@@ -88,6 +91,15 @@ const router = createBrowserRouter([
         path: "/auction",
         element: (
           <>
+            <Auctionlist />
+            <Footer />
+          </>
+        ),
+      },
+      {
+        path: "/auctionpage",
+        element: (
+          <>
             <Auction />
             <Footer />
           </>
@@ -134,6 +146,14 @@ const router = createBrowserRouter([
             element: (
               <>
                 <Adminauction />
+                <Footer />
+              </>
+            ),
+          },{
+            path: "/admin/auction/auctionhandel",
+            element: (
+              <>
+                <Auctionhandel />
                 <Footer />
               </>
             ),
