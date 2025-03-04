@@ -145,7 +145,7 @@ const Adminteam = () => {
                       style={{ backgroundColor: team.color }}
                     ></div>
                     <Link
-                      to={`/team_profile/${team.id}`}
+                      to={`/teamprofile/${team.id}`}
                       className="text-white font-bold hover:text-gray-300 p-2 transition-colors"
                     >
                       <button
