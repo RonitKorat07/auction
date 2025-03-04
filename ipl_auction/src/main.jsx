@@ -24,6 +24,7 @@ import Squad from "./team/squad.jsx";
 import Adminteam from "./admin/team.jsx";
 import Adminauction from "./admin/auction.jsx";
 import Auctionhandel from "./admin/auctionhandel.jsx";
+import Auctionlist from "./pages/auctionlist.jsx";
 
 const router = createBrowserRouter([
   {
@@ -85,6 +86,15 @@ const router = createBrowserRouter([
       },
       {
         path: "/auction",
+        element: (
+          <>
+            <Auctionlist />
+            <Footer />
+          </>
+        ),
+      },
+      {
+        path: "/auctionpage",
         element: (
           <>
             <Auction />
