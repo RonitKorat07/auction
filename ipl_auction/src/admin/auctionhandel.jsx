@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {  
+import {
   FaGavel,
   FaShieldAlt,
   FaWallet,
@@ -52,7 +52,7 @@ const Auctionhandel = () => {
     },
     {
       name: "Chennai Kings",
-      budget: "₹38.8 Cr",
+      budget: "₹38.8 Cr", 
       playersBought: 18,
       slotsLeft: 7,
     },
@@ -115,7 +115,7 @@ const Auctionhandel = () => {
     },
     {
       name: "Vishnu Vinod",
-      from: "Delhi Capitals",
+      from: "Delhi Capitals", 
       price: "₹50 Lakhs",
       date: "February 24, 2024",
     },
@@ -128,10 +128,10 @@ const Auctionhandel = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#202626] pt-20">
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* Admin Controls */}
-        <div className="mb-8 bg-[#2C2F32] rounded-lg shadow-lg p-6 border border-[#0047AB]">
+    <div className="min-h-screen bg-[#202626] w-full">
+      <main className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-25">
+      {/*AUCTION CONTROL*/}
+      <div className="mb-8 bg-[#2C2F32] rounded-lg shadow-lg p-6 border border-[#0047AB]">
           <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
             <FaGavel className="text-[#0047AB]" />
             Auction Controls
@@ -139,164 +139,139 @@ const Auctionhandel = () => {
           <div className="flex flex-wrap gap-4">
             <button
               onClick={handleStartAuction}
-              className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+              className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 flex items-center justify-center"
               disabled={auctionStatus === "running"}
             >
               Start Auction
             </button>
             <button
               onClick={handlePauseAuction}
-              className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded"
+              className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 flex items-center justify-center"
               disabled={auctionStatus !== "running"}
             >
               Pause Auction
             </button>
             <button
               onClick={handleEndAuction}
-              className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
+              className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 flex items-center justify-center"
               disabled={auctionStatus === "ended"}
             >
               End Auction
             </button>
-            <button
-              onClick={handleBreak}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-            >
-              Break
-            </button>
+           
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Middle Column - Player Profile */}
-          <div className="col-span-12 md:col-span-8">
-            <div className="bg-[#2C2F32] rounded-lg shadow-lg overflow-hidden border-2 border-[#0047AB]">
-              <div className="relative h-auto flex justify-center">
+          <div className="lg:col-span-8 w-full h-full">
+            <div className="bg-[#2C2F32] rounded-lg shadow-lg overflow-hidden border-2 border-[#0047AB] h-full">
+              <div className="flex flex-col sm:flex-row items-center justify-center p-4 sm:p-6">
                 <img
                   src="https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1"
                   alt="Player in Action"
-                  className="w-60 h-53 m-5 object-cover"
+                  className="w-48 sm:w-60 h-auto mb-4 sm:mb-0 sm:mr-6 object-cover"
                 />
-                <div className="flex flex-col justify-center">
-                  <h1 className="text-3xl font-bold text-white">
+                <div className="text-center sm:text-left">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">
                     Hardik Pandya
                   </h1>
-                  <p className="text-xl text-gray-200">All-rounder </p>
-                  <p className="text-md text-gray-200">INDIA </p>
+                  <p className="text-lg sm:text-xl text-gray-200 mb-1">All-rounder</p>
+                  <p className="text-sm sm:text-base text-gray-200">INDIA</p>
                 </div>
               </div>
-              <div className="pt-2 p-6 space-y-6">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
-                  <div className="text-center bg-[#2C2F32] rounded-lg">
-                    <p className="text-gray-400">Matches</p>
-                    <p className="text-xl font-bold text-white">125</p>
-                  </div>
-                  <div className="text-center bg-[#2C2F32] rounded-lg">
-                    <p className="text-gray-400">Runs</p>
-                    <p className="text-xl font-bold text-white">2,309</p>
-                  </div>
-                  <div className="text-center bg-[#2C2F32] rounded-lg">
-                    <p className="text-gray-400">Wickets</p>
-                    <p className="text-xl font-bold text-white">78</p>
-                  </div>
-                  <div className="text-center bg-[#2C2F32] rounded-lg">
-                    <p className="text-gray-400">Strike Rate</p>
-                    <p className="text-xl font-bold text-white">142.5</p>
-                  </div>
-                  <div className="text-center bg-[#2C2F32] rounded-lg">
-                    <p className="text-gray-400">Batting Avg</p>
-                    <p className="text-xl font-bold text-white">32.4</p>
-                  </div>
-                  <div className="text-center bg-[#2C2F32] rounded-lg">
-                    <p className="text-gray-400">Economy</p>
-                    <p className="text-xl font-bold text-white">8.24</p>
-                  </div>
-                  <div className="text-center bg-[#2C2F32] rounded-lg">
-                    <p className="text-gray-400">Sixes</p>
-                    <p className="text-xl font-bold text-white">112</p>
-                  </div>
-                  <div className="text-center bg-[#2C2F32] rounded-lg">
-                    <p className="text-gray-400">Best Score</p>
-                    <p className="text-xl font-bold text-white">91*</p>
-                  </div>
-                </div>
-                <div className="space-y-6">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <span className="text-xl text-white">Current Bid</span>
-                      <div className="ml-4 bg-[#FF4500] text-white px-3 py-1 rounded-full flex items-center">
-                        <i className="fas fa-clock mr-2"></i>
-                        <span id="timer" className="font-semibold">
-                          {timeLeft}s
-                        </span>
-                      </div>
+
+              <div className="p-4 sm:p-6 space-y-6">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  {[
+                    { label: "Matches", value: "125" },
+                    { label: "Runs", value: "2,309" },
+                    { label: "Wickets", value: "78" },
+                    { label: "Strike Rate", value: "142.5" },
+                    { label: "Batting Avg", value: "32.4" },
+                    { label: "Economy", value: "8.24" },
+                    { label: "Sixes", value: "112" },
+                    { label: "Best Score", value: "91*" }
+                  ].map((stat, index) => (
+                    <div key={index} className="bg-[#2C2F32] rounded-lg p-3 text-center">
+                      <p className="text-sm sm:text-base text-gray-400">{stat.label}</p>
+                      <p className="text-lg sm:text-xl font-bold text-white">{stat.value}</p>
                     </div>
-                    <span className="text-3xl font-bold text-[#0047AB]">
-                      ₹{(currentBid / 100000).toFixed(2)} Crore
-                    </span>
+                  ))}
+                </div>
+
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                  <div className="flex flex-col sm:flex-row items-center gap-3">
+                    <span className="text-lg sm:text-xl text-white">Current Bid</span>
+                    <div className="bg-[#FF4500] text-white px-4 py-2 rounded-full flex items-center">
+                      <span className="font-semibold">{timeLeft}s</span>
+                    </div>
                   </div>
+                  <span className="text-2xl sm:text-3xl font-bold text-[#0047AB]">
+                    ₹{(currentBid / 100000).toFixed(2)} Crore
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Right Column - Bid History */}
-          <div className="col-span-12 md:col-span-4 bg-[#2C2F32] rounded-lg shadow-lg border border-[#0047AB] overflow-y-auto p-6">
-            <h2 className="text-xl font-semibold mb-4 text-white">
-              Bid History
-            </h2>
-            <div className="space-y-6">
-              {[
-                {
-                  bidder: "Chennai Super Kings",
-                  amount: "₹16.5 Crore",
-                  time: "2 mins ago",
-                },
-                {
-                  bidder: "Royal Challengers Bangalore",
-                  amount: "₹16.25 Crore",
-                  time: "5 mins ago",
-                },
-                {
-                  bidder: "Kolkata Knight Riders",
-                  amount: "₹16 Crore",
-                  time: "8 mins ago",
-                },
-                {
-                  bidder: "Delhi Capitals",
-                  amount: "₹15.75 Crore",
-                  time: "12 mins ago",
-                },
-                {
-                  bidder: "Rajasthan Royals",
-                  amount: "₹15.5 Crore",
-                  time: "15 mins ago",
-                },
-              ].map((bid, index) => (
-                <div
-                  key={index}
-                  className="flex justify-between items-center p-3 bg-[#2C2F32] rounded-lg"
-                >
-                  <div>
-                    <p className="font-medium text-white">{bid.bidder}</p>
+          <div className="lg:col-span-4 w-full h-full">
+            <div className="bg-[#2C2F32] rounded-lg shadow-lg border border-[#0047AB] p-4 sm:p-6 h-full">
+              <h2 className="text-xl font-semibold mb-6 text-white">Bid History</h2>
+              <div className="space-y-4">
+                {[
+                  {
+                    bidder: "Chennai Super Kings",
+                    amount: "₹16.5 Crore",
+                    time: "2 mins ago",
+                  },
+                  {
+                    bidder: "Royal Challengers Bangalore",
+                    amount: "₹16.25 Crore",
+                    time: "5 mins ago",
+                  },
+                  {
+                    bidder: "Kolkata Knight Riders",
+                    amount: "₹16 Crore",
+                    time: "8 mins ago",
+                  },
+                  {
+                    bidder: "Delhi Capitals",
+                    amount: "₹15.75 Crore",
+                    time: "12 mins ago",
+                  },
+                  {
+                    bidder: "Rajasthan Royals",
+                    amount: "₹15.5 Crore",
+                    time: "15 mins ago",
+                  },
+                ].map((bid, index) => (
+                  <div
+                    key={index}
+                    className="flex justify-between items-center p-3 bg-[#2C2F32] rounded-lg hover:bg-[#353839] transition-colors"
+                  >
+                    <div className="flex-1">
+                      <p className="font-medium text-white">{bid.bidder}</p>
+                      <p className="text-sm text-gray-400">{bid.time}</p>
+                    </div>
+                    <span className="font-semibold text-white">{bid.amount}</span>
                   </div>
-                  <span className="font-semibold text-white">{bid.amount}</span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
 
         {/* Recent Purchases Section */}
-        <div className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-6 border border-[#0047AB]">
-          <h2 className="text-2xl font-semibold mb-6 text-white">
-            Recent Purchases
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-4 sm:p-6 border border-[#0047AB]">
+          <h2 className="text-2xl font-semibold mb-6 text-white">Recent Purchases</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {recentPurchases.map((purchase, index) => (
               <div
                 key={index}
-                className="bg-[#2C2F32] rounded-lg overflow-hidden border border-[#0047AB]"
+                className="bg-[#2C2F32] rounded-lg overflow-hidden border border-[#0047AB] hover:shadow-xl transition-shadow"
               >
                 <img
                   src={`https://readdy.ai/api/search-image?query=professional soccer player in manchester united red jersey celebrating goal victory moment dramatic stadium lighting&width=400&height=300&orientation=landscape&flag=912fa8b416ec5d3215e35a8d058b0af7`}
@@ -304,132 +279,116 @@ const Auctionhandel = () => {
                   className="w-full h-48 object-cover"
                 />
                 <div className="p-4">
-                  <h3 className="text-lg font-semibold text-white">
-                    {purchase.name}
-                  </h3>
-                  <div>
-                    <div className="flex justify-between items-center h-8">
-                      <span className="text-gray-400">From</span>
-                      <span className="font-medium text-white">
-                        {purchase.from}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center h-8">
-                      <span className="text-gray-400">Transfer Fee</span>
-                      <span className="font-medium text-[#0047AB]">
-                        {purchase.price}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center h-8">
-                      <span className="text-gray-400">Date</span>
-                      <span className="font-medium text-white">
-                        {purchase.date}
-                      </span>
-                    </div>
+                  <h3 className="text-lg font-semibold text-white mb-4">{purchase.name}</h3>
+                  <div className="space-y-3">
+                    {[
+                      { label: "From", value: purchase.from },
+                      { label: "Transfer Fee", value: purchase.price, highlight: true },
+                      { label: "Date", value: purchase.date }
+                    ].map((item, idx) => (
+                      <div key={idx} className="flex justify-between items-center">
+                        <span className="text-gray-400">{item.label}</span>
+                        <span className={`font-medium ${item.highlight ? 'text-[#0047AB]' : 'text-white'}`}>
+                          {item.value}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
-     {/* Teams Status */}
-            <div className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-6 border border-[#0047AB]">
-              <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
-                <FaShieldAlt className="text-[#0047AB]" />
-                Teams Status
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-                {teams.map((team, index) => (
-                  <div
-                    key={index}
-                    className={`flex flex-col items-center bg-[#2C2F32] rounded-lg p-4 border border-[#0047AB] cursor-pointer hover:bg-[#0047AB]/10 transition-all ${
-                      selectedTeam === team.name ? "ring-2 ring-[#0047AB]" : ""
-                    }`}
-                    onClick={() => setSelectedTeam(team.name)}
-                  >
-                    <img
-                      src={`https://readdy.ai/api/search-image?query=modern minimalist cricket team logo design with ${team.name} theme, professional sports branding on dark background, centered composition&width=200&height=200&orientation=squarish`}
-                      alt={team.name}
-                      className="w-24 h-24 rounded-full border-2 border-[#0047AB] mb-4"
-                    />
-                    <h4 className="font-bold text-lg text-white text-center mb-4">
-                      {team.name}
-                    </h4>
-                    <div className="w-full space-y-2">
-                      {[
-                        {
-                          label: "Budget",
-                          value: team.budget,
-                          icon: <FaWallet className="text-[#0047AB]" />,
-                          color: "text-green-400",
-                        },
-                        {
-                          label: "Players",
-                          value: team.playersBought,
-                          icon: <FaUsers className="text-[#0047AB]" />,
-                        },
-                        {
-                          label: "Slots",
-                          value: team.slotsLeft,
-                          icon: <FaPuzzlePiece className="text-[#0047AB]" />,
-                        },
-                      ].map((item, idx) => (
-                        <div
-                          key={idx}
-                          className="flex items-center justify-between bg-[#2C2F32] rounded-lg p-2"
-                        >
-                          <div className="flex items-center gap-2">
-                            {item.icon}
-                            <span className="text-gray-300 text-sm">
-                              {item.label}
-                            </span>
-                          </div>
-                          <span
-                            className={`${
-                              item.color || "text-white"
-                            } font-semibold text-sm`}
-                          >
-                            {item.value}
-                          </span>
-                        </div>
-                      ))}
+
+        {/* Teams Status */}
+        <div className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-4 sm:p-6 border border-[#0047AB]">
+          <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
+            <FaShieldAlt className="text-[#0047AB]" />
+            Teams Status
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            {teams.map((team, index) => (
+              <div
+                key={index}
+                className={`flex flex-col items-center bg-[#2C2F32] rounded-lg p-4 border border-[#0047AB] cursor-pointer hover:bg-[#0047AB]/10 transition-all ${
+                  selectedTeam === team.name ? "ring-2 ring-[#0047AB]" : ""
+                }`}
+                onClick={() => setSelectedTeam(team.name)}
+              >
+                <img
+                  src={`https://readdy.ai/api/search-image?query=modern minimalist cricket team logo design with ${team.name} theme, professional sports branding on dark background, centered composition&width=200&height=200&orientation=squarish`}
+                  alt={team.name}
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-2 border-[#0047AB] mb-4"
+                />
+                <h4 className="font-bold text-base sm:text-lg text-white text-center mb-4">
+                  {team.name}
+                </h4>
+                <div className="w-full space-y-2">
+                  {[
+                    {
+                      label: "Budget",
+                      value: team.budget,
+                      icon: <FaWallet className="text-[#0047AB]" />,
+                      color: "text-green-400",
+                    },
+                    {
+                      label: "Players",
+                      value: team.playersBought,
+                      icon: <FaUsers className="text-[#0047AB]" />,
+                    },
+                    {
+                      label: "Slots",
+                      value: team.slotsLeft,
+                      icon: <FaPuzzlePiece className="text-[#0047AB]" />,
+                    },
+                  ].map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between bg-[#2C2F32] rounded-lg p-2"
+                    >
+                      <div className="flex items-center gap-2">
+                        {item.icon}
+                        <span className="text-gray-300 text-sm">{item.label}</span>
+                      </div>
+                      <span className={`${item.color || "text-white"} font-semibold text-sm`}>
+                        {item.value}
+                      </span>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </main>
-    
-          {/* Bid Confirmation Modal */}
-          {showBidModal && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-              <div className="bg-[#2C2F32] rounded-lg p-6 max-w-md w-full">
-                <h3 className="text-xl font-semibold mb-4 text-white">
-                  Confirm Your Bid
-                </h3>
-                <p className="mb-4 text-white">
-                  Are you sure you want to place a bid of ₹
-                  {bidAmount.toLocaleString()}?
-                </p>
-                <div className="flex justify-end space-x-4">
-                  <button
-                    onClick={() => setShowBidModal(false)}
-                    className="!rounded-button whitespace-nowrap px-4 py-2 text-gray-400 hover:bg-gray-600"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleBid}
-                    className="!rounded-button whitespace-nowrap px-4 py-2 bg-[#0047AB] text-white hover:bg-[#003A8C]"
-                  >
-                    Confirm Bid
-                  </button>
+                  ))}
                 </div>
               </div>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
-      );
-    };
-    
-    export default Auctionhandel;
+      </main>
+
+      {/* Bid Confirmation Modal */}
+      {showBidModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-[#2C2F32] rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-xl font-semibold mb-4 text-white">Confirm Your Bid</h3>
+            <p className="mb-4 text-white">
+              Are you sure you want to place a bid of ₹{bidAmount.toLocaleString()}?
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setShowBidModal(false)}
+                className="px-4 py-2 text-gray-400 hover:bg-gray-600 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleBid}
+                className="px-4 py-2 bg-[#0047AB] text-white hover:bg-[#003A8C] rounded-lg transition-colors"
+              >
+                Confirm Bid
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Auctionhandel;
