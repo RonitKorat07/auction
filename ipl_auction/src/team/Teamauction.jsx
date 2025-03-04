@@ -1,6 +1,7 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
-const Auction = () => {
+const Teamauction = () => {
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState("live");
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -207,10 +208,13 @@ const Auction = () => {
                 </div>
                 <div className="space-y-2">
                   {auction.status === "live" && (
-                    <button className="w-full bg-[#0047AB] hover:bg-[#003A8C] py-2 rounded text-white font-semibold ">
-                      <i className="fas fa-eye mr-2"></i>
-                      View Auction
-                    </button>
+                    <Link
+                      to={"/team/joinauction"}
+                      className="w-full bg-[#0047AB] hover:bg-[#003A8C] py-2 px-5 rounded text-white font-semibold "
+                    >
+                      <i className="fas fa-eye mr-2 "></i>
+                      Join Auction
+                    </Link>
                   )}
                 </div>
               </div>
@@ -221,4 +225,4 @@ const Auction = () => {
   );
 };
 
-export default Auction;
+export default Teamauction;
