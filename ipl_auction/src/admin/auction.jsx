@@ -8,6 +8,7 @@ import {
 } from "../store/auctionslice"; // Import Redux actions
 import { db } from "../config/firebaseconfig";
 import { collection, addDoc } from "firebase/firestore";
+import { Link } from "react-router-dom";
 
 const Adminauction = () => {
   const [showModal, setShowModal] = useState(false);
@@ -131,9 +132,11 @@ const Adminauction = () => {
                       </button>
                     )}
                     {auction.status === "live" && (
+                     <Link to = "/admin/auction/auctionhandel">
                       <button className="w-full bg-[#0047AB] hover:bg-[#003A8C] py-2 rounded text-white font-semibold">
                         <i className="fas fa-eye mr-2"></i> View Auction
                       </button>
+                      </Link>
                     )}
                   </div>
                 </div>
@@ -211,6 +214,8 @@ const Adminauction = () => {
             </div>
           </div>
         )}
+
+        
 
         {/* Player Selection Modal */}
         {showPlayerModal && (

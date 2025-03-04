@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import {
+import {  
+  FaGavel,
   FaShieldAlt,
   FaWallet,
   FaUsers,
@@ -129,6 +130,42 @@ const Auctionhandel = () => {
   return (
     <div className="min-h-screen bg-[#202626] pt-20">
       <main className="max-w-7xl mx-auto px-4 py-8">
+        {/* Admin Controls */}
+        <div className="mb-8 bg-[#2C2F32] rounded-lg shadow-lg p-6 border border-[#0047AB]">
+          <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
+            <FaGavel className="text-[#0047AB]" />
+            Auction Controls
+          </h3>
+          <div className="flex flex-wrap gap-4">
+            <button
+              onClick={handleStartAuction}
+              className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+              disabled={auctionStatus === "running"}
+            >
+              Start Auction
+            </button>
+            <button
+              onClick={handlePauseAuction}
+              className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded"
+              disabled={auctionStatus !== "running"}
+            >
+              Pause Auction
+            </button>
+            <button
+              onClick={handleEndAuction}
+              className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
+              disabled={auctionStatus === "ended"}
+            >
+              End Auction
+            </button>
+            <button
+              onClick={handleBreak}
+              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+            >
+              Break
+            </button>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           {/* Middle Column - Player Profile */}
