@@ -1,19 +1,47 @@
 import React, { useState, useEffect } from "react";
-import {
-  FaShieldAlt,
-  FaWallet,
-  FaUsers,
-  FaPuzzlePiece,
-} from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAuctions } from "../store/auctionslice";
+import { FaPuzzlePiece, FaShieldAlt, FaUsers, FaWallet } from "react-icons/fa";
+import { useParams } from "react-router-dom";
+import { fetchTeam } from "../store/teamslice";
 
 const Auction = () => {
   const [currentBid, setCurrentBid] = useState(165000000);
   const [showBidModal, setShowBidModal] = useState(false);
   const [timeLeft, setTimeLeft] = useState(30);
-  const [selectedTeam, setSelectedTeam] = useState(null);
-  const [auctionStatus, setAuctionStatus] = useState("not-started"); // 'not-started', 'running', 'paused', 'ended'
-  const [bidAmount, setBidAmount] = useState(currentBid); // Added state for bidAmount
+  const [auctionStatus, setAuctionStatus] = useState("not-started");
+  const [bidAmount, setBidAmount] = useState(currentBid);
+  const { id } = useParams();
+  const dispatch = useDispatch();
 
+  // Fetch auctions and teams from Redux store
+  const { auctions, loading: auctionsLoading } = useSelector((state) => state.auction);
+  const { teams, loading: teamsLoading, error: teamsError } = useSelector((state) => state.team);
+
+  // Find the selected auction based on the ID
+  const selectedauction = auctions.find((auction) => auction.id.toString() === id);
+
+  // Compute joinedteams dynamically
+  const [joinedteams, setJoinedteams] = useState([]);
+
+  useEffect(() => {
+    // Fetch teams and auctions when the component mounts or when the ID changes
+    dispatch(fetchTeam());
+    dispatch(fetchAuctions());
+  }, [dispatch, id]);
+
+  useEffect(() => {
+    if (selectedauction && teams.length > 0) {
+      // Recompute joinedteams whenever selectedauction or teams changes
+      const allteams = selectedauction.teams || [];
+      const updatedJoinedteams = allteams.map((teamname) =>
+        teams.find((team) => team.name === teamname)
+      );
+      setJoinedteams(updatedJoinedteams);
+    }
+  }, [selectedauction, teams]);
+
+  // Timer logic
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prevTime) => {
@@ -27,138 +55,19 @@ const Auction = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const teams = [
-    {
-      name: "Mumbai Indians",
-      budget: "₹45.5 Cr",
-      playersBought: 15,
-      slotsLeft: 10,
-    },
-    {
-      name: "Chennai Kings",
-      budget: "₹38.8 Cr", 
-      playersBought: 18,
-      slotsLeft: 7,
-    },
-    {
-      name: "Delhi Capitals",
-      budget: "₹52.2 Cr",
-      playersBought: 12,
-      slotsLeft: 13,
-    },
-    {
-      name: "Royal Challengers",
-      budget: "₹29.9 Cr",
-      playersBought: 20,
-      slotsLeft: 5,
-    },
-    {
-      id: 1,
-      name: "IPL 2025 Mega Auction",
-      date: "2025-02-28",
-      time: "04:44 PM",
-      totalBids: 156,
-      isLive: true,
-      status: "live",
-      players: ["Virat Kohli", "Steve Smith", "Kane Williamson", "Babar Azam"],
-    },
-    {
-      id: 2,
-      name: "Big Bash League Player Draft",
-      date: "2025-02-28",
-      time: "05:30 PM",
-      totalBids: 89,
-      isLive: true,
-      status: "live",
-      players: [
-        "David Warner",
-        "Mitchell Starc",
-        "Glenn Maxwell",
-        "Pat Cummins",
-      ],
-    },
-    {
-      id: 3,
-      name: "Caribbean Premier League Auction",
-      date: "2025-02-28",
-      time: "06:15 PM",
-      totalBids: 124,
-      isLive: true,
-      status: "live",
-      players: [
-        "Chris Gayle",
-        "Andre Russell",
-        "Kieron Pollard",
-        "Dwayne Bravo",
-      ],
-    },
-    {
-      id: 4,
-      name: "The Hundred Draft 2025",
-      date: "2025-03-15",
-      time: "02:00 PM",
-      totalBids: 0,
-      isLive: false,
-      status: "upcoming",
-      players: ["Jos Buttler", "Ben Stokes", "Joe Root", "Eoin Morgan"],
-    },
-    {
-      id: 5,
-      name: "PSL 2025 Draft",
-      date: "2025-03-20",
-      time: "03:30 PM",
-      totalBids: 0,
-      isLive: false,
-      status: "upcoming",
-      players: [
-        "Shaheen Afridi",
-        "Mohammad Rizwan",
-        "Shadab Khan",
-        "Fakhar Zaman",
-      ],
-    },
-    {
-      id: 6,
-      name: "T20 Global League Auction 2024",
-      date: "2024-12-15",
-      time: "01:00 PM",
-      totalBids: 245,
-      isLive: false,
-      status: "completed",
-      players: [
-        "Rohit Sharma",
-        "AB de Villiers",
-        "Mitchell Marsh",
-        "Trent Boult",
-      ],
-    },
-  ];
-
-  const recentPurchases = [
-    {
-      name: "Shahrukh Khan",
-      from: "Punjab Kings",
-      price: "₹6 Crore",
-      date: "February 25, 2024",
-    },
-    {
-      name: "Vishnu Vinod",
-      from: "Delhi Capitals", 
-      price: "₹50 Lakhs",
-      date: "February 24, 2024",
-    },
-    {
-      name: "Tymal Mills",
-      from: "Rajasthan Royals",
-      price: "₹1 Crore",
-      date: "February 23, 2024",
-    },
-  ];
-
+  // Handle bid submission
   const handleBid = () => {
     // Logic to handle the bid
     setShowBidModal(false);
   };
+
+  if (auctionsLoading || teamsLoading) {
+    return <div className="text-white text-center">Loading...</div>;
+  }
+
+  if (teamsError) {
+    return <div className="text-red-500 text-center">Error: {teamsError}</div>;
+  }
 
   return (
     <div className="min-h-screen bg-[#202626] w-full mt-6">
@@ -264,42 +173,6 @@ const Auction = () => {
           </div>
         </div>
 
-        {/* Recent Purchases Section */}
-        <div className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-4 sm:p-6 border border-[#0047AB]">
-          <h2 className="text-2xl font-semibold mb-6 text-white">Recent Purchases</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recentPurchases.map((purchase, index) => (
-              <div
-                key={index}
-                className="bg-[#2C2F32] rounded-lg overflow-hidden border border-[#0047AB] hover:shadow-xl transition-shadow"
-              >
-                <img
-                  src={`https://readdy.ai/api/search-image?query=professional soccer player in manchester united red jersey celebrating goal victory moment dramatic stadium lighting&width=400&height=300&orientation=landscape&flag=912fa8b416ec5d3215e35a8d058b0af7`}
-                  alt={purchase.name}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-white mb-4">{purchase.name}</h3>
-                  <div className="space-y-3">
-                    {[
-                      { label: "From", value: purchase.from },
-                      { label: "Transfer Fee", value: purchase.price, highlight: true },
-                      { label: "Date", value: purchase.date }
-                    ].map((item, idx) => (
-                      <div key={idx} className="flex justify-between items-center">
-                        <span className="text-gray-400">{item.label}</span>
-                        <span className={`font-medium ${item.highlight ? 'text-[#0047AB]' : 'text-white'}`}>
-                          {item.value}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Teams Status */}
         <div className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-4 sm:p-6 border border-[#0047AB]">
           <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
@@ -307,18 +180,16 @@ const Auction = () => {
             Teams Status
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-            {teams.map((team, index) => (
+            {joinedteams.map((team, index) => (
               <div
                 key={index}
-                className={`flex flex-col items-center bg-[#2C2F32] rounded-lg p-4 border border-[#0047AB] cursor-pointer hover:bg-[#0047AB]/10 transition-all ${
-                  selectedTeam === team.name ? "ring-2 ring-[#0047AB]" : ""
+                className={`flex flex-col items-center bg-[#2C2F32] rounded-lg p-4 border border-[#0047AB] cursor-pointer hover:bg-[#0047AB]/10 transition-all "ring-2 ring-[#0047AB]" : ""
                 }`}
-                onClick={() => setSelectedTeam(team.name)}
               >
                 <img
-                  src={`https://readdy.ai/api/search-image?query=modern minimalist cricket team logo design with ${team.name} theme, professional sports branding on dark background, centered composition&width=200&height=200&orientation=squarish`}
+                  src={team.logo}
                   alt={team.name}
-                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-2 border-[#0047AB] mb-4"
+                  className="w-20 h-20 sm:w-24 sm:h-24 mb-4"
                 />
                 <h4 className="font-bold text-base sm:text-lg text-white text-center mb-4">
                   {team.name}
@@ -333,7 +204,7 @@ const Auction = () => {
                     },
                     {
                       label: "Players",
-                      value: team.playersBought,
+                      value: "0",
                       icon: <FaUsers className="text-[#0047AB]" />,
                     },
                     {
@@ -360,35 +231,7 @@ const Auction = () => {
             ))}
           </div>
         </div>
-
       </main>
-
-      {/* Bid Confirmation Modal */}
-      {showBidModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-[#2C2F32] rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-xl font-semibold mb-4 text-white">Confirm Your Bid</h3>
-            <p className="mb-4 text-white">
-              Are you sure you want to place a bid of ₹{bidAmount.toLocaleString()}?
-            </p>
-            <div className="flex justify-end gap-4">
-              <button
-                onClick={() => setShowBidModal(false)}
-                className="px-4 py-2 text-gray-400 hover:bg-gray-600 rounded-lg transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleBid}
-                className="px-4 py-2 bg-[#0047AB] text-white hover:bg-[#003A8C] rounded-lg transition-colors"
-              >
-                Confirm Bid
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
     </div>
   );
 };

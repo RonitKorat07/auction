@@ -197,7 +197,7 @@ const Teamjoinauction = () => {
                   ].map((stat, index) => (
                     <div
                       key={index}
-                      className="text-center bg-[#2C2F32] rounded-lg p-3"
+                      className="text-center bg-[#2C2F32]  rounded-lg p-3"
                     >
                       <p className="text-gray-400">{stat.label}</p>
                       <p className="text-xl font-bold text-white">
@@ -339,8 +339,8 @@ const Teamjoinauction = () => {
                     className="w-10 h-10 mr-3"
                   />
                   <div className="flex justify-between w-full">
-                    <p className="font-medium text-white">{bid.bidder}</p>
-                    <span className="font-semibold text-[#B0E0E6] justify-right">{bid.amount}</span>
+                    <p className="text-md text-white w-25">{bid.bidder}</p>
+                    <span className="font-semibold text-[#B0E0E6] justify-right pl-[0.6rem]">{bid.amount}</span>
                   </div>
                 </div>
               ))}

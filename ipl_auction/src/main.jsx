@@ -97,7 +97,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/auctionpage",
+        path: "/auctionpage/:id",
         element: (
           <>
             <Auction />
@@ -150,7 +150,7 @@ const router = createBrowserRouter([
               </>
             ),
           },{
-            path: "/admin/auction/auctionhandel",
+            path: "/admin/auction/auctionhandel/:id",
             element: (
               <>
                 <Auctionhandel />
