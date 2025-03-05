@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { FaShieldAlt, FaWallet, FaUsers, FaPuzzlePiece } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAuctions } from "../store/auctionslice";
-import { FaPuzzlePiece, FaShieldAlt, FaUsers, FaWallet } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import { fetchTeam } from "../store/teamslice";
 
@@ -16,11 +15,19 @@ const Auction = () => {
   const dispatch = useDispatch();
 
   // Fetch auctions and teams from Redux store
-  const { auctions, loading: auctionsLoading } = useSelector((state) => state.auction);
-  const { teams, loading: teamsLoading, error: teamsError } = useSelector((state) => state.team);
+  const { auctions, loading: auctionsLoading } = useSelector(
+    (state) => state.auction
+  );
+  const {
+    teams,
+    loading: teamsLoading,
+    error: teamsError,
+  } = useSelector((state) => state.team);
 
   // Find the selected auction based on the ID
-  const selectedauction = auctions.find((auction) => auction.id.toString() === id);
+  const selectedauction = auctions.find(
+    (auction) => auction.id.toString() === id
+  );
 
   // Compute joinedteams dynamically
   const [joinedteams, setJoinedteams] = useState([]);
@@ -76,7 +83,6 @@ const Auction = () => {
       date: "February 23, 2024",
     },
   ];
-
 
   const handleBid = () => {
     // Logic to handle the bid
@@ -264,7 +270,6 @@ const Auction = () => {
           </div>
         </div>
 
-
         {/* Recent Purchases Section */}
         <div className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-4 sm:p-6 border border-[#0047AB]">
           <h2 className="text-2xl font-semibold mb-6 text-white">
@@ -316,7 +321,6 @@ const Auction = () => {
           </div>
         </div>
 
-
         {/* Teams Status */}
         <div className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-4 sm:p-6 border border-[#0047AB]">
           <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
@@ -331,7 +335,7 @@ const Auction = () => {
                 }`}
               >
                 <img
-                  src={team.logo}
+                  src={team?.logo}
                   alt={team.name}
                   className="w-20 h-20 sm:w-24 sm:h-24 mb-4"
                 />
@@ -382,9 +386,6 @@ const Auction = () => {
           </div>
         </div>
       </main>
-
-
-
     </div>
   );
 };
