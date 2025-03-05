@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   FaShieldAlt,
@@ -13,6 +12,7 @@ const Auction = () => {
   const [timeLeft, setTimeLeft] = useState(30);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [auctionStatus, setAuctionStatus] = useState("not-started"); // 'not-started', 'running', 'paused', 'ended'
+  const [bidAmount, setBidAmount] = useState(currentBid); // Added state for bidAmount
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -26,8 +26,6 @@ const Auction = () => {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
-
-  
 
   const teams = [
     {
@@ -134,8 +132,7 @@ const Auction = () => {
         "Trent Boult",
       ],
     },
-  ]);
-
+  ];
 
   const recentPurchases = [
     {
@@ -158,8 +155,13 @@ const Auction = () => {
     },
   ];
 
+  const handleBid = () => {
+    // Logic to handle the bid
+    setShowBidModal(false);
+  };
+
   return (
-    <div className="min-h-screen bg-[#202626] w-full">
+    <div className="min-h-screen bg-[#202626] w-full mt-6">
       <main className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-25">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Middle Column - Player Profile */}
@@ -356,6 +358,7 @@ const Auction = () => {
                 </div>
               </div>
             ))}
+          </div>
         </div>
 
       </main>

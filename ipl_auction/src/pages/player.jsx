@@ -158,6 +158,9 @@ const PlayerList = () => {
                             <div className="text-sm font-medium text-[#E8EAF6]">
                               {player.name}
                             </div>
+                            <div className="text-sm font-medium text-[#E8EAF6]">
+                              {player.team}
+                            </div>
                           </div>
                         </div>
                       </td>

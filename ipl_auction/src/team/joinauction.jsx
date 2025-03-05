@@ -1,10 +1,44 @@
 import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchTeamemail } from "../store/teamslice";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const Teamjoinauction = () => {
-  const [currentBid, setCurrentBid] = useState(165000000);
+  const [currentBid, setCurrentBid] = useState(200000);
   const [bidAmount, setBidAmount] = useState(167500000);
   const [showBidModal, setShowBidModal] = useState(false);
   const [timeLeft, setTimeLeft] = useState(30);
+  const [totalSpent, setTotalSpent] = useState(0); // Track total spent
+  const [userEmail, setUserEmail] = useState(null); // Track user email
+
+  const { teams, loading, error } = useSelector((state) => state.team);
+  const dispatch = useDispatch();
+
+  // Get the logged-in user's email using onAuthStateChanged
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserEmail(user.email); // Set user email
+      } else {
+        setUserEmail(null); // No user logged in
+      }
+    });
+
+    return () => unsubscribe(); // Cleanup on unmount
+  }, []);
+
+  // Fetch team data when the userEmail changes
+  useEffect(() => {
+    if (userEmail) {
+      dispatch(fetchTeamemail(userEmail));
+    }
+  }, [dispatch, userEmail]);
+
+  const userTeam = teams?.find((team) => team.email === userEmail);
+
+  const totalBudget = userTeam?.budget || 0; // Total budget from userTeam
+  const remainingBudget = totalBudget - totalSpent; // Remaining budget
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -24,6 +58,7 @@ const Teamjoinauction = () => {
       return;
     }
     setCurrentBid(bidAmount);
+    setTotalSpent((prevSpent) => prevSpent + bidAmount); // Update total spent
     setShowBidModal(false);
   };
 
@@ -52,26 +87,25 @@ const Teamjoinauction = () => {
     <div className="min-h-screen bg-[#202626] pt-20">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column - Team Details */}
-
-          <div className="col-span-12 md:col-span-3 bg-[#2C2F32] rounded-lg shadow-lg p-6 border border-[#0047AB]">
+          <div className="col-span-12 lg:col-span-3 bg-[#2C2F32] rounded-lg shadow-lg p-6 border border-[#0047AB]">
             <div className="flex flex-col items-center mb-6">
               <img
-                src="https://public.readdy.ai/ai/img_res/e78402fd0fcab86435aff65d89c9be58.jpg"
-                alt="Mumbai Indians"
-                className="w-20 h-20 rounded-full mb-3 object-cover shadow-lg"
+                src={userTeam?.logo}
+                alt={userTeam?.teamName}
+                className="w-35 h-30 mb-3 object-contain "
               />
-              <h2 className="text-xl font-bold text-white">
-                Mumbai Indians (MI)
+              <h2 className="text-xl font-bold text-white text-center">
+                {userTeam?.name}
               </h2>
             </div>
             <div className="relative mb-6">
-              <div className="w-full h-16 bg-[#B0E0E6] rounded-lg flex items-center justify-between px-4">
+              <div className="w-full h-16 bg-[#B0E0E6] rounded-lg flex flex-col items-center justify-center">
                 <div className="text-sm text-gray-800">Remaining Budget</div>
                 <div className="flex items-baseline">
                   <span className="text-2xl font-bold text-green-600 mr-1">
-                    ₹14.5
+                    ₹{(remainingBudget / 100000).toFixed(2)}
                   </span>
                   <span className="text-base font-semibold text-green-600">
                     Crore
@@ -80,19 +114,21 @@ const Teamjoinauction = () => {
               </div>
             </div>
             <div className="space-y-6">
-              <div className="bg-[#2C2F32] rounded-lg p-4">
+              <div className="bg-[#2C2F32] rounded-lg px-4">
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-400">Total Budget</span>
-                  <span className="font-semibold text-white">₹100 Crore</span>
+                  <span className="font-semibold text-white">
+                    ₹{(totalBudget / 100000).toFixed(2)} Crore
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Spent</span>
                   <span className="font-semibold text-[#0047AB]">
-                    ₹85.5 Crore
+                    ₹{(totalSpent / 100000).toFixed(2)} Crore
                   </span>
                 </div>
               </div>
-              <div className="bg-[#2C2F32] rounded-lg p-4">
+              <div className="bg-[#2C2F32] rounded-lg px-4">
                 <h3 className="text-lg font-semibold mb-3 text-white">
                   Squad Composition
                 </h3>
@@ -131,15 +167,15 @@ const Teamjoinauction = () => {
           </div>
 
           {/* Middle Column - Player Profile */}
-          <div className="col-span-12 md:col-span-6">
+          <div className="col-span-12 lg:col-span-6">
             <div className="bg-[#2C2F32] rounded-lg shadow-lg overflow-hidden border-2 border-[#0047AB]">
-              <div className="flex flex-col md:flex-row items-center p-3">
+              <div className="flex flex-col lg:flex-row items-center p-3">
                 <img
                   src="https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1"
                   alt="Player in Action"
-                  className="w-40 h-40 md:w-60 md:h-60  object-cover "
+                  className="w-40 h-40 md:w-60 md:h-60 object-cover"
                 />
-                <div className="mt-4 md:mt-0 md:ml-6 text-center md:text-left">
+                <div className="mt-4 md:mt-0 md:ml-6 text-center lg:text-center">
                   <h1 className="text-3xl font-bold text-white">
                     Hardik Pandya
                   </h1>
@@ -147,7 +183,7 @@ const Teamjoinauction = () => {
                   <p className="text-md text-gray-200">INDIA</p>
                 </div>
               </div>
-              <div className="px-6  space-y-3">
+              <div className="px-6 space-y-3">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {[
                     { label: "Matches", value: "125" },
@@ -226,34 +262,68 @@ const Teamjoinauction = () => {
           </div>
 
           {/* Right Column - Bid History */}
-
-          <div className="col-span-12 md:col-span-3 bg-[#2C2F32] rounded-lg shadow-lg border border-[#0047AB] p-6">
+          <div className="col-span-12 lg:col-span-3 bg-[#2C2F32] rounded-lg shadow-lg border border-[#0047AB] p-6">
             <h2 className="text-xl font-semibold mb-4 text-white">
               Bid History
             </h2>
-            <div className="space-y-4">
+            <div className="max-h-130 overflow-y-auto space-y-4">
               {[
                 {
+                  teamLogo: "https://upload.wikimedia.org/wikipedia/en/4/4c/Chennai_Super_Kings_logo.png",
                   bidder: "Chennai Super Kings",
                   amount: "₹16.5 Crore",
                   time: "2 mins ago",
                 },
                 {
+                  teamLogo: "https://upload.wikimedia.org/wikipedia/en/6/6f/Royal_Challengers_Bangalore_logo.png",
                   bidder: "Royal Challengers Bangalore",
                   amount: "₹16.25 Crore",
                   time: "5 mins ago",
                 },
                 {
+                  teamLogo: "https://upload.wikimedia.org/wikipedia/en/8/8e/Kolkata_Knight_Riders_logo.png",
                   bidder: "Kolkata Knight Riders",
                   amount: "₹16 Crore",
                   time: "8 mins ago",
                 },
                 {
+                  teamLogo: "https://upload.wikimedia.org/wikipedia/en/3/3e/Delhi_Capitals_logo.png",
                   bidder: "Delhi Capitals",
                   amount: "₹15.75 Crore",
                   time: "12 mins ago",
                 },
                 {
+                  teamLogo: "https://upload.wikimedia.org/wikipedia/en/3/3e/Rajasthan_Royals_logo.png",
+                  bidder: "Rajasthan Royals",
+                  amount: "₹15.5 Crore",
+                  time: "15 mins ago",
+                },
+                {
+                  teamLogo: "https://upload.wikimedia.org/wikipedia/en/3/3e/Rajasthan_Royals_logo.png",
+                  bidder: "Rajasthan Royals",
+                  amount: "₹15.5 Crore",
+                  time: "15 mins ago",
+                },
+                {
+                  teamLogo: "https://upload.wikimedia.org/wikipedia/en/3/3e/Rajasthan_Royals_logo.png",
+                  bidder: "Rajasthan Royals",
+                  amount: "₹15.5 Crore",
+                  time: "15 mins ago",
+                },
+                {
+                  teamLogo: "https://upload.wikimedia.org/wikipedia/en/3/3e/Rajasthan_Royals_logo.png",
+                  bidder: "Rajasthan Royals",
+                  amount: "₹15.5 Crore",
+                  time: "15 mins ago",
+                },
+                {
+                  teamLogo: "https://upload.wikimedia.org/wikipedia/en/3/3e/Rajasthan_Royals_logo.png",
+                  bidder: "Rajasthan Royals",
+                  amount: "₹15.5 Crore",
+                  time: "15 mins ago",
+                },
+                {
+                  teamLogo: "https://upload.wikimedia.org/wikipedia/en/3/3e/Rajasthan_Royals_logo.png",
                   bidder: "Rajasthan Royals",
                   amount: "₹15.5 Crore",
                   time: "15 mins ago",
@@ -261,12 +331,17 @@ const Teamjoinauction = () => {
               ].map((bid, index) => (
                 <div
                   key={index}
-                  className="flex justify-between items-center p-3 bg-[#2C2F32] rounded-lg"
+                  className="flex items-center p-3 bg-[#202626] rounded-lg border border-blue-700 shadow-lg"
                 >
-                  <div>
+                  <img
+                    src={bid.teamLogo}
+                    alt={bid.bidder}
+                    className="w-10 h-10 mr-3"
+                  />
+                  <div className="flex justify-between w-full">
                     <p className="font-medium text-white">{bid.bidder}</p>
+                    <span className="font-semibold text-[#B0E0E6] justify-right">{bid.amount}</span>
                   </div>
-                  <span className="font-semibold text-white">{bid.amount}</span>
                 </div>
               ))}
             </div>

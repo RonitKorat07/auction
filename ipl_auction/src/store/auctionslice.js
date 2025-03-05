@@ -39,7 +39,6 @@ export const createAuction = createAsyncThunk(
   }
 );
 
-// ✅ FIXED: Update Auction Status
 export const updateAuctionStatus = createAsyncThunk(
   "auctions/updateAuctionStatus",
   async ({ id, status }, { rejectWithValue }) => {
