@@ -246,8 +246,12 @@ const Teamjoinauction = () => {
                   ].map((stat, index) => (
                     <div
                       key={index}
+
                       className=" rounded-xl p-4 border "
                       style={{ borderColor: team.color || "#0047AB" }}
+
+                    
+
                     >
                       <p className="text-sm text-gray-400 font-medium">
                         {stat.label}
@@ -377,10 +381,13 @@ const Teamjoinauction = () => {
                     alt={bid.bidder}
                     className="w-10 h-10 mr-3 rounded-full"
                   />
+
                   <div className="flex flex-col flex-grow ">
                     <p className="font-medium text-white text-sm">
                       {bid.bidder}
                     </p>
+
+                 
                   </div>
                   <span className="font-semibold text-[#B0E0E6] text-sm whitespace-nowrap">
                     {bid.amount}
