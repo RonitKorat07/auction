@@ -1,153 +1,69 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchAuctions,
+  updateAuctionStatus,
+} from "../store/auctionslice";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "../config/firebaseconfig"; // Ensure Firebase is configured
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { fetchTeamemail } from "../store/teamslice";
 
 const Teamauction = () => {
-  const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState("live");
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showPlayerModal, setShowPlayerModal] = useState(false);
-  const [selectedPlayers, setSelectedPlayers] = useState([]);
+  const navigate = useNavigate();
+  const [userEmail, setUserEmail] = useState(null); // Track user email
+  const { teams, loading, error } = useSelector((state) => state.team);
+  const dispatch = useDispatch();
+  // Get the logged-in user's email using onAuthStateChanged
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserEmail(user.email); // Set user email
+      } else {
+        setUserEmail(null); // No user logged in
+      }
+    });
 
-  const players = [
-    {
-      id: 1,
-      name: "Mitchell Starc",
-      role: "Bowler",
-      basePrice: "$200,000",
-      image:
-        "https://public.readdy.ai/ai/img_res/284a6c97bfae6d5bcd0f423fb26cd005.jpg",
-    },
-    {
-      id: 2,
-      name: "Ben Stokes",
-      role: "All-rounder",
-      basePrice: "$250,000",
-      image:
-        "https://public.readdy.ai/ai/img_res/ddd07055bf9047ca4e0d3519073fa777.jpg",
-    },
-  ];
+    return () => unsubscribe(); // Cleanup on unmount
+  }, []);
+  
+  // Fetch team data when the userEmail changes
+  useEffect(() => {
+    if (userEmail) {
+      dispatch(fetchTeamemail(userEmail));
+    }
+  }, [dispatch, userEmail]);
+  const userTeam = teams?.find((team) => team.email === userEmail);
+  const { auctions, loading: auctionsLoading } = useSelector(
+    (state) => state.auction
+  );
 
-  const [auctions, setAuctions] = useState([
-    {
-      id: 1,
-      name: "IPL 2025 Mega Auction",
-      date: "2025-02-28",
-      time: "04:44 PM",
-      totalBids: 156,
-      isLive: true,
-      status: "live",
-      players: ["Virat Kohli", "Steve Smith", "Kane Williamson", "Babar Azam"],
-    },
-    {
-      id: 2,
-      name: "Big Bash League Player Draft",
-      date: "2025-02-28",
-      time: "05:30 PM",
-      totalBids: 89,
-      isLive: true,
-      status: "live",
-      players: [
-        "David Warner",
-        "Mitchell Starc",
-        "Glenn Maxwell",
-        "Pat Cummins",
-      ],
-    },
-    {
-      id: 3,
-      name: "Caribbean Premier League Auction",
-      date: "2025-02-28",
-      time: "06:15 PM",
-      totalBids: 124,
-      isLive: true,
-      status: "live",
-      players: [
-        "Chris Gayle",
-        "Andre Russell",
-        "Kieron Pollard",
-        "Dwayne Bravo",
-      ],
-    },
-    {
-      id: 4,
-      name: "The Hundred Draft 2025",
-      date: "2025-03-15",
-      time: "02:00 PM",
-      totalBids: 0,
-      isLive: false,
-      status: "upcoming",
-      players: ["Jos Buttler", "Ben Stokes", "Joe Root", "Eoin Morgan"],
-    },
-    {
-      id: 5,
-      name: "PSL 2025 Draft",
-      date: "2025-03-20",
-      time: "03:30 PM",
-      totalBids: 0,
-      isLive: false,
-      status: "upcoming",
-      players: [
-        "Shaheen Afridi",
-        "Mohammad Rizwan",
-        "Shadab Khan",
-        "Fakhar Zaman",
-      ],
-    },
-    {
-      id: 6,
-      name: "T20 Global League Auction 2024",
-      date: "2024-12-15",
-      time: "01:00 PM",
-      totalBids: 245,
-      isLive: false,
-      status: "completed",
-      players: [
-        "Rohit Sharma",
-        "AB de Villiers",
-        "Mitchell Marsh",
-        "Trent Boult",
-      ],
-    },
-  ]);
+  useEffect(() => {
+    dispatch(fetchAuctions()); 
+  }, [dispatch]);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    date: "",
-    time: "",
-    playerList: "",
-  });
+  const handleJoinAuction = async (auction) => {
+    const teamName = userTeam?.name // Replace with actual team name logic
+    const auctionRef = doc(db, "auctions", auction.id);
 
-  const handleCreateAuction = (e) => {
-    e.preventDefault();
-    const newAuction = {
-      id: auctions.length + 1,
-      name: formData.name,
-      date: formData.date,
-      time: formData.time,
-      totalBids: 0,
-      isLive: false,
-      status: "upcoming",
-      players: formData.playerList
-        .split("\n")
-        .filter((player) => player.trim() !== ""),
-    };
-    setAuctions([...auctions, newAuction]);
-    setShowModal(false);
-    setFormData({ name: "", date: "", time: "", playerList: "" });
-  };
+    // Check if team is already in the auction
+    if (auction.teams.includes(teamName)) {
+      alert("Your team has already joined this auction!");
+      navigate("/team/joinauction");
+      return;
+    }
 
-  const handleStartAuction = (id) => {
-    const updatedAuctions = auctions.map((auction) =>
-      auction.id === id ? { ...auction, status: "live", isLive: true } : auction
-    );
-    setAuctions(updatedAuctions);
-  };
-
-  const handlePlayerSelection = (player) => {
-    if (selectedPlayers.some((p) => p.id === player.id)) {
-      setSelectedPlayers(selectedPlayers.filter((p) => p.id !== player.id));
-    } else {
-      setSelectedPlayers([...selectedPlayers, player]);
+    try {
+      await updateDoc(auctionRef, {
+        teams: [...auction.teams, teamName],
+      });
+      navigate(`/team/joinauction`);
+    } catch (error) {
+      console.error("Error joining auction:", error);
+      alert("Failed to join auction. Try again.");
     }
   };
 
@@ -187,7 +103,7 @@ const Teamauction = () => {
               >
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="text-lg md:text-xl font-semibold">
-                    {auction.name}
+                    {auction.auctionName}
                   </h3>
                   {auction.isLive && (
                     <span className="bg-[#FF4500]/20 text-[#FF4500] px-2 py-1 rounded-full text-xs font-medium">
@@ -200,21 +116,21 @@ const Teamauction = () => {
                   <p className="text-[#B0E0E6]">{auction.date}</p>
                   <p className="text-[#B0E0E6]">{auction.time}</p>
                   <p className="text-[#B0E0E6]">
-                    {auction.totalBids} Total Bids
+                    {auction.selectedPlayers.length} Players Selected
                   </p>
                   <p className="text-[#B0E0E6]">
-                    {selectedPlayers.length} Players Selected
+                    {auction.teams.length} Teams Joined
                   </p>
                 </div>
                 <div className="space-y-2">
                   {auction.status === "live" && (
-                    <Link
-                      to={"/team/joinauction"}
-                      className="w-full bg-[#0047AB] hover:bg-[#003A8C] py-2 px-5 rounded text-white font-semibold "
+                    <button
+                      onClick={() => handleJoinAuction(auction)}
+                      className="w-full bg-[#0047AB] hover:bg-[#003A8C] py-2 px-5 rounded text-white font-semibold"
                     >
-                      <i className="fas fa-eye mr-2 "></i>
+                      <i className="fas fa-eye mr-2"></i>
                       Join Auction
-                    </Link>
+                    </button>
                   )}
                 </div>
               </div>
