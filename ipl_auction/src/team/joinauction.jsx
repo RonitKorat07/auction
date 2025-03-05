@@ -7,7 +7,11 @@ const Teamjoinauction = () => {
   const [currentBid, setCurrentBid] = useState(200000);
   const [bidAmount, setBidAmount] = useState(167500000);
   const [showBidModal, setShowBidModal] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(30);
+
+  const [timeLeft, setTimeLeft] = useState(() => {
+    const savedTime = localStorage.getItem("timeLeft");
+    return savedTime ? Number(savedTime) : 30;
+  });
   const [totalSpent, setTotalSpent] = useState(0); // Track total spent
   const [userEmail, setUserEmail] = useState(null); // Track user email
 
@@ -34,7 +38,7 @@ const Teamjoinauction = () => {
       dispatch(fetchTeamemail(userEmail));
     }
   }, [dispatch, userEmail]);
-
+  const team = teams.length > 0 ? teams[0] : null;
   const userTeam = teams?.find((team) => team.email === userEmail);
 
   const totalBudget = userTeam?.budget || 0; // Total budget from userTeam
@@ -60,8 +64,22 @@ const Teamjoinauction = () => {
     setCurrentBid(bidAmount);
     setTotalSpent((prevSpent) => prevSpent + bidAmount); // Update total spent
     setShowBidModal(false);
+    setTimeLeft(30);
   };
 
+  if (loading) {
+    return <div className="text-center text-[#E8EAF6]">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center text-red-500">Error: {error}</div>;
+  }
+
+  if (!team) {
+    return (
+      <div className="text-center text-[#E8EAF6]">No team data available.</div>
+    );
+  }
   const recentPurchases = [
     {
       name: "Shahrukh Khan",
@@ -82,6 +100,28 @@ const Teamjoinauction = () => {
       date: "February 23, 2024",
     },
   ];
+  const upcomingPlayers = [
+    {
+      name: "Virat Kohli",
+      basePrice: "₹2 Crore",
+      logo: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
+    },
+    {
+      name: "Rohit Sharma",
+      basePrice: "₹2 Crore",
+      logo: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
+    },
+    {
+      name: "Rohit Sharma",
+      basePrice: "₹2 Crore",
+      logo: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
+    },
+    {
+      name: "KL Rahul",
+      basePrice: "₹1.5 Crore",
+      logo: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-[#202626] pt-20">
@@ -89,7 +129,10 @@ const Teamjoinauction = () => {
         {/* Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column - Team Details */}
-          <div className="col-span-12 lg:col-span-3 bg-[#2C2F32] rounded-lg shadow-lg p-6 border border-[#0047AB]">
+          <div
+            className="col-span-12 lg:col-span-3 bg-[#2C2F32] rounded-lg shadow-lg p-6 border "
+            style={{ borderColor: team.color || "#0047AB" }}
+          >
             <div className="flex flex-col items-center mb-6">
               <img
                 src={userTeam?.logo}
@@ -101,7 +144,10 @@ const Teamjoinauction = () => {
               </h2>
             </div>
             <div className="relative mb-6">
-              <div className="w-full h-16 bg-[#B0E0E6] rounded-lg flex flex-col items-center justify-center">
+              <div
+                className="w-full h-16 bg-[#B0E0E6] rounded-lg flex flex-col items-center justify-center border-2"
+                style={{ borderColor: team.color || "#0047AB" }}
+              >
                 <div className="text-sm text-gray-800">Remaining Budget</div>
                 <div className="flex items-baseline">
                   <span className="text-2xl font-bold text-green-600 mr-1">
@@ -123,7 +169,7 @@ const Teamjoinauction = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Spent</span>
-                  <span className="font-semibold text-[#0047AB]">
+                  <span className="font-semibold text-[#B0E0E6]">
                     ₹{(totalSpent / 100000).toFixed(2)} Crore
                   </span>
                 </div>
@@ -168,7 +214,10 @@ const Teamjoinauction = () => {
 
           {/* Middle Column - Player Profile */}
           <div className="col-span-12 lg:col-span-6">
-            <div className="bg-[#2C2F32] rounded-lg shadow-lg overflow-hidden border-2 border-[#0047AB]">
+            <div
+              className="bg-[#2C2F32] rounded-lg shadow-lg overflow-hidden border-2 "
+              style={{ borderColor: team.color || "#0047AB" }}
+            >
               <div className="flex flex-col lg:flex-row items-center p-3">
                 <img
                   src="https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1"
@@ -197,10 +246,17 @@ const Teamjoinauction = () => {
                   ].map((stat, index) => (
                     <div
                       key={index}
-                      className="text-center bg-[#2C2F32]  rounded-lg p-3"
+
+                      className=" rounded-xl p-4 border "
+                      style={{ borderColor: team.color || "#0047AB" }}
+
+                    
+
                     >
-                      <p className="text-gray-400">{stat.label}</p>
-                      <p className="text-xl font-bold text-white">
+                      <p className="text-sm text-gray-400 font-medium">
+                        {stat.label}
+                      </p>
+                      <p className="text-2xl font-bold text-blue-400">
                         {stat.value}
                       </p>
                     </div>
@@ -217,7 +273,7 @@ const Teamjoinauction = () => {
                         </span>
                       </div>
                     </div>
-                    <span className="text-3xl font-bold text-[#0047AB]">
+                    <span className="text-3xl font-bold text-[#B0E0E6]">
                       ₹{(currentBid / 100000).toFixed(2)} Crore
                     </span>
                   </div>
@@ -226,7 +282,8 @@ const Teamjoinauction = () => {
                       type="number"
                       value={bidAmount}
                       onChange={(e) => setBidAmount(Number(e.target.value))}
-                      className="w-full p-4 border border-gray-600 rounded-lg text-lg font-medium text-white bg-[#2C2F32] focus:outline-none focus:ring-2 focus:ring-[#0047AB] focus:border-transparent"
+                      className="w-full p-4 border  rounded-lg text-lg font-medium text-white bg-[#2C2F32] focus:outline-none focus:ring-2 focus:ring-[#0047AB] focus:border-transparent"
+                      style={{ borderColor: team.color || "#0047AB" }}
                       min={currentBid + 50000}
                       step={50000}
                     />
@@ -241,7 +298,10 @@ const Teamjoinauction = () => {
                           onClick={() =>
                             setBidAmount(currentBid + button.amount)
                           }
-                          className="flex-1 bg-[#B0E0E6] hover:bg-[#E8EAF6] px-4 py-2 text-base font-semibold text-[#0047AB] rounded-lg transition-colors"
+                          className="flex-1   px-4 py-2 text-base font-semibold text-black rounded-lg transition-colors "
+                          style={{
+                            backgroundColor: team.color || "#B0E0E6",
+                          }}
                         >
                           <i className="fas fa-plus-circle mr-1"></i>
                           {button.label}
@@ -262,94 +322,121 @@ const Teamjoinauction = () => {
           </div>
 
           {/* Right Column - Bid History */}
-          <div className="col-span-12 lg:col-span-3 bg-[#2C2F32] rounded-lg shadow-lg border border-[#0047AB] p-6">
+          <div
+            className="col-span-12 lg:col-span-3 bg-[#2C2F32] rounded-lg shadow-lg border  p-3"
+            style={{ borderColor: team.color || "#0047AB" }}
+          >
             <h2 className="text-xl font-semibold mb-4 text-white">
               Bid History
             </h2>
-            <div className="max-h-130 overflow-y-auto space-y-4">
+            <div
+              className="max-h-130 overflow-y-auto scrollbar-hide space-y-4"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
               {[
                 {
-                  teamLogo: "https://upload.wikimedia.org/wikipedia/en/4/4c/Chennai_Super_Kings_logo.png",
+                  teamLogo:
+                    "https://upload.wikimedia.org/wikipedia/en/4/4c/Chennai_Super_Kings_logo.png",
                   bidder: "Chennai Super Kings",
-                  amount: "₹16.5 Crore",
+                  amount: "₹16.50 Cr",
                   time: "2 mins ago",
                 },
                 {
-                  teamLogo: "https://upload.wikimedia.org/wikipedia/en/6/6f/Royal_Challengers_Bangalore_logo.png",
+                  teamLogo:
+                    "https://upload.wikimedia.org/wikipedia/en/6/6f/Royal_Challengers_Bangalore_logo.png",
                   bidder: "Royal Challengers Bangalore",
-                  amount: "₹16.25 Crore",
+                  amount: "₹16.25 Cr",
                   time: "5 mins ago",
                 },
                 {
-                  teamLogo: "https://upload.wikimedia.org/wikipedia/en/8/8e/Kolkata_Knight_Riders_logo.png",
+                  teamLogo:
+                    "https://upload.wikimedia.org/wikipedia/en/8/8e/Kolkata_Knight_Riders_logo.png",
                   bidder: "Kolkata Knight Riders",
-                  amount: "₹16 Crore",
+                  amount: "₹16.00 Cr",
                   time: "8 mins ago",
                 },
                 {
-                  teamLogo: "https://upload.wikimedia.org/wikipedia/en/3/3e/Delhi_Capitals_logo.png",
+                  teamLogo:
+                    "https://upload.wikimedia.org/wikipedia/en/3/3e/Delhi_Capitals_logo.png",
                   bidder: "Delhi Capitals",
-                  amount: "₹15.75 Crore",
+                  amount: "₹15.75 Cr",
                   time: "12 mins ago",
                 },
                 {
-                  teamLogo: "https://upload.wikimedia.org/wikipedia/en/3/3e/Rajasthan_Royals_logo.png",
+                  teamLogo:
+                    "https://upload.wikimedia.org/wikipedia/en/3/3e/Rajasthan_Royals_logo.png",
                   bidder: "Rajasthan Royals",
-                  amount: "₹15.5 Crore",
+                  amount: "₹15.50 Cr",
                   time: "15 mins ago",
                 },
-                {
-                  teamLogo: "https://upload.wikimedia.org/wikipedia/en/3/3e/Rajasthan_Royals_logo.png",
-                  bidder: "Rajasthan Royals",
-                  amount: "₹15.5 Crore",
-                  time: "15 mins ago",
-                },
-                {
-                  teamLogo: "https://upload.wikimedia.org/wikipedia/en/3/3e/Rajasthan_Royals_logo.png",
-                  bidder: "Rajasthan Royals",
-                  amount: "₹15.5 Crore",
-                  time: "15 mins ago",
-                },
-                {
-                  teamLogo: "https://upload.wikimedia.org/wikipedia/en/3/3e/Rajasthan_Royals_logo.png",
-                  bidder: "Rajasthan Royals",
-                  amount: "₹15.5 Crore",
-                  time: "15 mins ago",
-                },
-                {
-                  teamLogo: "https://upload.wikimedia.org/wikipedia/en/3/3e/Rajasthan_Royals_logo.png",
-                  bidder: "Rajasthan Royals",
-                  amount: "₹15.5 Crore",
-                  time: "15 mins ago",
-                },
-                {
-                  teamLogo: "https://upload.wikimedia.org/wikipedia/en/3/3e/Rajasthan_Royals_logo.png",
-                  bidder: "Rajasthan Royals",
-                  amount: "₹15.5 Crore",
-                  time: "15 mins ago",
-                },
+                // Add more bids as needed
               ].map((bid, index) => (
                 <div
                   key={index}
-                  className="flex items-center p-3 bg-[#202626] rounded-lg border border-blue-700 shadow-lg"
+                  className="flex items-center p-3 bg-[#202626] rounded-lg border  shadow-lg"
+                  style={{ borderColor: team.color || "#0047AB" }}
                 >
                   <img
                     src={bid.teamLogo}
                     alt={bid.bidder}
-                    className="w-10 h-10 mr-3"
+                    className="w-10 h-10 mr-3 rounded-full"
                   />
-                  <div className="flex justify-between w-full">
-                    <p className="text-md text-white w-25">{bid.bidder}</p>
-                    <span className="font-semibold text-[#B0E0E6] justify-right pl-[0.6rem]">{bid.amount}</span>
+
+                  <div className="flex flex-col flex-grow ">
+                    <p className="font-medium text-white text-sm">
+                      {bid.bidder}
+                    </p>
+
+                 
                   </div>
+                  <span className="font-semibold text-[#B0E0E6] text-sm whitespace-nowrap">
+                    {bid.amount}
+                  </span>
                 </div>
               ))}
             </div>
           </div>
         </div>
+        {/* Upcoming Players */}
+        <div
+          className="mt-8 bg-[#2C2F32] rounded-lg p-6 border"
+          style={{ borderColor: team.color || "#0047AB" }}
+        >
+          <h2 className="text-xl font-bold text-white mb-6">
+            Upcoming Players
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6">
+            {upcomingPlayers.map((player, index) => (
+              <div
+                key={index}
+                className="bg-[#202626] rounded-lg p-2 hover:bg-gray-600 transition-colors duration-300 text-white border"
+                style={{ borderColor: team.color || "#0047AB" }}
+              >
+                <div className="flex justify-center  items-center mb-4 ">
+                  <img
+                    className="w-20 h-20 object-contain rounded-full"
+                    src={player.logo}
+                    alt=""
+                  />
+                  <div className="flex-col items-center justify-center mt-4 pl-5">
+                    <h3 className="text-xl font-bold ">{player.name}</h3>
 
+                    <div className="flex items-center gap-2 mt-2">
+                      <div className="px-3 py-1 bg-green-500/10 text-green-400 rounded-full text-sm font-semibold">
+                        {player.basePrice}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
         {/* Recent Purchases Section */}
-        <div className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-6 border border-[#0047AB]">
+        <div
+          className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-6 border "
+          style={{ borderColor: team.color || "#0047AB" }}
+        >
           <h2 className="text-2xl font-semibold mb-6 text-white">
             Recent Purchases
           </h2>
@@ -357,7 +444,8 @@ const Teamjoinauction = () => {
             {recentPurchases.map((purchase, index) => (
               <div
                 key={index}
-                className="bg-[#2C2F32] rounded-lg overflow-hidden border border-[#0047AB]"
+                className="bg-[#2C2F32] rounded-lg overflow-hidden border "
+                style={{ borderColor: team.color || "#0047AB" }}
               >
                 <img
                   src={`https://readdy.ai/api/search-image?query=professional soccer player in manchester united red jersey celebrating goal victory moment dramatic stadium lighting&width=400&height=300&orientation=landscape&flag=912fa8b416ec5d3215e35a8d058b0af7`}
@@ -395,8 +483,14 @@ const Teamjoinauction = () => {
         </div>
 
         {/* Team Squad Section */}
-        <div className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-6 border border-[#0047AB]">
-          <h2 className="text-2xl font-semibold mb-6 text-white">Team Squad</h2>
+        <div
+          className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-6 border "
+          style={{ borderColor: team.color || "#0047AB" }}
+        >
+          <h2 className="text-2xl font-semibold mb-6 text-white ">
+            Team Squad
+          </h2>
+
           <div className="overflow-x-auto">
             <table className="w-full text-lg">
               <thead>
@@ -416,8 +510,30 @@ const Teamjoinauction = () => {
                   <th className="px-6 py-5 text-left text-white">Economy</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#0047AB]">
+              <tbody className="divide-y  ">
                 {[
+                  {
+                    name: "Rohit Sharma",
+                    position: "Batsman",
+                    age: 36,
+                    nationality: "India",
+                    matches: 243,
+                    runs: 6211,
+                    wickets: 0,
+                    strikeRate: 130.5,
+                    economy: 0,
+                  },
+                  {
+                    name: "Rohit Sharma",
+                    position: "Batsman",
+                    age: 36,
+                    nationality: "India",
+                    matches: 243,
+                    runs: 6211,
+                    wickets: 0,
+                    strikeRate: 130.5,
+                    economy: 0,
+                  },
                   {
                     name: "Rohit Sharma",
                     position: "Batsman",
@@ -431,13 +547,17 @@ const Teamjoinauction = () => {
                   },
                   // Add more players here...
                 ].map((player, index) => (
-                  <tr key={index}>
+                  <tr
+                    key={index}
+                    style={{ borderColor: team.color || "#0047AB" }}
+                  >
                     <td className="px-6 py-5">
                       <div className="flex items-center space-x-4">
                         <img
                           src="https://public.readdy.ai/ai/img_res/7ef4f29068f1540d64cc7eb86183279f.jpg"
                           alt={player.name}
-                          className="w-12 h-12 rounded-full object-cover border-2 border-[#0047AB]"
+                          className="w-12 h-12 rounded-full object-cover border-2 "
+                          style={{ borderColor: team.color || "#0047AB" }}
                         />
                         <div>
                           <span className="font-medium text-white">

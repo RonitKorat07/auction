@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { FaShieldAlt, FaWallet, FaUsers, FaPuzzlePiece } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAuctions } from "../store/auctionslice";
 import { FaPuzzlePiece, FaShieldAlt, FaUsers, FaWallet } from "react-icons/fa";
@@ -55,7 +56,28 @@ const Auction = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Handle bid submission
+  const recentPurchases = [
+    {
+      name: "Shahrukh Khan",
+      from: "Punjab Kings",
+      price: "₹6 Crore",
+      date: "February 25, 2024",
+    },
+    {
+      name: "Vishnu Vinod",
+      from: "Delhi Capitals",
+      price: "₹50 Lakhs",
+      date: "February 24, 2024",
+    },
+    {
+      name: "Tymal Mills",
+      from: "Rajasthan Royals",
+      price: "₹1 Crore",
+      date: "February 23, 2024",
+    },
+  ];
+
+
   const handleBid = () => {
     // Logic to handle the bid
     setShowBidModal(false);
@@ -86,13 +108,15 @@ const Auction = () => {
                   <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">
                     Hardik Pandya
                   </h1>
-                  <p className="text-lg sm:text-xl text-gray-200 mb-1">All-rounder</p>
+                  <p className="text-lg sm:text-xl text-gray-200 mb-1">
+                    All-rounder
+                  </p>
                   <p className="text-sm sm:text-base text-gray-200">INDIA</p>
                 </div>
               </div>
 
               <div className="p-4 sm:p-6 space-y-6">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4  ">
                   {[
                     { label: "Matches", value: "125" },
                     { label: "Runs", value: "2,309" },
@@ -101,18 +125,27 @@ const Auction = () => {
                     { label: "Batting Avg", value: "32.4" },
                     { label: "Economy", value: "8.24" },
                     { label: "Sixes", value: "112" },
-                    { label: "Best Score", value: "91*" }
+                    { label: "Best Score", value: "91*" },
                   ].map((stat, index) => (
-                    <div key={index} className="bg-[#2C2F32] rounded-lg p-3 text-center">
-                      <p className="text-sm sm:text-base text-gray-400">{stat.label}</p>
-                      <p className="text-lg sm:text-xl font-bold text-white">{stat.value}</p>
+                    <div
+                      key={index}
+                      className="bg-[#2C2F32] rounded-lg p-3 text-center  "
+                    >
+                      <p className="text-sm sm:text-base text-gray-400 ">
+                        {stat.label}
+                      </p>
+                      <p className="text-lg sm:text-xl font-bold text-white">
+                        {stat.value}
+                      </p>
                     </div>
                   ))}
                 </div>
 
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                   <div className="flex flex-col sm:flex-row items-center gap-3">
-                    <span className="text-lg sm:text-xl text-white">Current Bid</span>
+                    <span className="text-lg sm:text-xl text-white">
+                      Current Bid
+                    </span>
                     <div className="bg-[#FF4500] text-white px-4 py-2 rounded-full flex items-center">
                       <span className="font-semibold">{timeLeft}s</span>
                     </div>
@@ -128,30 +161,80 @@ const Auction = () => {
           {/* Right Column - Bid History */}
           <div className="lg:col-span-4 w-full h-full">
             <div className="bg-[#2C2F32] rounded-lg shadow-lg border border-[#0047AB] p-4 sm:p-6 h-full">
-              <h2 className="text-xl font-semibold mb-6 text-white">Bid History</h2>
-              <div className="space-y-4">
+              <h2 className="text-xl font-semibold mb-4 text-white">
+                Bid History
+              </h2>
+              <div
+                className="max-h-130 overflow-y-auto scrollbar-hide space-y-4"
+                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+              >
                 {[
                   {
+                    teamLogo:
+                      "https://upload.wikimedia.org/wikipedia/en/4/4c/Chennai_Super_Kings_logo.png",
                     bidder: "Chennai Super Kings",
                     amount: "₹16.5 Crore",
                     time: "2 mins ago",
                   },
                   {
+                    teamLogo:
+                      "https://upload.wikimedia.org/wikipedia/en/6/6f/Royal_Challengers_Bangalore_logo.png",
                     bidder: "Royal Challengers Bangalore",
                     amount: "₹16.25 Crore",
                     time: "5 mins ago",
                   },
                   {
+                    teamLogo:
+                      "https://upload.wikimedia.org/wikipedia/en/8/8e/Kolkata_Knight_Riders_logo.png",
                     bidder: "Kolkata Knight Riders",
                     amount: "₹16 Crore",
                     time: "8 mins ago",
                   },
                   {
+                    teamLogo:
+                      "https://upload.wikimedia.org/wikipedia/en/3/3e/Delhi_Capitals_logo.png",
                     bidder: "Delhi Capitals",
                     amount: "₹15.75 Crore",
                     time: "12 mins ago",
                   },
                   {
+                    teamLogo:
+                      "https://upload.wikimedia.org/wikipedia/en/3/3e/Rajasthan_Royals_logo.png",
+                    bidder: "Rajasthan Royals",
+                    amount: "₹15.5 Crore",
+                    time: "15 mins ago",
+                  },
+                  {
+                    teamLogo:
+                      "https://upload.wikimedia.org/wikipedia/en/3/3e/Rajasthan_Royals_logo.png",
+                    bidder: "Rajasthan Royals",
+                    amount: "₹15.5 Crore",
+                    time: "15 mins ago",
+                  },
+                  {
+                    teamLogo:
+                      "https://upload.wikimedia.org/wikipedia/en/3/3e/Rajasthan_Royals_logo.png",
+                    bidder: "Rajasthan Royals",
+                    amount: "₹15.5 Crore",
+                    time: "15 mins ago",
+                  },
+                  {
+                    teamLogo:
+                      "https://upload.wikimedia.org/wikipedia/en/3/3e/Rajasthan_Royals_logo.png",
+                    bidder: "Rajasthan Royals",
+                    amount: "₹15.5 Crore",
+                    time: "15 mins ago",
+                  },
+                  {
+                    teamLogo:
+                      "https://upload.wikimedia.org/wikipedia/en/3/3e/Rajasthan_Royals_logo.png",
+                    bidder: "Rajasthan Royals",
+                    amount: "₹15.5 Crore",
+                    time: "15 mins ago",
+                  },
+                  {
+                    teamLogo:
+                      "https://upload.wikimedia.org/wikipedia/en/3/3e/Rajasthan_Royals_logo.png",
                     bidder: "Rajasthan Royals",
                     amount: "₹15.5 Crore",
                     time: "15 mins ago",
@@ -159,19 +242,80 @@ const Auction = () => {
                 ].map((bid, index) => (
                   <div
                     key={index}
-                    className="flex justify-between items-center p-3 bg-[#2C2F32] rounded-lg hover:bg-[#353839] transition-colors"
+                    className="flex items-center p-3 bg-[#202626] rounded-lg border border-blue-700 shadow-lg"
                   >
-                    <div className="flex-1">
-                      <p className="font-medium text-white">{bid.bidder}</p>
-                      <p className="text-sm text-gray-400">{bid.time}</p>
+                    <img
+                      src={bid.teamLogo}
+                      alt={bid.bidder}
+                      className="w-10 h-10 mr-3 rounded-full"
+                    />
+                    <div className="flex flex-col flex-grow ">
+                      <p className="font-medium text-white text-sm">
+                        {bid.bidder}
+                      </p>
                     </div>
-                    <span className="font-semibold text-white">{bid.amount}</span>
+                    <span className="font-semibold text-[#B0E0E6] text-sm whitespace-nowrap">
+                      {bid.amount}
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
         </div>
+
+
+        {/* Recent Purchases Section */}
+        <div className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-4 sm:p-6 border border-[#0047AB]">
+          <h2 className="text-2xl font-semibold mb-6 text-white">
+            Recent Purchases
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {recentPurchases.map((purchase, index) => (
+              <div
+                key={index}
+                className="bg-[#2C2F32] rounded-lg overflow-hidden border border-[#0047AB] hover:shadow-xl transition-shadow"
+              >
+                <img
+                  src={`https://readdy.ai/api/search-image?query=professional soccer player in manchester united red jersey celebrating goal victory moment dramatic stadium lighting&width=400&height=300&orientation=landscape&flag=912fa8b416ec5d3215e35a8d058b0af7`}
+                  alt={purchase.name}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-4">
+                  <h3 className="text-lg font-semibold text-white mb-4">
+                    {purchase.name}
+                  </h3>
+                  <div className="space-y-3">
+                    {[
+                      { label: "From", value: purchase.from },
+                      {
+                        label: "Transfer Fee",
+                        value: purchase.price,
+                        highlight: true,
+                      },
+                      { label: "Date", value: purchase.date },
+                    ].map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="flex justify-between items-center"
+                      >
+                        <span className="text-gray-400">{item.label}</span>
+                        <span
+                          className={`font-medium ${
+                            item.highlight ? "text-[#0047AB]" : "text-white"
+                          }`}
+                        >
+                          {item.value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
 
         {/* Teams Status */}
         <div className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-4 sm:p-6 border border-[#0047AB]">
@@ -219,9 +363,15 @@ const Auction = () => {
                     >
                       <div className="flex items-center gap-2">
                         {item.icon}
-                        <span className="text-gray-300 text-sm">{item.label}</span>
+                        <span className="text-gray-300 text-sm">
+                          {item.label}
+                        </span>
                       </div>
-                      <span className={`${item.color || "text-white"} font-semibold text-sm`}>
+                      <span
+                        className={`${
+                          item.color || "text-white"
+                        } font-semibold text-sm`}
+                      >
                         {item.value}
                       </span>
                     </div>
@@ -232,6 +382,9 @@ const Auction = () => {
           </div>
         </div>
       </main>
+
+
+
     </div>
   );
 };
