@@ -132,7 +132,7 @@ const Adminauction = () => {
                       </button>
                     )}
                     {auction.status === "live" && (
-                     <Link to = "/admin/auction/auctionhandel">
+                     <Link to ={`/admin/auction/auctionhandel/${auction.id}`}>
                       <button className="w-full bg-[#0047AB] hover:bg-[#003A8C] py-2 rounded text-white font-semibold">
                         <i className="fas fa-eye mr-2"></i> View Auction
                       </button>
