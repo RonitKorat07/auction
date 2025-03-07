@@ -7,93 +7,92 @@ import {
   FaPuzzlePiece,
 } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
+import {
+  fetchJoinedPlayers,
+  fetchCurrentPlayer,
+  startAuction,
+  pauseAuction,
+  resumeAuction,
+  endAuction,
+  nextPlayer,
+  startTimer,
+} from "../store/joinedPlayersSlice";
 import { fetchPlayers } from "../store/playerslice";
 import { fetchAuctions } from "../store/auctionslice";
-import { useParams } from "react-router-dom";
 
 const Auctionhandel = () => {
-  const [currentBid, setCurrentBid] = useState(165000000);
-  const [showBidModal, setShowBidModal] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(30);
-  const [selectedTeam, setSelectedTeam] = useState(null);
-  const [auctionStatus, setAuctionStatus] = useState("not-started");
-  const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
   const { id } = useParams();
   const dispatch = useDispatch();
 
   const { auctions, loading: auctionsLoading } = useSelector((state) => state.auction);
-  const { players, loading, error } = useSelector((state) => state.player);
+  const { players, loading: playersLoading, error: playersError } = useSelector((state) => state.player);
+  const {
+    joinedPlayers,
+    loading: joinedPlayersLoading,
+    error: joinedPlayersError,
+    currentPlayer,
+    currentBid,
+    timeLeft,
+    auctionStatus,
+  } = useSelector((state) => state.joinedPlayers);
 
+  const [showBidModal, setShowBidModal] = useState(false);
+  const [selectedTeam, setSelectedTeam] = useState(null);
+
+  // Fetch players and auctions when the component mounts or when the ID changes
   useEffect(() => {
     dispatch(fetchPlayers());
     dispatch(fetchAuctions());
   }, [dispatch, id]);
 
-  const selectedauction = auctions.find((auction) => auction.id.toString() === id);
-  const [joinedplayers, setJoinedplayers] = useState([]);
-
+  // Fetch joined players and current player when the auction is selected
   useEffect(() => {
-    if (selectedauction && players.length > 0) {
-      const allplayers = selectedauction.selectedPlayers || [];
-      const updatedJoinedplayers = allplayers.map((playerid) =>
-        players.find((player) => player.id === playerid)
-      );
-      setJoinedplayers(updatedJoinedplayers);
+    if (id && players.length > 0) {
+      dispatch(fetchJoinedPlayers(id, players));
+      dispatch(fetchCurrentPlayer(id));
     }
-  }, [selectedauction, players]);
+  }, [dispatch, id, players]);
 
+  // Start the timer when the auction is running
   useEffect(() => {
-    let timer;
     if (auctionStatus === "running") {
-      timer = setInterval(() => {
-        setTimeLeft((prevTime) => {
-          if (prevTime <= 1) {
-            setTimeLeft(30);
-          }
-          return prevTime - 1;
-        });
-      }, 1000);
+      dispatch(startTimer());
     }
-    return () => clearInterval(timer);
-  }, [auctionStatus]);
+  }, [auctionStatus, dispatch]);
 
-  const handleStartAuction = () => {
-    setAuctionStatus("running");
-    if (joinedplayers.length > 0 && auctionStatus !== "running" && auctionStatus !== "paused") {
-      setCurrentPlayerIndex(0);
-    }
-    setTimeLeft(30);
+  // Handle auction controls
+  const handleStartAuction = async () => {
+    const initialPlayer = joinedPlayers[0]; // First player in the list
+    await dispatch(startAuction(id, initialPlayer));
   };
 
-  const handlePauseAuction = () => {
-    setAuctionStatus(auctionStatus === "running" ? "paused" : "running");
+  const handlePauseAuction = async () => {
+    await dispatch(pauseAuction(id));
   };
 
-  const handleEndAuction = () => {
-    setAuctionStatus("ended");
+  const handleResumeAuction = async () => {
+    await dispatch(resumeAuction(id));
+  };
+
+  const handleEndAuction = async () => {
+    await dispatch(endAuction(id));
+  };
+
+  const handleNextPlayer = async () => {
+    await dispatch(nextPlayer());
   };
 
   const handleBid = () => {
     setShowBidModal(false);
-    setTimeLeft(30);
   };
 
-  const handleNextPlayer = () => {
-    if (currentPlayerIndex < joinedplayers.length - 1) {
-      setCurrentPlayerIndex((prevIndex) => prevIndex + 1);
-      setCurrentBid(165000000);
-      setTimeLeft(30);
-    }
-  };
-
-  const currentPlayer = joinedplayers[currentPlayerIndex];
-
-  if (auctionsLoading || loading) {
+  if (auctionsLoading || playersLoading || joinedPlayersLoading) {
     return <div className="text-white text-center">Loading...</div>;
   }
 
-  if (error) {
-    return <div className="text-red-500 text-center">Error: {error}</div>;
+  if (playersError || joinedPlayersError) {
+    return <div className="text-red-500 text-center">Error: {playersError || joinedPlayersError}</div>;
   }
 
   const teams = [
@@ -112,6 +111,7 @@ const Auctionhandel = () => {
   return (
     <div className="min-h-screen bg-[#202626] w-full">
       <main className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-25">
+        {/* Auction Controls */}
         <div className="mb-8 bg-[#2C2F32] rounded-lg shadow-lg p-6 border border-[#0047AB]">
           <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
             <FaGavel className="text-[#0047AB]" />
@@ -120,35 +120,52 @@ const Auctionhandel = () => {
           <div className="flex flex-wrap gap-4">
             <button
               onClick={handleStartAuction}
-              className={`bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 flex items-center justify-center ${auctionStatus === "running" ? "opacity-50 cursor-not-allowed" : ""}`}
+              className={`bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 flex items-center justify-center ${
+                auctionStatus === "running" ? "opacity-50 cursor-not-allowed" : ""
+              }`}
               disabled={auctionStatus === "running"}
             >
               Start Auction
             </button>
             <button
               onClick={handlePauseAuction}
-              className={`bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 flex items-center justify-center ${auctionStatus === "not-started" || auctionStatus === "ended" ? "opacity-50 cursor-not-allowed" : ""}`}
-              disabled={auctionStatus === "not-started" || auctionStatus === "ended"}
+              className={`bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 flex items-center justify-center ${
+                auctionStatus !== "running" ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              disabled={auctionStatus !== "running"}
             >
-              {auctionStatus === "running" ? "Pause Auction" : "Resume Auction"}
+              Pause Auction
+            </button>
+            <button
+              onClick={handleResumeAuction}
+              className={`bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 flex items-center justify-center ${
+                auctionStatus !== "paused" ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              disabled={auctionStatus !== "paused"}
+            >
+              Resume Auction
             </button>
             <button
               onClick={handleEndAuction}
-              className={`bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 flex items-center justify-center ${auctionStatus === "ended" ? "opacity-50 cursor-not-allowed" : ""}`}
+              className={`bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 flex items-center justify-center ${
+                auctionStatus === "ended" ? "opacity-50 cursor-not-allowed" : ""
+              }`}
               disabled={auctionStatus === "ended"}
             >
               End Auction
             </button>
-            {auctionStatus === "running" && joinedplayers.length > 1 && (
+            {auctionStatus === "running" && joinedPlayers.length > 1 && (
               <button
                 onClick={handleNextPlayer}
-                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 flex items-center justify-center"
+                className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 flex items-center justify-center"
               >
                 Next Player
               </button>
             )}
           </div>
         </div>
+
+        {/* Player Profile */}
         {auctionStatus === "running" && currentPlayer && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div className="lg:col-span-8 w-full h-full">
@@ -185,7 +202,6 @@ const Auctionhandel = () => {
                       </div>
                     ))}
                   </div>
-
                   <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div className="flex flex-col sm:flex-row items-center gap-3">
                       <span className="text-lg sm:text-xl text-white">Current Bid</span>
@@ -201,6 +217,7 @@ const Auctionhandel = () => {
               </div>
             </div>
 
+            {/* Bid History */}
             <div className="lg:col-span-4 w-full h-full">
               <div className="bg-[#2C2F32] rounded-lg shadow-lg border border-[#0047AB] p-4 sm:p-6 h-full">
                 <h2 className="text-xl font-semibold mb-6 text-white">Bid History</h2>
@@ -229,6 +246,7 @@ const Auctionhandel = () => {
           </div>
         )}
 
+        {/* Recent Purchases */}
         <div className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-4 sm:p-6 border border-[#0047AB]">
           <h2 className="text-2xl font-semibold mb-6 text-white">Recent Purchases</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -264,6 +282,7 @@ const Auctionhandel = () => {
           </div>
         </div>
 
+        {/* Teams Status */}
         <div className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-4 sm:p-6 border border-[#0047AB]">
           <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
             <FaShieldAlt className="text-[#0047AB]" />
@@ -296,7 +315,7 @@ const Auctionhandel = () => {
                       <div className="flex items-center gap-2">
                         {item.icon}
                         <span className="text-gray-300 text-sm">{item.label}</span>
-                        </div>
+                      </div>
                       <span className={`${item.color || "text-white"} font-semibold text-sm`}>
                         {item.value}
                       </span>
@@ -309,6 +328,7 @@ const Auctionhandel = () => {
         </div>
       </main>
 
+      {/* Bid Modal */}
       {showBidModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-[#2C2F32] rounded-lg p-6 max-w-md w-full">

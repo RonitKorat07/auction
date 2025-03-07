@@ -2,21 +2,20 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTeamemail } from "../store/teamslice";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { fetchCurrentPlayer } from "../store/joinedPlayersSlice";
+import { useParams } from "react-router-dom";
 
 const Teamjoinauction = () => {
   const [currentBid, setCurrentBid] = useState(200000);
   const [bidAmount, setBidAmount] = useState(167500000);
   const [showBidModal, setShowBidModal] = useState(false);
 
-  const [timeLeft, setTimeLeft] = useState(() => {
-    const savedTime = localStorage.getItem("timeLeft");
-    return savedTime ? Number(savedTime) : 30;
-  });
   const [totalSpent, setTotalSpent] = useState(0); // Track total spent
   const [userEmail, setUserEmail] = useState(null); // Track user email
 
   const { teams, loading, error } = useSelector((state) => state.team);
   const dispatch = useDispatch();
+  const {id} = useParams()
 
   // Get the logged-in user's email using onAuthStateChanged
   useEffect(() => {
@@ -32,10 +31,17 @@ const Teamjoinauction = () => {
     return () => unsubscribe(); // Cleanup on unmount
   }, []);
 
+
+  const { currentPlayer , timeLeft  } = useSelector((state) => state.joinedPlayers);
+
+
   // Fetch team data when the userEmail changes
   useEffect(() => {
     if (userEmail) {
       dispatch(fetchTeamemail(userEmail));
+    } 
+    if (id) {
+          dispatch(fetchCurrentPlayer(id));
     }
   }, [dispatch, userEmail]);
   const team = teams.length > 0 ? teams[0] : null;
@@ -44,18 +50,7 @@ const Teamjoinauction = () => {
   const totalBudget = userTeam?.budget || 0; // Total budget from userTeam
   const remainingBudget = totalBudget - totalSpent; // Remaining budget
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        if (prevTime <= 1) {
-          clearInterval(timer);
-          return 30;
-        }
-        return prevTime - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+  
 
   const handleBid = () => {
     if (bidAmount <= currentBid) {
@@ -214,44 +209,42 @@ const Teamjoinauction = () => {
 
           {/* Middle Column - Player Profile */}
           <div className="col-span-12 lg:col-span-6">
+          {currentPlayer && (
+
             <div
               className="bg-[#2C2F32] rounded-lg shadow-lg overflow-hidden border-2 "
               style={{ borderColor: team.color || "#0047AB" }}
             >
               <div className="flex flex-col lg:flex-row items-center p-3">
                 <img
-                  src="https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1"
-                  alt="Player in Action"
+                    src={currentPlayer.image || "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1"}
+                    alt="Player in Action"
                   className="w-40 h-40 md:w-60 md:h-60 object-cover"
                 />
                 <div className="mt-4 md:mt-0 md:ml-6 text-center lg:text-center">
                   <h1 className="text-3xl font-bold text-white">
-                    Hardik Pandya
+                  {currentPlayer.name}
                   </h1>
-                  <p className="text-xl text-gray-200">All-rounder</p>
-                  <p className="text-md text-gray-200">INDIA</p>
+                  <p className="text-xl text-gray-200">{currentPlayer.role}</p>
+                  <p className="text-md text-gray-200">{currentPlayer.country}</p>
                 </div>
               </div>
               <div className="px-6 space-y-3">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {[
-                    { label: "Matches", value: "125" },
-                    { label: "Runs", value: "2,309" },
-                    { label: "Wickets", value: "78" },
-                    { label: "Strike Rate", value: "142.5" },
-                    { label: "Batting Avg", value: "32.4" },
-                    { label: "Economy", value: "8.24" },
-                    { label: "Sixes", value: "112" },
-                    { label: "Best Score", value: "91*" },
-                  ].map((stat, index) => (
+                {[
+                      { label: "Matches", value: currentPlayer?.state?.ipl?.batting?.match },
+                      { label: "Runs", value: currentPlayer?.state?.ipl?.batting?.runs },
+                      { label: "Wickets", value: currentPlayer?.state?.ipl?.bowling?.wicket },
+                      { label: "Strike Rate", value: currentPlayer?.state?.ipl?.batting?.strike_rate },
+                      { label: "Batting Avg", value: currentPlayer?.state?.ipl?.batting?.average },
+                      { label: "Economy", value: currentPlayer?.state?.ipl?.bowling?.eco },
+                      { label: "Best Wickets", value: currentPlayer?.state?.ipl?.bowling?.best_bowling || "N/A" },
+                      { label: "Best Score", value: currentPlayer?.state?.ipl?.batting?.high_score },
+                    ].map((stat, index) => (
                     <div
                       key={index}
-
                       className=" rounded-xl p-4 border "
                       style={{ borderColor: team.color || "#0047AB" }}
-
-                    
-
                     >
                       <p className="text-sm text-gray-400 font-medium">
                         {stat.label}
@@ -319,6 +312,7 @@ const Teamjoinauction = () => {
                 </div>
               </div>
             </div>
+          )}
           </div>
 
           {/* Right Column - Bid History */}

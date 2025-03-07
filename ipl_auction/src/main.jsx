@@ -205,7 +205,7 @@ const router = createBrowserRouter([
             ),
           },
           {
-            path: "/team/joinauction",
+            path: "/team/joinauction/:id",
             element: (
               <>
                 <Teamjoinauction />
