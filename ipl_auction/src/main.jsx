@@ -28,6 +28,7 @@ import Teamauction from "./team/Teamauction.jsx";
 import Teamjoinauction from "./team/joinauction.jsx";
 import Auctionhandel from "./admin/auctionhandel.jsx";
 import Auctionlist from "./pages/auctionlist.jsx";
+import AuctionHistory from "./admin/history.jsx";
 
 const router = createBrowserRouter([
   {
@@ -149,11 +150,21 @@ const router = createBrowserRouter([
                 <Footer />
               </>
             ),
-          },{
+          },
+          {
             path: "/admin/auction/auctionhandel/:id",
             element: (
               <>
                 <Auctionhandel />
+                <Footer />
+              </>
+            ),
+          },
+          {
+            path: "/admin/auction/history/:id",
+            element: (
+              <>
+                <AuctionHistory />
                 <Footer />
               </>
             ),
