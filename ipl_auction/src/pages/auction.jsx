@@ -121,7 +121,7 @@ const Auction = () => {
                     <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">
                       {currentPlayer.name}
                     </h1>
-                    <p className="text-lg sm:text-xl text-gray-200 mb-1">{currentPlayer.role}</p>
+                    <p className="text-lg sm:text-xl text-gray-200 mb-1">{currentPlayer.player_role}</p>
                     <p className="text-sm sm:text-base text-gray-200">{currentPlayer.country}</p>
                   </div>
                 </div>
