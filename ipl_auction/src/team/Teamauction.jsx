@@ -49,7 +49,7 @@ const Teamauction = () => {
     // Check if team is already in the auction
     if (auction.teams.includes(teamName)) {
       alert("Your team has already joined this auction!");
-      navigate("/team/joinauction");
+      navigate(`/team/joinauction/${auction.id}`);
       return;
     }
 
@@ -57,7 +57,7 @@ const Teamauction = () => {
       await updateDoc(auctionRef, {
         teams: [...auction.teams, teamName],
       });
-      navigate(`/team/joinauction`);
+      navigate(`/team/joinauction/${auction.id}`);
     } catch (error) {
       console.error("Error joining auction:", error);
       alert("Failed to join auction. Try again.");
