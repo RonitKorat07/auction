@@ -21,7 +21,6 @@ const Teamprofile = () => {
     }
   }, [teams, id]);
 
-
   const players = [
     {
       name: "Rohit Sharma",
@@ -77,7 +76,7 @@ const Teamprofile = () => {
       </div>
     );
   }
-
+  const teamColor = selectedteam.color || "#0047AB";
   return (
     <div className="min-h-screen bg-[#202626]">
       {/* Hero Section */}
@@ -105,29 +104,37 @@ const Teamprofile = () => {
 
       {/* Quick Stats */}
       <div className="container mx-auto px-4 -mt-12 sm:-mt-16 relative z-20">
-        <div className="bg-[#202626] rounded-lg shadow-lg shadow-[#0047AB]/10 p-4 md:p-6 lg:p-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8 hover:shadow-[#0047AB]/100 transition delay-150 duration-300 ease-in-out border border-[#0047AB] ">
+        <div
+          className="bg-[#202626] rounded-lg shadow-lg p-4 md:p-6 lg:p-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8 transition-all duration-300 ease-in-out border-2 hover:border-opacity-100"
+          style={{
+            borderColor: teamColor,
+            boxShadow: `0 4px 6px -1px ${teamColor}40, 0 2px 4px -1px ${teamColor}30`,
+            transition:
+              "box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.boxShadow = `0 10px 15px -3px ${teamColor}80, 0 4px 6px -4px ${teamColor}60`;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.boxShadow = `0 4px 6px -1px ${teamColor}40, 0 2px 4px -1px ${teamColor}30`;
+          }}
+        >
           <div className="text-center">
             <p className="text-[#B0E0E6] text-sm">Home Venue</p>
             <p className="text-lg sm:text-xl md:text-2xl font-bold text-[#E8EAF6]">
-
               {selectedteam?.homeVenue?.name}
-
             </p>
           </div>
           <div className="text-center">
             <p className="text-[#B0E0E6] text-sm">Coach</p>
             <p className="text-lg sm:text-xl md:text-2xl font-bold text-[#E8EAF6]">
-
               {selectedteam?.coach}
-
             </p>
           </div>
           <div className="text-center">
             <p className="text-[#B0E0E6] text-sm">Owner</p>
             <p className="text-lg sm:text-xl md:text-2xl font-bold text-[#E8EAF6]">
-
               {selectedteam?.owner}
-
             </p>
           </div>
           <div className="text-center">

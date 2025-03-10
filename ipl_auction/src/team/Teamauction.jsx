@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  fetchAuctions,
-  updateAuctionStatus,
-} from "../store/auctionslice";
+import { fetchAuctions, updateAuctionStatus } from "../store/auctionslice";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../config/firebaseconfig"; // Ensure Firebase is configured
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -29,7 +26,7 @@ const Teamauction = () => {
 
     return () => unsubscribe(); // Cleanup on unmount
   }, []);
-  
+
   // Fetch team data when the userEmail changes
   useEffect(() => {
     if (userEmail) {
@@ -42,17 +39,17 @@ const Teamauction = () => {
   );
 
   useEffect(() => {
-    dispatch(fetchAuctions()); 
+    dispatch(fetchAuctions());
   }, [dispatch]);
 
   const handleJoinAuction = async (auction) => {
-    const teamName = userTeam?.name // Replace with actual team name logic
+    const teamName = userTeam?.name; // Replace with actual team name logic
     const auctionRef = doc(db, "auctions", auction.id);
 
     // Check if team is already in the auction
     if (auction.teams.includes(teamName)) {
       alert("Your team has already joined this auction!");
-      navigate(`/team/joinauction/${auction.id}`);
+      navigate("/team/joinauction");
       return;
     }
 
@@ -60,7 +57,7 @@ const Teamauction = () => {
       await updateDoc(auctionRef, {
         teams: [...auction.teams, teamName],
       });
-      navigate(`/team/joinauction/${auction.id}`);
+      navigate(`/team/joinauction`);
     } catch (error) {
       console.error("Error joining auction:", error);
       alert("Failed to join auction. Try again.");
@@ -126,11 +123,19 @@ const Teamauction = () => {
                   {auction.status === "live" && (
                     <button
                       onClick={() => handleJoinAuction(auction)}
-                      className="w-full bg-[#0047AB] hover:bg-[#003A8C] py-2 px-5 rounded text-white font-semibold"
+                      className="w-full bg-[#0047AB] hover:bg-[#003A8C] py-2 px-5 rounded text-white font-semibold hover:cursor-pointer"
                     >
                       <i className="fas fa-eye mr-2"></i>
                       Join Auction
                     </button>
+                  )}
+                  {auction.status === "completed" && (
+                    <Link to={`/admin/auction/history/${auction.id}`}>
+                      <button className="w-full bg-[#0047AB] hover:bg-[#003A8C] py-2 px-5 rounded text-white font-semibold hover:cursor-pointer">
+                        <i className="fas fa-eye mr-2"></i>
+                        view Auction
+                      </button>
+                    </Link>
                   )}
                 </div>
               </div>
