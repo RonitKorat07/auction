@@ -91,7 +91,7 @@ const PlayerList = () => {
                 Add Player
               </Link>
               <select
-                className="w-full sm:w-auto px-6 py-3 rounded-lg border-2 border-[#0047AB] bg-[#202626] text-[#E8EAF6] transition-all focus:ring-2 focus:ring-[#0047AB]"
+                className="w-full sm:w-auto px-6 py-3 rounded-lg border-2 border-[#0047AB] bg-[#202626] text-[#E8EAF6] transition-all focus:ring-2 focus:ring-[#0047AB] hover:cursor-pointer"
                 value={selectedStatus}
                 onChange={handleStatusChange}
               >
@@ -191,13 +191,13 @@ const PlayerList = () => {
                             <FaEye />
                           </Link>
                           <button
-                            className="text-[#008000] hover:text-[#B0E0E6] p-2 transition-colors"
+                            className="text-[#008000] hover:text-[#B0E0E6] p-2 transition-colors hover:cursor-pointer"
                             title="Edit Player"
                           >
                             <FaEdit />
                           </button>
                           <button
-                            className="text-[#FF4500] hover:text-[#B0E0E6] p-2 transition-colors"
+                            className="text-[#FF4500] hover:text-[#B0E0E6] p-2 transition-colors hover:cursor-pointer"
                             title="Delete Player"
                           >
                             <FaTrash />

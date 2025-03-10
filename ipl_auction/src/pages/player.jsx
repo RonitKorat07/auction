@@ -85,7 +85,7 @@ const PlayerList = () => {
 
             <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
               <select
-                className="w-full sm:w-auto px-6 py-3 rounded-lg border-2 border-[#0047AB] bg-[#202626] text-[#E8EAF6] transition-all focus:ring-2 focus:ring-[#0047AB]"
+                className="w-full sm:w-auto px-6 py-3 rounded-lg border-2 border-[#0047AB] bg-[#202626] text-[#E8EAF6] transition-all focus:ring-2 focus:ring-[#0047AB] hover:cursor-pointer"
                 value={selectedStatus}
                 onChange={handleStatusChange}
               >
@@ -185,7 +185,7 @@ const PlayerList = () => {
                             className="text-[#0047AB] hover:text-[#B0E0E6] p-2 transition-colors"
                             title="View Player"
                           >
-                            <FaEye className="h-6 w-6"/>
+                            <FaEye className="h-6 w-6" />
                           </Link>
                         </div>
                       </td>

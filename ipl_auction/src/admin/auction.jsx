@@ -131,21 +131,21 @@ const Adminauction = () => {
                     {auction.status === "upcoming" && (
                       <button
                         onClick={() => handleStartAuction(auction.id)}
-                        className="w-full bg-[#0047AB] hover:bg-[#003A8C] py-2 rounded text-white font-semibold"
+                        className="w-full bg-[#0047AB] hover:bg-[#003A8C] py-2 rounded text-white font-semibold hover:cursor-pointer"
                       >
                         <i className="fas fa-play mr-2"></i> Start Auction
                       </button>
                     )}
                     {auction.status === "live" && (
                       <Link to={`/admin/auction/auctionhandel/${auction.id}`}>
-                        <button className="w-full bg-[#0047AB] hover:bg-[#003A8C] py-2 rounded text-white font-semibold">
+                        <button className="w-full bg-[#0047AB] hover:bg-[#003A8C] py-2 rounded text-white font-semibold hover:cursor-pointer">
                           <i className="fas fa-eye mr-2"></i> Handle Auction
                         </button>
                       </Link>
                     )}
                     {auction.status === "completed" && (
                       <Link to={`/admin/auction/history/${auction.id}`}>
-                        <button className="w-full bg-[#0047AB] hover:bg-[#003A8C] py-2 rounded text-white font-semibold">
+                        <button className="w-full bg-[#0047AB] hover:bg-[#003A8C] py-2 rounded text-white font-semibold hover:cursor-pointer">
                           <i className="fas fa-eye mr-2"></i> View Auction
                         </button>
                       </Link>

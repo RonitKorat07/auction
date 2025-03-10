@@ -149,7 +149,7 @@ const Adminteam = () => {
                       className="text-white font-bold hover:text-gray-300 p-2 transition-colors"
                     >
                       <button
-                        className="w-full py-2 text-white rounded-full whitespace-nowrap transition-all duration-500 hover:shadow-lg relative overflow-hidden group"
+                        className="w-full py-2 text-white rounded-full whitespace-nowrap transition-all duration-500 hover:shadow-lg relative overflow-hidden group hover:cursor-pointer"
                         style={{
                           backgroundColor: team.color,
                           transform: "translateZ(0)",

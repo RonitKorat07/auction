@@ -189,7 +189,7 @@ export const Homepage = () => {
             <motion.div className="mt-10 flex justify-center">
               <Link
                 to={"/auction"}
-                className="start-auction-btn group relative px-8 py-4 bg-gradient-to-r from-purple-500 to-blue-600 rounded-xl text-xl font-bold text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden"
+                className="start-auction-btn group relative px-8 py-4 bg-gradient-to-r from-purple-500 to-blue-600 rounded-xl text-xl font-bold text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden hover:cursor-pointer"
               >
                 <span className="relative z-10 flex items-center">
                   Start Auction <FaArrowRight className="ml-2" />
@@ -214,7 +214,7 @@ export const Homepage = () => {
             </h1>
             <button
               onClick={() => handleNavigate("/teampage")}
-              className="flex items-center gap-2 bg-[#0047AB] text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
+              className="flex items-center gap-2 bg-[#0047AB] text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition hover:cursor-pointer"
             >
               See More <FaArrowRight />
             </button>
@@ -266,7 +266,7 @@ export const Homepage = () => {
             <h1 className="text-4xl font-bold text-blue-400">Top 3 Batsmen</h1>
             <button
               onClick={() => handleNavigate("/players")}
-              className="flex items-center justify-center bg-[#0047AB] text-white px-4 py-2 rounded-full hover:bg-blue-700 transition"
+              className="flex items-center justify-center bg-[#0047AB] text-white px-4 py-2 rounded-full hover:bg-blue-700 transition hover:cursor-pointer"
             >
               <FaArrowRight />
             </button>
@@ -319,7 +319,7 @@ export const Homepage = () => {
             <h1 className="text-4xl font-bold text-blue-400">Top 3 Bowlers</h1>
             <button
               onClick={() => handleNavigate("/players")}
-              className="flex items-center justify-center bg-[#0047AB] text-white px-4 py-2 rounded-full hover:bg-blue-700 transition"
+              className="flex items-center justify-center bg-[#0047AB] text-white px-4 py-2 rounded-full hover:bg-blue-700 transition hover:cursor-pointer"
             >
               <FaArrowRight />
             </button>
@@ -372,7 +372,7 @@ export const Homepage = () => {
             </h1>
             <button
               onClick={() => handleNavigate("/players")}
-              className="flex items-center justify-center bg-[#0047AB] text-white px-4 py-2 rounded-full hover:bg-blue-700 transition"
+              className="flex items-center justify-center bg-[#0047AB] text-white px-4 py-2 rounded-full hover:bg-blue-700 transition hover:cursor-pointer"
             >
               <FaArrowRight />
             </button>
