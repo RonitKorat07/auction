@@ -225,7 +225,7 @@ const Teamjoinauction = () => {
                   <h1 className="text-3xl font-bold text-white">
                   {currentPlayer.name}
                   </h1>
-                  <p className="text-xl text-gray-200">{currentPlayer.role}</p>
+                  <p className="text-xl text-gray-200">{currentPlayer.player_role }</p>
                   <p className="text-md text-gray-200">{currentPlayer.country}</p>
                 </div>
               </div>

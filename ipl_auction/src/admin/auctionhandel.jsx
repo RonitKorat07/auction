@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  FaGavel,
-  FaShieldAlt,
-  FaWallet,
-  FaUsers,
-  FaPuzzlePiece,
-} from "react-icons/fa";
+import { FaGavel, FaShieldAlt, FaWallet, FaUsers, FaPuzzlePiece } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import {
@@ -40,13 +34,11 @@ const Auctionhandel = () => {
   const [showBidModal, setShowBidModal] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState(null);
 
-  // Fetch players and auctions when the component mounts or when the ID changes
   useEffect(() => {
     dispatch(fetchPlayers());
     dispatch(fetchAuctions());
   }, [dispatch, id]);
 
-  // Fetch joined players and current player when the auction is selected
   useEffect(() => {
     if (id && players.length > 0) {
       dispatch(fetchJoinedPlayers(id, players));
@@ -54,37 +46,26 @@ const Auctionhandel = () => {
     }
   }, [dispatch, id, players]);
 
-  // Start the timer when the auction is running
   useEffect(() => {
-    if (auctionStatus === "running") {
-      dispatch(startTimer());
+    if (auctionStatus === "running" && id) {
+      dispatch(startTimer(id));
     }
-  }, [auctionStatus, dispatch]);
+  }, [auctionStatus, dispatch, id]);
 
-  // Handle auction controls
-  const handleStartAuction = async () => {
-    const initialPlayer = joinedPlayers[0]; // First player in the list
-    await dispatch(startAuction(id, initialPlayer));
+  const handleStartAuction = () => {
+    if (joinedPlayers.length > 0) {
+      dispatch(startAuction(id, joinedPlayers[0], players));
+    }
   };
 
-  const handlePauseAuction = async () => {
-    await dispatch(pauseAuction(id));
-  };
-
-  const handleResumeAuction = async () => {
-    await dispatch(resumeAuction(id));
-  };
-
-  const handleEndAuction = async () => {
-    await dispatch(endAuction(id));
-  };
-
-  const handleNextPlayer = async () => {
-    await dispatch(nextPlayer());
-  };
+  const handlePauseAuction = () => dispatch(pauseAuction(id));
+  const handleResumeAuction = () => dispatch(resumeAuction(id));
+  const handleEndAuction = () => dispatch(endAuction(id));
+  const handleNextPlayer = () => dispatch(nextPlayer(id));
 
   const handleBid = () => {
     setShowBidModal(false);
+    // Add bid logic here if needed
   };
 
   if (auctionsLoading || playersLoading || joinedPlayersLoading) {
@@ -120,16 +101,16 @@ const Auctionhandel = () => {
           <div className="flex flex-wrap gap-4">
             <button
               onClick={handleStartAuction}
-              className={`bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 flex items-center justify-center ${
-                auctionStatus === "running" ? "opacity-50 cursor-not-allowed" : ""
+              className={`bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 ${
+                auctionStatus === "running" || !joinedPlayers.length ? "opacity-50 cursor-not-allowed" : ""
               }`}
-              disabled={auctionStatus === "running"}
+              disabled={auctionStatus === "running" || !joinedPlayers.length}
             >
               Start Auction
             </button>
             <button
               onClick={handlePauseAuction}
-              className={`bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 flex items-center justify-center ${
+              className={`bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 ${
                 auctionStatus !== "running" ? "opacity-50 cursor-not-allowed" : ""
               }`}
               disabled={auctionStatus !== "running"}
@@ -138,7 +119,7 @@ const Auctionhandel = () => {
             </button>
             <button
               onClick={handleResumeAuction}
-              className={`bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 flex items-center justify-center ${
+              className={`bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 ${
                 auctionStatus !== "paused" ? "opacity-50 cursor-not-allowed" : ""
               }`}
               disabled={auctionStatus !== "paused"}
@@ -147,7 +128,7 @@ const Auctionhandel = () => {
             </button>
             <button
               onClick={handleEndAuction}
-              className={`bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 flex items-center justify-center ${
+              className={`bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 ${
                 auctionStatus === "ended" ? "opacity-50 cursor-not-allowed" : ""
               }`}
               disabled={auctionStatus === "ended"}
@@ -157,7 +138,7 @@ const Auctionhandel = () => {
             {auctionStatus === "running" && joinedPlayers.length > 1 && (
               <button
                 onClick={handleNextPlayer}
-                className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 flex items-center justify-center"
+                className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300"
               >
                 Next Player
               </button>
@@ -180,21 +161,21 @@ const Auctionhandel = () => {
                     <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">
                       {currentPlayer.name}
                     </h1>
-                    <p className="text-lg sm:text-xl text-gray-200 mb-1">{currentPlayer.role}</p>
+                    <p className="text-lg sm:text-xl text-gray-200 mb-1">{currentPlayer.player_role}</p>
                     <p className="text-sm sm:text-base text-gray-200">{currentPlayer.country}</p>
                   </div>
                 </div>
                 <div className="p-4 sm:p-6 space-y-6">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     {[
-                      { label: "Matches", value: currentPlayer?.state?.ipl?.batting?.match },
-                      { label: "Runs", value: currentPlayer?.state?.ipl?.batting?.runs },
-                      { label: "Wickets", value: currentPlayer?.state?.ipl?.bowling?.wicket },
-                      { label: "Strike Rate", value: currentPlayer?.state?.ipl?.batting?.strike_rate },
-                      { label: "Batting Avg", value: currentPlayer?.state?.ipl?.batting?.average },
-                      { label: "Economy", value: currentPlayer?.state?.ipl?.bowling?.eco },
+                      { label: "Matches", value: currentPlayer?.state?.ipl?.batting?.match || "N/A" },
+                      { label: "Runs", value: currentPlayer?.state?.ipl?.batting?.runs || "N/A" },
+                      { label: "Wickets", value: currentPlayer?.state?.ipl?.bowling?.wicket || "N/A" },
+                      { label: "Strike Rate", value: currentPlayer?.state?.ipl?.batting?.strike_rate || "N/A" },
+                      { label: "Batting Avg", value: currentPlayer?.state?.ipl?.batting?.average || "N/A" },
+                      { label: "Economy", value: currentPlayer?.state?.ipl?.bowling?.eco || "N/A" },
                       { label: "Best Wickets", value: currentPlayer?.state?.ipl?.bowling?.best_bowling || "N/A" },
-                      { label: "Best Score", value: currentPlayer?.state?.ipl?.batting?.high_score },
+                      { label: "Best Score", value: currentPlayer?.state?.ipl?.batting?.high_score || "N/A" },
                     ].map((stat, index) => (
                       <div key={index} className="bg-[#2C2F32] rounded-lg p-3 text-center">
                         <p className="text-sm sm:text-base text-gray-400">{stat.label}</p>
@@ -210,7 +191,7 @@ const Auctionhandel = () => {
                       </div>
                     </div>
                     <span className="text-2xl sm:text-3xl font-bold text-[#0047AB]">
-                      ₹{(currentBid / 100000).toFixed(2)} Crore
+                      ₹{(currentBid / 10000000).toFixed(2)} Crore
                     </span>
                   </div>
                 </div>
@@ -270,7 +251,7 @@ const Auctionhandel = () => {
                     ].map((item, idx) => (
                       <div key={idx} className="flex justify-between items-center">
                         <span className="text-gray-400">{item.label}</span>
-                        <span className={`font-medium ${item.highlight ? 'text-[#0047AB]' : 'text-white'}`}>
+                        <span className={`font-medium ${item.highlight ? "text-[#0047AB]" : "text-white"}`}>
                           {item.value}
                         </span>
                       </div>
@@ -308,8 +289,8 @@ const Auctionhandel = () => {
                 <div className="w-full space-y-2">
                   {[
                     { label: "Budget", value: team.budget, icon: <FaWallet className="text-[#0047AB]" />, color: "text-green-400" },
-                    { label: "Players", value: team.playersBought, icon: <FaUsers className="text-[#0047AB]" />, },
-                    { label: "Slots", value: team.slotsLeft, icon: <FaPuzzlePiece className="text-[#0047AB]" />, },
+                    { label: "Players", value: team.playersBought, icon: <FaUsers className="text-[#0047AB]" /> },
+                    { label: "Slots", value: team.slotsLeft, icon: <FaPuzzlePiece className="text-[#0047AB]" /> },
                   ].map((item, idx) => (
                     <div key={idx} className="flex items-center justify-between bg-[#2C2F32] rounded-lg p-2">
                       <div className="flex items-center gap-2">
@@ -334,7 +315,7 @@ const Auctionhandel = () => {
           <div className="bg-[#2C2F32] rounded-lg p-6 max-w-md w-full">
             <h3 className="text-xl font-semibold mb-4 text-white">Confirm Your Bid</h3>
             <p className="mb-4 text-white">
-              Are you sure you want to place a bid of ₹{currentBid.toLocaleString()}?
+              Are you sure you want to place a bid of ₹{(currentBid / 10000000).toFixed(2)} Crore?
             </p>
             <div className="flex justify-end gap-4">
               <button
