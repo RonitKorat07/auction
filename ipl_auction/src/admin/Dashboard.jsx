@@ -93,7 +93,21 @@ const Dashboard = () => {
       );
     });
   }, []);
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#202626]">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-[#0047AB]"></div>
+      </div>
+    );
+  }
 
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#202626]">
+        <div className="text-[#FF4500] text-xl">Error: {error}</div>
+      </div>
+    );
+  }
   return (
     <>
       <div className="flex min-h-screen w-full flex-col items-center justify-center gap-6 bg-[#202626] ">

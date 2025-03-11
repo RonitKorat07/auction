@@ -34,10 +34,13 @@ const Auctionlist = () => {
     date: "",
     time: "",
   });
-
-  
-
- 
+  if (auctionsLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#202626]">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-[#0047AB]"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#202626] text-[#E8EAF6] pt-20 md:pt-25">
@@ -45,7 +48,6 @@ const Auctionlist = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold">Auctions</h1>
-        
         </div>
 
         {/* Tabs */}
@@ -54,7 +56,9 @@ const Auctionlist = () => {
             <button
               key={tab}
               className={`pb-2 px-2 font-medium ${
-                activeTab === tab ? "text-[#0047AB] border-b-2 border-[#0047AB]" : "text-[#B0E0E6] hover:text-[#E8EAF6]"
+                activeTab === tab
+                  ? "text-[#0047AB] border-b-2 border-[#0047AB]"
+                  : "text-[#B0E0E6] hover:text-[#E8EAF6]"
               }`}
               onClick={() => setActiveTab(tab)}
             >
@@ -71,9 +75,14 @@ const Auctionlist = () => {
             auctions
               ?.filter((auction) => auction.status === activeTab)
               ?.map((auction) => (
-                <div key={auction.id} className="bg-[#202626] rounded-lg p-4 md:p-6 border border-[#B0E0E6]">
+                <div
+                  key={auction.id}
+                  className="bg-[#202626] rounded-lg p-4 md:p-6 border border-[#B0E0E6]"
+                >
                   <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-lg md:text-xl font-semibold">{auction.auctionName}</h3>
+                    <h3 className="text-lg md:text-xl font-semibold">
+                      {auction.auctionName}
+                    </h3>
                     {auction.isLive && (
                       <span className="bg-[#FF4500]/20 text-[#FF4500] px-2 py-1 rounded-full text-xs font-medium">
                         <i className="fas fa-circle text-xs mr-1"></i> Live
@@ -83,16 +92,26 @@ const Auctionlist = () => {
                   <div className="space-y-1 mb-4">
                     <p className="text-[#B0E0E6]">{auction.date}</p>
                     <p className="text-[#B0E0E6]">{auction.time}</p>
-                    <p className="text-[#B0E0E6]">{auction.bidHistory?.length || 0} Total Bids</p>
-                    <p className="text-[#B0E0E6]">{auction.selectedPlayers?.length || 0} Players Selected</p>
+                    <p className="text-[#B0E0E6]">
+                      {auction.bidHistory?.length || 0} Total Bids
+                    </p>
+                    <p className="text-[#B0E0E6]">
+                      {auction.selectedPlayers?.length || 0} Players Selected
+                    </p>
                   </div>
                   <div className="space-y-2">
-                  
                     {auction.status === "live" && (
-                     <Link to = {`/auctionpage/${auction.id}`}>
-                      <button className="w-full bg-[#0047AB] hover:bg-[#003A8C] py-2 rounded text-white font-semibold">
-                        <i className="fas fa-eye mr-2"></i> View Auction
-                      </button>
+                      <Link to={`/auctionpage/${auction.id}`}>
+                        <button className="w-full bg-[#0047AB] hover:bg-[#003A8C] py-2 rounded text-white font-semibold hover:cursor-pointer">
+                          <i className="fas fa-eye mr-2"></i> View Auction
+                        </button>
+                      </Link>
+                    )}
+                    {auction.status === "completed" && (
+                      <Link to={`/admin/auction/history/${auction.id}`}>
+                        <button className="w-full bg-[#0047AB] hover:bg-[#003A8C] py-2 rounded text-white font-semibold hover:cursor-pointer">
+                          <i className="fas fa-eye mr-2"></i> View Auction
+                        </button>
                       </Link>
                     )}
                   </div>

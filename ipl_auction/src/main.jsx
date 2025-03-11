@@ -29,11 +29,17 @@ import Teamjoinauction from "./team/joinauction.jsx";
 import Auctionhandel from "./admin/auctionhandel.jsx";
 import Auctionlist from "./pages/auctionlist.jsx";
 import AuctionHistory from "./admin/history.jsx";
+import ScrollToTop from "./components/Scrolltop.jsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: (
+      <>
+        <ScrollToTop />
+        <App />
+      </>
+    ),
     children: [
       {
         path: "/",

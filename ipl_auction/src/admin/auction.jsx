@@ -20,9 +20,11 @@ const Adminauction = () => {
   const { players, loading: playersLoading } = useSelector(
     (state) => state.player
   );
-  const { auctions, loading: auctionsLoading } = useSelector(
-    (state) => state.auction
-  );
+  const {
+    auctions,
+    loading: auctionsLoading,
+    error,
+  } = useSelector((state) => state.auction);
 
   useEffect(() => {
     dispatch(fetchPlayers());
@@ -66,7 +68,21 @@ const Adminauction = () => {
       setSelectedPlayers([...selectedPlayers, player]);
     }
   };
+  if (auctionsLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#202626]">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-[#0047AB]"></div>
+      </div>
+    );
+  }
 
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#202626]">
+        <div className="text-[#FF4500] text-xl">Error: {error}</div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-[#202626] text-[#E8EAF6] pt-20 md:pt-25">
       <div className="max-w-7xl mx-auto px-4">
@@ -98,7 +114,9 @@ const Adminauction = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {auctionsLoading ? (
-            <p>Loading auctions...</p>
+            <div className="min-h-screen flex items-center justify-center bg-[#202626]">
+              <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-[#0047AB]"></div>
+            </div>
           ) : (
             auctions
               ?.filter((auction) => auction.status === activeTab)
