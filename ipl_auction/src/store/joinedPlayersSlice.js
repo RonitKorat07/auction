@@ -10,10 +10,8 @@ const initialState = {
   auctionStatus: "not-started", // 'not-started', 'running', 'paused', 'ended'
   currentPlayerIndex: 0,
   timeLeft: 30, // Timer in seconds
-  currentBid: 165000000, // Default bid amount
+  currentBid: 2000000, // Default bid amount
   auctionId: null,
-  unsubscribeJoinedPlayers: null,
-  unsubscribeCurrentPlayer: null,
 };
 
 const joinedPlayersSlice = createSlice({
@@ -50,14 +48,6 @@ const joinedPlayersSlice = createSlice({
     decrementTimeLeft: (state) => {
       if (state.timeLeft > 0) state.timeLeft -= 1;
     },
-    setUnsubscribeJoinedPlayers: (state, action) => {
-      if (state.unsubscribeJoinedPlayers) state.unsubscribeJoinedPlayers();
-      state.unsubscribeJoinedPlayers = action.payload;
-    },
-    setUnsubscribeCurrentPlayer: (state, action) => {
-      if (state.unsubscribeCurrentPlayer) state.unsubscribeCurrentPlayer();
-      state.unsubscribeCurrentPlayer = action.payload;
-    },
     resetAuctionState: (state) => {
       state.joinedPlayers = [];
       state.currentPlayer = null;
@@ -66,10 +56,6 @@ const joinedPlayersSlice = createSlice({
       state.timeLeft = 30;
       state.currentBid = 165000000;
       state.auctionId = null;
-      if (state.unsubscribeJoinedPlayers) state.unsubscribeJoinedPlayers();
-      if (state.unsubscribeCurrentPlayer) state.unsubscribeCurrentPlayer();
-      state.unsubscribeJoinedPlayers = null;
-      state.unsubscribeCurrentPlayer = null;
     },
   },
 });
@@ -85,8 +71,6 @@ export const {
   setCurrentBid,
   setAuctionId,
   decrementTimeLeft,
-  setUnsubscribeJoinedPlayers,
-  setUnsubscribeCurrentPlayer,
   resetAuctionState,
 } = joinedPlayersSlice.actions;
 
@@ -119,7 +103,9 @@ export const fetchJoinedPlayers = (auctionId, players = []) => (dispatch) => {
       dispatch(setLoading(false));
     }
   );
-  dispatch(setUnsubscribeJoinedPlayers(unsubscribe));
+
+  // Return the unsubscribe function for the component to manage
+  return unsubscribe;
 };
 
 // Fetch current player data with real-time updates
@@ -132,16 +118,9 @@ export const fetchCurrentPlayer = (auctionId) => (dispatch) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         dispatch(setCurrentPlayer(data.currentPlayer || null));
-        dispatch(setCurrentBid(data.currentBid || 165000000));
+        dispatch(setCurrentBid(data?.currentPlayer?.auction_detail?.base_price));
         dispatch(setTimeLeft(data.timeLeft || 30));
         dispatch(setAuctionStatus(data.auctionStatus || "not-started"));
-      } else {
-        setDoc(currentPlayerRef, {
-          currentPlayer: null,
-          currentBid: 165000000,
-          timeLeft: 30,
-          auctionStatus: "not-started",
-        });
       }
       dispatch(setLoading(false));
     },
@@ -150,7 +129,9 @@ export const fetchCurrentPlayer = (auctionId) => (dispatch) => {
       dispatch(setLoading(false));
     }
   );
-  dispatch(setUnsubscribeCurrentPlayer(unsubscribe));
+
+  // Return the unsubscribe function for the component to manage
+  return unsubscribe;
 };
 
 // Start auction
@@ -160,12 +141,16 @@ export const startAuction = (auctionId, initialPlayer, players = []) => async (d
     dispatch(resetAuctionState());
 
     const currentPlayerRef = doc(db, "currentplayer", auctionId);
-    await setDoc(currentPlayerRef, {
-      currentPlayer: initialPlayer,
-      currentBid: 165000000,
-      timeLeft: 30,
-      auctionStatus: "running",
-    }, { merge: true });
+    await setDoc(
+      currentPlayerRef,
+      {
+        currentPlayer: initialPlayer,
+        currentBid: 165000000,
+        timeLeft: 30,
+        auctionStatus: "running",
+      },
+      { merge: true }
+    );
 
     dispatch(fetchJoinedPlayers(auctionId, players));
     dispatch(fetchCurrentPlayer(auctionId));

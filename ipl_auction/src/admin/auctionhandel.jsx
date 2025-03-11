@@ -191,7 +191,7 @@ const Auctionhandel = () => {
                       </div>
                     </div>
                     <span className="text-2xl sm:text-3xl font-bold text-[#0047AB]">
-                      ₹{(currentBid / 10000000).toFixed(2)} Crore
+                      ₹{(currentBid / 100000).toFixed(2)} L
                     </span>
                   </div>
                 </div>
