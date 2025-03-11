@@ -15,7 +15,7 @@ const Team = () => {
     dispatch(fetchTeam());
   }, [dispatch]);
 
-  gsap.registerPlugin(ScrollTrigger);
+  gsap.registerPlugin();
   useEffect(() => {
     if (!loading && teams.length > 0) {
       // Animate main content from bottom
