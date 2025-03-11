@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../config/firebaseconfig"; // Ensure correct path
-
+import cricket_logo from "../assets/cricklogo.png";
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
@@ -61,7 +61,7 @@ const Navbar = () => {
         { key: "Team", value: "/teampage" },
         { key: "Auction", value: "/auction" },
       ]);
-      setlogoLinks("/")
+      setlogoLinks("/");
     } else if (userRole === "admin") {
       setLinks([
         { key: "Home", value: "/admin" },
@@ -69,8 +69,7 @@ const Navbar = () => {
         { key: "Team", value: "/admin/teampage" },
         { key: "Auction", value: "/admin/auction" },
       ]);
-      setlogoLinks("/admin")
-
+      setlogoLinks("/admin");
     } else if (userRole === "team") {
       setLinks([
         { key: "Home", value: "/team" },
@@ -78,7 +77,7 @@ const Navbar = () => {
         { key: "Squad", value: "/team/squad" },
         { key: "Auction", value: "/team/auction" },
       ]);
-      setlogoLinks("/team")
+      setlogoLinks("/team");
     } else {
       setLinks([
         { key: "Home", value: "/" },
@@ -86,14 +85,13 @@ const Navbar = () => {
         { key: "Team", value: "/teampage" },
         { key: "Auction", value: "/auction" },
       ]);
-      setlogoLinks("/")
-
+      setlogoLinks("/");
     }
   }, [userRole]);
 
   useEffect(() => {
     // Set default underline style to Home
-    const defaultActiveLink = links.find(link => link.value === "/");
+    const defaultActiveLink = links.find((link) => link.value === "/");
     if (defaultActiveLink) {
       const activeLink = document.querySelector(".nav-link.active");
       if (activeLink) {
@@ -141,11 +139,7 @@ const Navbar = () => {
           {/* Logo */}
           <motion.div className="flex items-center" whileTap={{ scale: 0.95 }}>
             <Link to={logolinks}>
-              <img
-                src="../src/assets/cricklogo.png"
-                alt="Logo"
-                className="h-20 w-auto"
-              />
+              <img src={cricket_logo} alt="Logo" className="h-20 w-auto" />
             </Link>
           </motion.div>
 
