@@ -14,6 +14,7 @@ const Navbar = () => {
     localStorage.getItem("userRole") || ""
   );
   const [links, setLinks] = useState([]);
+  const [logolinks, setlogoLinks] = useState(null);
   const navigate = useNavigate();
 
   // Fetch user role from Firestore
@@ -60,6 +61,7 @@ const Navbar = () => {
         { key: "Team", value: "/teampage" },
         { key: "Auction", value: "/auction" },
       ]);
+      setlogoLinks("/")
     } else if (userRole === "admin") {
       setLinks([
         { key: "Home", value: "/admin" },
@@ -67,6 +69,8 @@ const Navbar = () => {
         { key: "Team", value: "/admin/teampage" },
         { key: "Auction", value: "/admin/auction" },
       ]);
+      setlogoLinks("/admin")
+
     } else if (userRole === "team") {
       setLinks([
         { key: "Home", value: "/team" },
@@ -74,6 +78,7 @@ const Navbar = () => {
         { key: "Squad", value: "/team/squad" },
         { key: "Auction", value: "/team/auction" },
       ]);
+      setlogoLinks("/team")
     } else {
       setLinks([
         { key: "Home", value: "/" },
@@ -81,6 +86,8 @@ const Navbar = () => {
         { key: "Team", value: "/teampage" },
         { key: "Auction", value: "/auction" },
       ]);
+      setlogoLinks("/")
+
     }
   }, [userRole]);
 
@@ -133,7 +140,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <motion.div className="flex items-center" whileTap={{ scale: 0.95 }}>
-            <Link to="/">
+            <Link to={logolinks}>
               <img
                 src="../src/assets/cricklogo.png"
                 alt="Logo"
