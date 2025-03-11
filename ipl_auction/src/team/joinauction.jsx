@@ -44,12 +44,19 @@ const Teamjoinauction = () => {
   }, [dispatch, userEmail, id]);
 
   // Set bidAmount when currentPlayer is available
-  useEffect(() => {
-    if (currentPlayer?.auction_detail?.base_price >= bidAmount) {
-      setBidAmount(currentPlayer.auction_detail.base_price);
-    }
-  }, [currentPlayer]); // Run this effect only when currentPlayer changes
+  const [prevPlayerId, setPrevPlayerId] = useState(null); // Track previous player ID
 
+  useEffect(() => {
+    if (currentPlayer && currentPlayer.auction_detail?.base_price) {
+      if (currentPlayer.id !== prevPlayerId) { // Reset only if new player comes
+        setBidAmount(currentPlayer.auction_detail.base_price);
+        setCurrentBid(currentPlayer.auction_detail.base_price);
+        setTimeLeft(30);
+        setPrevPlayerId(currentPlayer.id); // Update previous player ID
+      }
+    }
+  }, [currentPlayer]);
+  
   // Timer countdown
   useEffect(() => {
     if (timeLeft > 0) {
