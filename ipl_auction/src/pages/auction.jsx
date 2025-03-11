@@ -96,7 +96,11 @@ const Auction = () => {
   };
 
   if (auctionsLoading || teamsLoading) {
-    return <div className="text-white text-center">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#202626]">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-[#0047AB]"></div>
+      </div>
+    );
   }
 
   if (teamsError) {
@@ -131,7 +135,6 @@ const Auction = () => {
                     <p className="text-sm sm:text-base text-gray-200">
                       {currentPlayer.country}
                     </p>
-
                   </div>
                 </div>
                 <div className="p-4 sm:p-6 space-y-6">

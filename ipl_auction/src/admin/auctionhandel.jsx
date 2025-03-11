@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { FaGavel, FaShieldAlt, FaWallet, FaUsers, FaPuzzlePiece } from "react-icons/fa";
+import {
+  FaGavel,
+  FaShieldAlt,
+  FaWallet,
+  FaUsers,
+  FaPuzzlePiece,
+} from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import {
@@ -19,8 +25,14 @@ const Auctionhandel = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
 
-  const { auctions, loading: auctionsLoading } = useSelector((state) => state.auction);
-  const { players, loading: playersLoading, error: playersError } = useSelector((state) => state.player);
+  const { auctions, loading: auctionsLoading } = useSelector(
+    (state) => state.auction
+  );
+  const {
+    players,
+    loading: playersLoading,
+    error: playersError,
+  } = useSelector((state) => state.player);
   const {
     joinedPlayers,
     loading: joinedPlayersLoading,
@@ -69,24 +81,67 @@ const Auctionhandel = () => {
   };
 
   if (auctionsLoading || playersLoading || joinedPlayersLoading) {
-    return <div className="text-white text-center">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#202626]">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-[#0047AB]"></div>
+      </div>
+    );
   }
 
   if (playersError || joinedPlayersError) {
-    return <div className="text-red-500 text-center">Error: {playersError || joinedPlayersError}</div>;
+    return (
+      <div className="text-red-500 text-center">
+        Error: {playersError || joinedPlayersError}
+      </div>
+    );
   }
 
   const teams = [
-    { name: "Mumbai Indians", budget: "₹45.5 Cr", playersBought: 15, slotsLeft: 10 },
-    { name: "Chennai Kings", budget: "₹38.8 Cr", playersBought: 18, slotsLeft: 7 },
-    { name: "Delhi Capitals", budget: "₹52.2 Cr", playersBought: 12, slotsLeft: 13 },
-    { name: "Royal Challengers", budget: "₹29.9 Cr", playersBought: 20, slotsLeft: 5 },
+    {
+      name: "Mumbai Indians",
+      budget: "₹45.5 Cr",
+      playersBought: 15,
+      slotsLeft: 10,
+    },
+    {
+      name: "Chennai Kings",
+      budget: "₹38.8 Cr",
+      playersBought: 18,
+      slotsLeft: 7,
+    },
+    {
+      name: "Delhi Capitals",
+      budget: "₹52.2 Cr",
+      playersBought: 12,
+      slotsLeft: 13,
+    },
+    {
+      name: "Royal Challengers",
+      budget: "₹29.9 Cr",
+      playersBought: 20,
+      slotsLeft: 5,
+    },
   ];
 
   const recentPurchases = [
-    { name: "Shahrukh Khan", from: "Punjab Kings", price: "₹6 Crore", date: "February 25, 2024" },
-    { name: "Vishnu Vinod", from: "Delhi Capitals", price: "₹50 Lakhs", date: "February 24, 2024" },
-    { name: "Tymal Mills", from: "Rajasthan Royals", price: "₹1 Crore", date: "February 23, 2024" },
+    {
+      name: "Shahrukh Khan",
+      from: "Punjab Kings",
+      price: "₹6 Crore",
+      date: "February 25, 2024",
+    },
+    {
+      name: "Vishnu Vinod",
+      from: "Delhi Capitals",
+      price: "₹50 Lakhs",
+      date: "February 24, 2024",
+    },
+    {
+      name: "Tymal Mills",
+      from: "Rajasthan Royals",
+      price: "₹1 Crore",
+      date: "February 23, 2024",
+    },
   ];
 
   return (
@@ -102,7 +157,9 @@ const Auctionhandel = () => {
             <button
               onClick={handleStartAuction}
               className={`bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 ${
-                auctionStatus === "running" || !joinedPlayers.length ? "opacity-50 cursor-not-allowed" : ""
+                auctionStatus === "running" || !joinedPlayers.length
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
               }`}
               disabled={auctionStatus === "running" || !joinedPlayers.length}
             >
@@ -111,7 +168,9 @@ const Auctionhandel = () => {
             <button
               onClick={handlePauseAuction}
               className={`bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 ${
-                auctionStatus !== "running" ? "opacity-50 cursor-not-allowed" : ""
+                auctionStatus !== "running"
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
               }`}
               disabled={auctionStatus !== "running"}
             >
@@ -120,7 +179,9 @@ const Auctionhandel = () => {
             <button
               onClick={handleResumeAuction}
               className={`bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 ${
-                auctionStatus !== "paused" ? "opacity-50 cursor-not-allowed" : ""
+                auctionStatus !== "paused"
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
               }`}
               disabled={auctionStatus !== "paused"}
             >
@@ -153,7 +214,10 @@ const Auctionhandel = () => {
               <div className="bg-[#2C2F32] rounded-lg shadow-lg overflow-hidden border-2 border-[#0047AB] h-full">
                 <div className="flex flex-col sm:flex-row items-center justify-center p-4 sm:p-6">
                   <img
-                    src={currentPlayer.image || "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1"}
+                    src={
+                      currentPlayer.image ||
+                      "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1"
+                    }
                     alt="Player in Action"
                     className="w-48 sm:w-60 h-auto mb-4 sm:mb-0 sm:mr-6 object-cover"
                   />
@@ -161,31 +225,78 @@ const Auctionhandel = () => {
                     <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">
                       {currentPlayer.name}
                     </h1>
-                    <p className="text-lg sm:text-xl text-gray-200 mb-1">{currentPlayer.player_role}</p>
-                    <p className="text-sm sm:text-base text-gray-200">{currentPlayer.country}</p>
+                    <p className="text-lg sm:text-xl text-gray-200 mb-1">
+                      {currentPlayer.player_role}
+                    </p>
+                    <p className="text-sm sm:text-base text-gray-200">
+                      {currentPlayer.country}
+                    </p>
                   </div>
                 </div>
                 <div className="p-4 sm:p-6 space-y-6">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     {[
-                      { label: "Matches", value: currentPlayer?.state?.ipl?.batting?.match || "N/A" },
-                      { label: "Runs", value: currentPlayer?.state?.ipl?.batting?.runs || "N/A" },
-                      { label: "Wickets", value: currentPlayer?.state?.ipl?.bowling?.wicket || "N/A" },
-                      { label: "Strike Rate", value: currentPlayer?.state?.ipl?.batting?.strike_rate || "N/A" },
-                      { label: "Batting Avg", value: currentPlayer?.state?.ipl?.batting?.average || "N/A" },
-                      { label: "Economy", value: currentPlayer?.state?.ipl?.bowling?.eco || "N/A" },
-                      { label: "Best Wickets", value: currentPlayer?.state?.ipl?.bowling?.best_bowling || "N/A" },
-                      { label: "Best Score", value: currentPlayer?.state?.ipl?.batting?.high_score || "N/A" },
+                      {
+                        label: "Matches",
+                        value:
+                          currentPlayer?.state?.ipl?.batting?.match || "N/A",
+                      },
+                      {
+                        label: "Runs",
+                        value:
+                          currentPlayer?.state?.ipl?.batting?.runs || "N/A",
+                      },
+                      {
+                        label: "Wickets",
+                        value:
+                          currentPlayer?.state?.ipl?.bowling?.wicket || "N/A",
+                      },
+                      {
+                        label: "Strike Rate",
+                        value:
+                          currentPlayer?.state?.ipl?.batting?.strike_rate ||
+                          "N/A",
+                      },
+                      {
+                        label: "Batting Avg",
+                        value:
+                          currentPlayer?.state?.ipl?.batting?.average || "N/A",
+                      },
+                      {
+                        label: "Economy",
+                        value: currentPlayer?.state?.ipl?.bowling?.eco || "N/A",
+                      },
+                      {
+                        label: "Best Wickets",
+                        value:
+                          currentPlayer?.state?.ipl?.bowling?.best_bowling ||
+                          "N/A",
+                      },
+                      {
+                        label: "Best Score",
+                        value:
+                          currentPlayer?.state?.ipl?.batting?.high_score ||
+                          "N/A",
+                      },
                     ].map((stat, index) => (
-                      <div key={index} className="bg-[#2C2F32] rounded-lg p-3 text-center">
-                        <p className="text-sm sm:text-base text-gray-400">{stat.label}</p>
-                        <p className="text-lg sm:text-xl font-bold text-white">{stat.value}</p>
+                      <div
+                        key={index}
+                        className="bg-[#2C2F32] rounded-lg p-3 text-center"
+                      >
+                        <p className="text-sm sm:text-base text-gray-400">
+                          {stat.label}
+                        </p>
+                        <p className="text-lg sm:text-xl font-bold text-white">
+                          {stat.value}
+                        </p>
                       </div>
                     ))}
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div className="flex flex-col sm:flex-row items-center gap-3">
-                      <span className="text-lg sm:text-xl text-white">Current Bid</span>
+                      <span className="text-lg sm:text-xl text-white">
+                        Current Bid
+                      </span>
                       <div className="bg-[#FF4500] text-white px-4 py-2 rounded-full flex items-center">
                         <span className="font-semibold">{timeLeft}s</span>
                       </div>
@@ -201,14 +312,36 @@ const Auctionhandel = () => {
             {/* Bid History */}
             <div className="lg:col-span-4 w-full h-full">
               <div className="bg-[#2C2F32] rounded-lg shadow-lg border border-[#0047AB] p-4 sm:p-6 h-full">
-                <h2 className="text-xl font-semibold mb-6 text-white">Bid History</h2>
+                <h2 className="text-xl font-semibold mb-6 text-white">
+                  Bid History
+                </h2>
                 <div className="space-y-4">
                   {[
-                    { bidder: "Chennai Super Kings", amount: "₹16.5 Crore", time: "2 mins ago" },
-                    { bidder: "Royal Challengers Bangalore", amount: "₹16.25 Crore", time: "5 mins ago" },
-                    { bidder: "Kolkata Knight Riders", amount: "₹16 Crore", time: "8 mins ago" },
-                    { bidder: "Delhi Capitals", amount: "₹15.75 Crore", time: "12 mins ago" },
-                    { bidder: "Rajasthan Royals", amount: "₹15.5 Crore", time: "15 mins ago" },
+                    {
+                      bidder: "Chennai Super Kings",
+                      amount: "₹16.5 Crore",
+                      time: "2 mins ago",
+                    },
+                    {
+                      bidder: "Royal Challengers Bangalore",
+                      amount: "₹16.25 Crore",
+                      time: "5 mins ago",
+                    },
+                    {
+                      bidder: "Kolkata Knight Riders",
+                      amount: "₹16 Crore",
+                      time: "8 mins ago",
+                    },
+                    {
+                      bidder: "Delhi Capitals",
+                      amount: "₹15.75 Crore",
+                      time: "12 mins ago",
+                    },
+                    {
+                      bidder: "Rajasthan Royals",
+                      amount: "₹15.5 Crore",
+                      time: "15 mins ago",
+                    },
                   ].map((bid, index) => (
                     <div
                       key={index}
@@ -218,7 +351,9 @@ const Auctionhandel = () => {
                         <p className="font-medium text-white">{bid.bidder}</p>
                         <p className="text-sm text-gray-400">{bid.time}</p>
                       </div>
-                      <span className="font-semibold text-white">{bid.amount}</span>
+                      <span className="font-semibold text-white">
+                        {bid.amount}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -229,7 +364,9 @@ const Auctionhandel = () => {
 
         {/* Recent Purchases */}
         <div className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-4 sm:p-6 border border-[#0047AB]">
-          <h2 className="text-2xl font-semibold mb-6 text-white">Recent Purchases</h2>
+          <h2 className="text-2xl font-semibold mb-6 text-white">
+            Recent Purchases
+          </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {recentPurchases.map((purchase, index) => (
               <div
@@ -242,16 +379,29 @@ const Auctionhandel = () => {
                   className="w-full h-48 object-cover"
                 />
                 <div className="p-4">
-                  <h3 className="text-lg font-semibold text-white mb-4">{purchase.name}</h3>
+                  <h3 className="text-lg font-semibold text-white mb-4">
+                    {purchase.name}
+                  </h3>
                   <div className="space-y-3">
                     {[
                       { label: "From", value: purchase.from },
-                      { label: "Transfer Fee", value: purchase.price, highlight: true },
+                      {
+                        label: "Transfer Fee",
+                        value: purchase.price,
+                        highlight: true,
+                      },
                       { label: "Date", value: purchase.date },
                     ].map((item, idx) => (
-                      <div key={idx} className="flex justify-between items-center">
+                      <div
+                        key={idx}
+                        className="flex justify-between items-center"
+                      >
                         <span className="text-gray-400">{item.label}</span>
-                        <span className={`font-medium ${item.highlight ? "text-[#0047AB]" : "text-white"}`}>
+                        <span
+                          className={`font-medium ${
+                            item.highlight ? "text-[#0047AB]" : "text-white"
+                          }`}
+                        >
                           {item.value}
                         </span>
                       </div>
@@ -288,16 +438,38 @@ const Auctionhandel = () => {
                 </h4>
                 <div className="w-full space-y-2">
                   {[
-                    { label: "Budget", value: team.budget, icon: <FaWallet className="text-[#0047AB]" />, color: "text-green-400" },
-                    { label: "Players", value: team.playersBought, icon: <FaUsers className="text-[#0047AB]" /> },
-                    { label: "Slots", value: team.slotsLeft, icon: <FaPuzzlePiece className="text-[#0047AB]" /> },
+                    {
+                      label: "Budget",
+                      value: team.budget,
+                      icon: <FaWallet className="text-[#0047AB]" />,
+                      color: "text-green-400",
+                    },
+                    {
+                      label: "Players",
+                      value: team.playersBought,
+                      icon: <FaUsers className="text-[#0047AB]" />,
+                    },
+                    {
+                      label: "Slots",
+                      value: team.slotsLeft,
+                      icon: <FaPuzzlePiece className="text-[#0047AB]" />,
+                    },
                   ].map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between bg-[#2C2F32] rounded-lg p-2">
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between bg-[#2C2F32] rounded-lg p-2"
+                    >
                       <div className="flex items-center gap-2">
                         {item.icon}
-                        <span className="text-gray-300 text-sm">{item.label}</span>
+                        <span className="text-gray-300 text-sm">
+                          {item.label}
+                        </span>
                       </div>
-                      <span className={`${item.color || "text-white"} font-semibold text-sm`}>
+                      <span
+                        className={`${
+                          item.color || "text-white"
+                        } font-semibold text-sm`}
+                      >
                         {item.value}
                       </span>
                     </div>
@@ -313,9 +485,12 @@ const Auctionhandel = () => {
       {showBidModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-[#2C2F32] rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-xl font-semibold mb-4 text-white">Confirm Your Bid</h3>
+            <h3 className="text-xl font-semibold mb-4 text-white">
+              Confirm Your Bid
+            </h3>
             <p className="mb-4 text-white">
-              Are you sure you want to place a bid of ₹{(currentBid / 10000000).toFixed(2)} Crore?
+              Are you sure you want to place a bid of ₹
+              {(currentBid / 10000000).toFixed(2)} Crore?
             </p>
             <div className="flex justify-end gap-4">
               <button

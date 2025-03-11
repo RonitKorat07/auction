@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FaTrophy, FaChartLine, FaUsers } from "react-icons/fa";
@@ -37,21 +36,36 @@ const Teamdashboard = () => {
   const team = teams.length > 0 ? teams[0] : null;
 
   if (loading) {
-    return <div className="text-center text-[#E8EAF6]">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#202626]">
+        <div
+          className="animate-spin rounded-full h-16 w-16 border-t-4 border"
+          style={{ borderColor: team?.color || "#0047AB" }} // Optional chaining with fallback // Use team.color if available, otherwise use default
+        ></div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-center text-red-500">Error: {error}</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#202626]">
+        <div className="text-[#FF4500] text-xl">Error: {error}</div>
+      </div>
+    );
   }
 
   if (!team) {
     return (
-      <div className="text-center text-[#E8EAF6]">No team data available.</div>
+      <div className="min-h-screen flex items-center justify-center bg-[#202626]">
+        <div className="text-[#E8EAF6]">No team data available.</div>
+      </div>
     );
   }
 
+  const teamColor = team ? team.color : "#0047AB"; // Default color
+
   return (
-    <div className="min-h-screen bg-[#202626] text-[#E8EAF6]">
+    <div className="min-h-screen bg-[#202626] text-[#E8EAF6] mt-20">
       {/* Hero Section */}
       <div className="relative h-[600px]">
         <img
@@ -96,7 +110,7 @@ const Teamdashboard = () => {
           {/* Ownership Details */}
           <div
             className="bg-[#202626] rounded-lg  p-6 md:p-8 border text-center"
-            style={{ borderColor: team.color || "#0047AB" }}
+            style={{ borderColor: teamColor }}
           >
             <h2 className="text-2xl font-bold mb-6 text-[#E8EAF6]">
               Ownership Details
@@ -135,7 +149,7 @@ const Teamdashboard = () => {
             </div>
             <div
               className="mt-4 pt-4  border-t  text-center "
-              style={{ borderColor: team.color || "#0047AB" }}
+              style={{ borderColor: teamColor }}
             >
               <p className="text-sm text-[#B0E0E6] font-semibold">
                 Board of Directors
@@ -145,7 +159,7 @@ const Teamdashboard = () => {
                   <span
                     key={index}
                     className="px-3 py-1 bg-[#202626] rounded-full text-xs text-[#B0E0E6] border"
-                    style={{ borderColor: team.color || "#0047AB" }}
+                    style={{ borderColor: teamColor }}
                   >
                     {director}
                   </span>
@@ -157,7 +171,7 @@ const Teamdashboard = () => {
           {/* Home Venue */}
           <div
             className="bg-[#202626] rounded-lg shadow-lg p-6 md:p-8 border text-center"
-            style={{ borderColor: team.color || "#0047AB" }}
+            style={{ borderColor: teamColor }}
           >
             <h2 className="text-2xl font-bold mb-6 text-[#E8EAF6]">
               Home Venue
@@ -201,7 +215,7 @@ const Teamdashboard = () => {
             </div>
             <div
               className="mt-4 pt-4 border-t "
-              style={{ borderColor: team.color || "#0047AB" }}
+              style={{ borderColor: teamColor }}
             >
               <h4 className="text-sm font-semibold text-[#E8EAF6] mb-2">
                 Facilities
@@ -211,7 +225,7 @@ const Teamdashboard = () => {
                   <span
                     key={index}
                     className="px-3 py-1 bg-[#202626] rounded-full text-xs text-[#B0E0E6] border"
-                    style={{ borderColor: team.color || "#0047AB" }}
+                    style={{ borderColor: teamColor }}
                   >
                     <i className="fas fa-parking mr-1"></i> {facility}
                   </span>
@@ -231,7 +245,7 @@ const Teamdashboard = () => {
               <div
                 key={index}
                 className="bg-[#202626] rounded-lg shadow-lg overflow-hidden border"
-                style={{ borderColor: team.color || "#0047AB" }}
+                style={{ borderColor: teamColor }}
               >
                 <img
                   src={player.image}
@@ -265,7 +279,7 @@ const Teamdashboard = () => {
               <div
                 key={index}
                 className="rounded-lg overflow-hidden shadow-lg border"
-                style={{ borderColor: team.color || "#0047AB" }}
+                style={{ borderColor: teamColor }}
               >
                 <img
                   src={image}
@@ -295,8 +309,8 @@ const Teamdashboard = () => {
                   }`}
                   style={{
                     backgroundColor:
-                      activeTab === tab.toLowerCase() ? team.color : "",
-                    borderColor: team.color || "#0047AB",
+                      activeTab === tab.toLowerCase() ? teamColor : "",
+                    borderColor: teamColor,
                   }}
                 >
                   {tab}
@@ -309,7 +323,7 @@ const Teamdashboard = () => {
               <div
                 key={index}
                 className="bg-[#202626] rounded-lg shadow-lg overflow-hidden border"
-                style={{ borderColor: team.color || "#0047AB" }}
+                style={{ borderColor: teamColor }}
               >
                 <img
                   src={player.image}

@@ -151,6 +151,21 @@ export const Homepage = () => {
     });
   }, []);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#202626] to-[#1a1f1f]">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#202626] to-[#1a1f1f]">
+        <div className="text-red-500 text-xl">Error: {error}</div>
+      </div>
+    );
+  }
   return (
     <>
       {/* Hero Section */}
@@ -200,7 +215,7 @@ export const Homepage = () => {
         </div>
       </div>
 
-      {/* Player List */}
+      {/* Team List */}
       <div className="min-h-screen bg-[#202626] text-white p-4 md:p-6">
         <div className="max-w-7xl mx-auto px-4 py-12">
           <motion.div
@@ -234,7 +249,7 @@ export const Homepage = () => {
                   className="team-card  flex flex-col items-center justify-center rounded-2xl w-[280px] h-[320px] bg-gray-800 p-6 snap-start mt-30  border border-[#0047AB] hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/20  transition-transform duration-100  "
                   initial={{ opacity: 0, y: 0 }}
                   whileInView={{ opacity: 1, y: -100 }}
-                  transition={{ duration: 0.8, delay: index * 0.025 }}
+                  transition={{ duration: 0.8, delay: index * 0.028 }}
                 >
                   <div className="w-45 h-45 flex items-center justify-center mb-4">
                     <img

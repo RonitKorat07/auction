@@ -1,5 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
+import { fetchTeamemail } from "../store/teamslice"; // Adjust the import path
+import { getAuth, onAuthStateChanged } from "firebase/auth"; // Add onAuthStateChanged
+
+import { AiOutlineArrowRight } from "react-icons/ai";
 const Squad = () => {
   const players = [
     // Batsmen
@@ -193,7 +198,60 @@ const Squad = () => {
       achievements: "280+ wickets, Best figures: 7/32",
     },
   ];
+  const dispatch = useDispatch();
+  const { teams, loading, error } = useSelector((state) => state.team);
+  const [activeTab, setActiveTab] = useState("batsmen");
+  const [userEmail, setUserEmail] = useState(null); // Track user email
 
+  // Get the logged-in user's email using onAuthStateChanged
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserEmail(user.email); // Set user email
+      } else {
+        setUserEmail(null); // No user logged in
+      }
+    });
+
+    return () => unsubscribe(); // Cleanup on unmount
+  }, []);
+
+  // Fetch team data when the userEmail changes
+  useEffect(() => {
+    if (userEmail) {
+      dispatch(fetchTeamemail(userEmail)); // Pass the email to fetchTeam
+    }
+  }, [dispatch, userEmail]);
+
+  // Use the first team in the array (or handle multiple teams as needed)
+  const team = teams.length > 0 ? teams[0] : null;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#202626]">
+        <div
+          className="animate-spin rounded-full h-16 w-16 border-t-4 border"
+          style={{ borderColor: team?.color || "#0047AB" }} // Optional chaining with fallback // Use team.color if available, otherwise use default
+        ></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#202626]">
+        <div className="text-[#FF4500] text-xl">Error: {error}</div>
+      </div>
+    );
+  }
+
+  if (!team) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#202626]">
+        <div className="text-[#E8EAF6]">No team data available.</div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-[#202626]">
       <div className="max-w-[1440px] mx-auto px-8 py-25">
@@ -202,8 +260,8 @@ const Squad = () => {
           <div className="mb-16">
             <div className="flex flex-col items-center mb-12">
               <div className="flex items-center gap-4">
-                <i className="fas fa-bat text-4xl text-blue-400"></i>
-                <h2 className="text-4xl font-bold text-white">Batsmen</h2>
+                <i className="fas fa-bat text-4xl text-[#0047AB]"></i>
+                <h2 className="text-4xl font-bold text-[#E8EAF6]">Batsmen</h2>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -212,13 +270,12 @@ const Squad = () => {
                 .map((player, index) => (
                   <div
                     key={index}
-                    className="bg-gradient-to-b from-[#1F2937] to-[#111827] rounded-2xl overflow-hidden relative group transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/20"
+                    className={`bg-gradient-to-b from-[#1F2937] to-[#111827] border rounded-2xl overflow-hidden relative group transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl`}
+                    style={{
+                      borderColor: team.color || "#0047AB",
+                      boxShadow: `0px 4px 20px ${team.color || "#0047AB"}40`, // Adding transparency
+                    }}
                   >
-                    <div className="absolute top-4 right-4 z-10 flex gap-2">
-                      <span className="text-white/70 bg-black/20 backdrop-blur-sm p-2 rounded-full">
-                        <i className="fas fa-bat text-sm"></i>
-                      </span>
-                    </div>
                     <div className="relative overflow-hidden">
                       <img
                         src={player.imageUrl}
@@ -228,22 +285,25 @@ const Squad = () => {
                     </div>
                     <div className="p-6 bg-gradient-to-b from-transparent to-black/40">
                       <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors duration-300">
+                        <h3 className="text-xl font-bold text-[#E8EAF6] group-hover:text-[#0047AB] transition-colors duration-300">
                           {player.name}
                         </h3>
-                        <span className="px-3 py-1 bg-blue-500/10 text-blue-400 text-sm rounded-full border border-blue-500/20 backdrop-blur-sm">
+                        <span className="px-3 py-1 bg-[#0047AB]/10 text-[#0047AB] text-sm rounded-full border border-[#0047AB]/20 backdrop-blur-sm">
                           {player.nationality}
                         </span>
                       </div>
-                      <p className="text-gray-300 text-sm mb-3">
+                      <p className="text-[#B0E0E6] text-sm mb-3">
                         {player.speciality}
                       </p>
                       <div className="flex items-center justify-between">
-                        <p className="text-blue-300/80 text-sm font-medium">
+                        <p className="text-[#B0E0E6]/80 text-sm font-medium">
                           {player.achievements}
                         </p>
-                        <button className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 hover:bg-blue-500/20 transition-all duration-300 backdrop-blur-sm">
-                          <i className="fas fa-arrow-right"></i>
+                        <button className="w-8 h-8 rounded-full bg-[#0047AB]/10 flex items-center justify-center text-[#0047AB] hover:bg-[#0047AB]/20 transition-all duration-300 backdrop-blur-sm">
+                          <i className="fas fa-arrow-right">
+                            {" "}
+                            <AiOutlineArrowRight />
+                          </i>
                         </button>
                       </div>
                     </div>
@@ -255,7 +315,9 @@ const Squad = () => {
           {/* All-Rounders Section */}
           <div className="mb-8">
             <div className="flex flex-col items-center mb-8">
-              <h2 className="text-4xl font-bold text-white">All-Rounders</h2>
+              <h2 className="text-4xl font-bold text-[#E8EAF6]">
+                All-Rounders
+              </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {players
@@ -263,13 +325,12 @@ const Squad = () => {
                 .map((player, index) => (
                   <div
                     key={index}
-                    className="bg-gradient-to-b from-[#1F2937] to-[#111827] rounded-2xl overflow-hidden relative group transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/20"
+                    className={`bg-gradient-to-b from-[#1F2937] to-[#111827] border rounded-2xl overflow-hidden relative group transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl`}
+                    style={{
+                      borderColor: team.color || "#0047AB",
+                      boxShadow: `0px 4px 20px ${team.color || "#0047AB"}40`, // Adding transparency
+                    }}
                   >
-                    <div className="absolute top-4 right-4 z-10 flex gap-2">
-                      <span className="text-white/70 bg-black/20 backdrop-blur-sm p-2 rounded-full">
-                        <i className="fas fa-bat text-sm"></i>
-                      </span>
-                    </div>
                     <div className="relative overflow-hidden">
                       <img
                         src={player.imageUrl}
@@ -279,22 +340,25 @@ const Squad = () => {
                     </div>
                     <div className="p-6 bg-gradient-to-b from-transparent to-black/40">
                       <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors duration-300">
+                        <h3 className="text-xl font-bold text-[#E8EAF6] group-hover:text-[#0047AB] transition-colors duration-300">
                           {player.name}
                         </h3>
-                        <span className="px-3 py-1 bg-blue-500/10 text-blue-400 text-sm rounded-full border border-blue-500/20 backdrop-blur-sm">
+                        <span className="px-3 py-1 bg-[#0047AB]/10 text-[#0047AB] text-sm rounded-full border border-[#0047AB]/20 backdrop-blur-sm">
                           {player.nationality}
                         </span>
                       </div>
-                      <p className="text-gray-300 text-sm mb-3">
+                      <p className="text-[#B0E0E6] text-sm mb-3">
                         {player.speciality}
                       </p>
                       <div className="flex items-center justify-between">
-                        <p className="text-blue-300/80 text-sm font-medium">
+                        <p className="text-[#B0E0E6]/80 text-sm font-medium">
                           {player.achievements}
                         </p>
-                        <button className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 hover:bg-blue-500/20 transition-all duration-300 backdrop-blur-sm">
-                          <i className="fas fa-arrow-right"></i>
+                        <button className="w-8 h-8 rounded-full bg-[#0047AB]/10 flex items-center justify-center text-[#0047AB] hover:bg-[#0047AB]/20 transition-all duration-300 backdrop-blur-sm">
+                          <i className="fas fa-arrow-right">
+                            {" "}
+                            <AiOutlineArrowRight />
+                          </i>
                         </button>
                       </div>
                     </div>
@@ -306,7 +370,7 @@ const Squad = () => {
           {/* Bowlers Section */}
           <div className="mb-8">
             <div className="flex flex-col items-center mb-8">
-              <h2 className="text-4xl font-bold text-white">Bowlers</h2>
+              <h2 className="text-4xl font-bold text-[#E8EAF6]">Bowlers</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {players
@@ -314,13 +378,12 @@ const Squad = () => {
                 .map((player, index) => (
                   <div
                     key={index}
-                    className="bg-gradient-to-b from-[#1F2937] to-[#111827] rounded-2xl overflow-hidden relative group transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/20"
+                    className={`bg-gradient-to-b from-[#1F2937] to-[#111827] border rounded-2xl overflow-hidden relative group transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl`}
+                    style={{
+                      borderColor: team.color || "#0047AB",
+                      boxShadow: `0px 4px 20px ${team.color || "#0047AB"}40`, // Adding transparency
+                    }}
                   >
-                    <div className="absolute top-4 right-4 z-10 flex gap-2">
-                      <span className="text-white/70 bg-black/20 backdrop-blur-sm p-2 rounded-full">
-                        <i className="fas fa-bat text-sm"></i>
-                      </span>
-                    </div>
                     <div className="relative overflow-hidden">
                       <img
                         src={player.imageUrl}
@@ -330,22 +393,24 @@ const Squad = () => {
                     </div>
                     <div className="p-6 bg-gradient-to-b from-transparent to-black/40">
                       <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors duration-300">
+                        <h3 className="text-xl font-bold text-[#E8EAF6] group-hover:text-[#0047AB] transition-colors duration-300">
                           {player.name}
                         </h3>
-                        <span className="px-3 py-1 bg-blue-500/10 text-blue-400 text-sm rounded-full border border-blue-500/20 backdrop-blur-sm">
+                        <span className="px-3 py-1 bg-[#0047AB]/10 text-[#0047AB] text-sm rounded-full border border-[#0047AB]/20 backdrop-blur-sm">
                           {player.nationality}
                         </span>
                       </div>
-                      <p className="text-gray-300 text-sm mb-3">
+                      <p className="text-[#B0E0E6] text-sm mb-3">
                         {player.speciality}
                       </p>
                       <div className="flex items-center justify-between">
-                        <p className="text-blue-300/80 text-sm font-medium">
+                        <p className="text-[#B0E0E6]/80 text-sm font-medium">
                           {player.achievements}
                         </p>
-                        <button className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 hover:bg-blue-500/20 transition-all duration-300 backdrop-blur-sm">
-                          <i className="fas fa-arrow-right"></i>
+                        <button className="w-8 h-8 rounded-full bg-[#0047AB]/10 flex items-center justify-center text-[#0047AB] hover:bg-[#0047AB]/20 transition-all duration-300 backdrop-blur-sm">
+                          <i className="fas fa-arrow-right">
+                            <AiOutlineArrowRight />
+                          </i>
                         </button>
                       </div>
                     </div>
