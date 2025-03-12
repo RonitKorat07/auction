@@ -7,11 +7,12 @@ const initialState = {
   currentPlayer: null,
   loading: false,
   error: null,
-  auctionStatus: "not-started", // 'not-started', 'running', 'paused', 'ended'
+  auctionStatus: "not-started",
   currentPlayerIndex: 0,
-  timeLeft: 30, // Timer in seconds
-  currentBid: 2000000, // Default bid amount
+  timeLeft: 30,
+  currentBid: 2000000,
   auctionId: null,
+  upcomingPlayers: [],
 };
 
 const joinedPlayersSlice = createSlice({
@@ -45,6 +46,9 @@ const joinedPlayersSlice = createSlice({
     setAuctionId: (state, action) => {
       state.auctionId = action.payload;
     },
+    setUpcomingPlayers: (state, action) => {
+      state.upcomingPlayers = action.payload;
+    },
     decrementTimeLeft: (state) => {
       if (state.timeLeft > 0) state.timeLeft -= 1;
     },
@@ -56,6 +60,7 @@ const joinedPlayersSlice = createSlice({
       state.timeLeft = 30;
       state.currentBid = 165000000;
       state.auctionId = null;
+      state.upcomingPlayers = [];
     },
   },
 });
@@ -70,6 +75,7 @@ export const {
   setTimeLeft,
   setCurrentBid,
   setAuctionId,
+  setUpcomingPlayers,
   decrementTimeLeft,
   resetAuctionState,
 } = joinedPlayersSlice.actions;
@@ -79,7 +85,6 @@ const handleFirestoreError = (error, dispatch) => {
   dispatch(setError(error.message));
 };
 
-// Fetch joined players with real-time updates
 export const fetchJoinedPlayers = (auctionId, players = []) => (dispatch) => {
   dispatch(setLoading(true));
   dispatch(setAuctionId(auctionId));
@@ -95,6 +100,7 @@ export const fetchJoinedPlayers = (auctionId, players = []) => (dispatch) => {
           .map((playerId) => players.find((player) => player.id === playerId))
           .filter((p) => p !== undefined);
         dispatch(setJoinedPlayers(updatedJoinedPlayers));
+        dispatch(fetchUpcomingPlayersRealtime(auctionId)); // Fetch upcoming players here
       }
       dispatch(setLoading(false));
     },
@@ -104,11 +110,9 @@ export const fetchJoinedPlayers = (auctionId, players = []) => (dispatch) => {
     }
   );
 
-  // Return the unsubscribe function for the component to manage
   return unsubscribe;
 };
 
-// Fetch current player data with real-time updates
 export const fetchCurrentPlayer = (auctionId) => (dispatch) => {
   dispatch(setLoading(true));
   const currentPlayerRef = doc(db, "currentplayer", auctionId);
@@ -118,7 +122,7 @@ export const fetchCurrentPlayer = (auctionId) => (dispatch) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         dispatch(setCurrentPlayer(data.currentPlayer || null));
-        dispatch(setCurrentBid(data?.currentPlayer?.auction_detail?.base_price));
+        dispatch(setCurrentBid(data?.currentPlayer?.auction_details?.current_bid || data?.currentPlayer?.auction_detail?.base_price));
         dispatch(setTimeLeft(data.timeLeft || 30));
         dispatch(setAuctionStatus(data.auctionStatus || "not-started"));
       }
@@ -130,30 +134,72 @@ export const fetchCurrentPlayer = (auctionId) => (dispatch) => {
     }
   );
 
-  // Return the unsubscribe function for the component to manage
   return unsubscribe;
 };
 
+export const updateCurrentBid = ({ auctionId, bidAmount }) => async (dispatch, getState) => {
+  try {
+    dispatch(setLoading(true));
+    console.log("Updating Firestore with auctionId:", auctionId, "and bidAmount:", bidAmount);
+
+    const currentPlayerRef = doc(db, "currentplayer", auctionId);
+    await updateDoc(currentPlayerRef, {
+      "currentPlayer.auction_detail.current_bid": bidAmount,
+    });
+
+    console.log("Firestore update successful"); // Log success
+    dispatch(setCurrentBid(bidAmount));
+  } catch (error) {
+    console.error("Firestore update error:", error); // Log the full error object
+    throw error; // Re-throw the error to be caught by handleBid
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
+
 // Start auction
+export const fetchUpcomingPlayersRealtime = (auctionId) => (dispatch) => {
+  const currentPlayerRef = doc(db, "currentplayer", auctionId);
+
+  return onSnapshot(currentPlayerRef, (docSnap) => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      
+      // Fetch upcomingPlayers directly from Firestore
+      const upcomingPlayers = data.upcomingPlayers || [];
+
+      dispatch(setUpcomingPlayers(upcomingPlayers));
+    }
+  });
+};
+
+
+
 export const startAuction = (auctionId, initialPlayer, players = []) => async (dispatch) => {
   try {
     dispatch(setLoading(true));
     dispatch(resetAuctionState());
+
+    // Get upcoming players (next 4 players after initialPlayer)
+    const upcomingPlayers = players.slice(1, 5);
 
     const currentPlayerRef = doc(db, "currentplayer", auctionId);
     await setDoc(
       currentPlayerRef,
       {
         currentPlayer: initialPlayer,
-        currentBid: 165000000,
+        "currentPlayer.auction_details.current_bid": initialPlayer.auction_detail.base_price,
         timeLeft: 30,
         auctionStatus: "running",
+        upcomingPlayers:upcomingPlayers, // Store upcoming players in Firestore
       },
       { merge: true }
     );
 
     dispatch(fetchJoinedPlayers(auctionId, players));
     dispatch(fetchCurrentPlayer(auctionId));
+    dispatch(setUpcomingPlayers(upcomingPlayers));
+
   } catch (error) {
     handleFirestoreError(error, dispatch);
   } finally {
@@ -161,7 +207,7 @@ export const startAuction = (auctionId, initialPlayer, players = []) => async (d
   }
 };
 
-// Pause auction
+
 export const pauseAuction = (auctionId) => async (dispatch) => {
   try {
     dispatch(setLoading(true));
@@ -174,12 +220,22 @@ export const pauseAuction = (auctionId) => async (dispatch) => {
   }
 };
 
-// Resume auction
-export const resumeAuction = (auctionId) => async (dispatch) => {
+export const resumeAuction = (auctionId) => async (dispatch, getState) => {
   try {
     dispatch(setLoading(true));
     const currentPlayerRef = doc(db, "currentplayer", auctionId);
     await updateDoc(currentPlayerRef, { auctionStatus: "running" });
+
+    const { joinedPlayers, currentPlayerIndex, upcomingPlayers } = getState().joinedPlayers;
+    
+    if (upcomingPlayers.length === 0) {
+      const newUpcomingPlayers = joinedPlayers.slice(currentPlayerIndex + 1, currentPlayerIndex + 5);
+      dispatch(setUpcomingPlayers(newUpcomingPlayers));
+      
+      // Update Firestore with new upcoming players
+      await updateDoc(currentPlayerRef, { upcomingPlayers: newUpcomingPlayers });
+    }
+
   } catch (error) {
     handleFirestoreError(error, dispatch);
   } finally {
@@ -187,7 +243,8 @@ export const resumeAuction = (auctionId) => async (dispatch) => {
   }
 };
 
-// End auction
+
+
 export const endAuction = (auctionId) => async (dispatch) => {
   try {
     dispatch(setLoading(true));
@@ -200,25 +257,34 @@ export const endAuction = (auctionId) => async (dispatch) => {
   }
 };
 
-// Move to next player
 export const nextPlayer = (auctionId) => async (dispatch, getState) => {
   const { joinedPlayers, currentPlayerIndex } = getState().joinedPlayers;
+  
   if (currentPlayerIndex < joinedPlayers.length - 1) {
     const newIndex = currentPlayerIndex + 1;
     const nextPlayerData = joinedPlayers[newIndex];
+
+    dispatch(setCurrentPlayerIndex(newIndex));
+
+    // Get new upcoming players
+    const newUpcomingPlayers = joinedPlayers.slice(newIndex + 1, newIndex + 5);
+
     const currentPlayerRef = doc(db, "currentplayer", auctionId);
     await updateDoc(currentPlayerRef, {
       currentPlayer: nextPlayerData,
-      currentBid: 165000000,
+      "currentPlayer.auction_details.current_bid": nextPlayerData.auction_detail.base_price,
       timeLeft: 30,
+      upcomingPlayers: newUpcomingPlayers, // Update upcoming players in Firestore
     });
-    dispatch(setCurrentPlayerIndex(newIndex));
+
+    dispatch(setCurrentPlayer(nextPlayerData));
+    dispatch(setUpcomingPlayers(newUpcomingPlayers));
+
   } else {
     dispatch(endAuction(auctionId));
   }
 };
 
-// Timer logic
 export const startTimer = (auctionId) => (dispatch, getState) => {
   const timer = setInterval(async () => {
     const { auctionStatus, timeLeft } = getState().joinedPlayers;
