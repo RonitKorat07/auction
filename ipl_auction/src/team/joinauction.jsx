@@ -55,6 +55,7 @@ const Teamjoinauction = () => {
       setBidAmount(newBidAmount);
       setCurrentBid(current_bid);
       setTimeLeft(30);
+
     }
   }, [currentPlayer]);
 
@@ -108,10 +109,12 @@ const Teamjoinauction = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#202626]">
+
         <div
           className="animate-spin rounded-full h-16 w-16 border-t-4 border"
           style={{ borderColor: userTeam?.color || "#0047AB" }}
         ></div>
+
       </div>
     );
   }
@@ -125,7 +128,12 @@ const Teamjoinauction = () => {
   }
 
   if (!userTeam) {
-    return <div className="text-center text-[#E8EAF6]">No team data available.</div>;
+
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#202626]">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border border-[#0047AB]"></div>
+      </div>
+    );
   }
   // Hardcoded data for demonstration
   const recentPurchases = [
