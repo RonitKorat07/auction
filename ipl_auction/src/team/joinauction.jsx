@@ -359,7 +359,7 @@ const Teamjoinauction = () => {
                         <div className="ml-4 bg-[#FF4500] text-white px-3 py-1 rounded-full flex items-center">
                           <i className="fas fa-clock mr-2"></i>
                           <span id="timer" className="font-semibold">
-                            {timeLeft}s
+                            {timeLeft}s 
                           </span>
                         </div>
                       </div>
@@ -382,6 +382,7 @@ const Teamjoinauction = () => {
                         { amount: 2500000, label: "₹25L" },
                         { amount: 5000000, label: "₹50L" },
                       ].map((button, index) => (
+                        currentPlayer.auction_detail.base_price <= currentPlayer.auction_detail.current_bid ? (
                         <button
                           key={index}
                           onClick={() => handleBidButtonClick(button.amount)}
@@ -392,7 +393,7 @@ const Teamjoinauction = () => {
                         >
                           <i className="fas fa-plus-circle mr-1"></i>
                           {button.label}
-                        </button>
+                        </button>):null
                       ))}
                         <button
                           onClick={() => setShowBidModal(true)}
