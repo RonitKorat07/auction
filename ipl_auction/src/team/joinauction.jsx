@@ -53,9 +53,11 @@ const Teamjoinauction = () => {
   const [prevPlayerId, setPrevPlayerId] = useState(null);
   useEffect(() => {
     if (currentPlayer && currentPlayer.auction_detail?.base_price) {
+
       if (currentPlayer.id !== prevPlayerId) { // Reset only if new player comes
         setBidAmount(currentPlayer.auction_detail.base_price );
         setCurrentBid(currentPlayer.auction_detail.current_bid);
+
 
         setTimeLeft(30);
         setPrevPlayerId(currentPlayer.id);
@@ -112,10 +114,12 @@ const Teamjoinauction = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#202626]">
+
         <div
           className="animate-spin rounded-full h-16 w-16 border-t-4 border"
           style={{ borderColor: userTeam?.color || "#0047AB" }}
         ></div>
+
       </div>
     );
   }
@@ -130,7 +134,9 @@ const Teamjoinauction = () => {
 
   if (!userTeam) {
     return (
-      <div className="text-center text-[#E8EAF6]">No team data available.</div>
+      <div className="min-h-screen flex items-center justify-center bg-[#202626]">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border border-[#0047AB]"></div>
+      </div>
     );
   }
   // Hardcoded data for demonstration

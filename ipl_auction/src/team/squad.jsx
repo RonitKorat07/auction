@@ -14,8 +14,7 @@ const Squad = () => {
       matches: 156,
       average: 48.5,
       speciality: "Right-handed Opening Batsman",
-      imageUrl:
-        "https://public.readdy.ai/ai/img_res/98bb037f864d64e4d83822db177f3460.jpg",
+      imageUrl: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
       nationality: "England",
       achievements: "5000+ runs, Average: 48.5",
     },
@@ -25,8 +24,7 @@ const Squad = () => {
       matches: 142,
       average: 45.8,
       speciality: "Left-handed Middle Order",
-      imageUrl:
-        "https://public.readdy.ai/ai/img_res/d70658149ad2ea295f211ef2c19aad67.jpg",
+      imageUrl: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
       nationality: "Australia",
       achievements: "4800+ runs, Average: 45.8",
     },
@@ -36,8 +34,7 @@ const Squad = () => {
       matches: 198,
       average: 49.2,
       speciality: "Right-handed Opening Batsman",
-      imageUrl:
-        "https://public.readdy.ai/ai/img_res/e33f6f2ad12abe40d2c15bc3346ce8d1.jpg",
+      imageUrl: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
       nationality: "India",
       achievements: "6500+ runs, Average: 49.2",
     },
@@ -47,8 +44,7 @@ const Squad = () => {
       matches: 165,
       average: 52.3,
       speciality: "Right-handed Top Order",
-      imageUrl:
-        "https://public.readdy.ai/ai/img_res/3971e4332a588c931e88b6df645e6975.jpg",
+      imageUrl: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
       nationality: "New Zealand",
       achievements: "7000+ runs, Average: 52.3",
     },
@@ -58,8 +54,7 @@ const Squad = () => {
       matches: 187,
       average: 46.8,
       speciality: "Left-handed Opening Batsman",
-      imageUrl:
-        "https://public.readdy.ai/ai/img_res/998369c154e3a2082c699442c9a53e1f.jpg",
+      imageUrl: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
       nationality: "Australia",
       achievements: "5800+ runs, Average: 46.8",
     },
@@ -69,8 +64,7 @@ const Squad = () => {
       matches: 145,
       average: 50.1,
       speciality: "Right-handed Top Order",
-      imageUrl:
-        "https://public.readdy.ai/ai/img_res/c9367335178e8ab74b550a44e339ca26.jpg",
+      imageUrl: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
       nationality: "Pakistan",
       achievements: "5200+ runs, Average: 50.1",
     },
@@ -80,8 +74,7 @@ const Squad = () => {
       matches: 154,
       average: 44.7,
       speciality: "Left-handed Wicket-keeper Batsman",
-      imageUrl:
-        "https://public.readdy.ai/ai/img_res/8afbdda1c33dffb9fa6f6cdc0813df4a.jpg",
+      imageUrl: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
       nationality: "South Africa",
       achievements: "4900+ runs, Average: 44.7",
     },
@@ -91,8 +84,7 @@ const Squad = () => {
       matches: 134,
       average: 42.3,
       speciality: "Left-handed Wicket-keeper Batsman",
-      imageUrl:
-        "https://public.readdy.ai/ai/img_res/c735ea6b73813d3a0f43818ac21b14aa.jpg",
+      imageUrl: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
       nationality: "New Zealand",
       achievements: "4500+ runs, Average: 42.3",
     },
@@ -103,8 +95,7 @@ const Squad = () => {
       matches: 178,
       average: 38.6,
       speciality: "Right-handed Batsman & Medium Fast Bowler",
-      imageUrl:
-        "https://public.readdy.ai/ai/img_res/fc95cd02ec584827d88614f3cc1c9910.jpg",
+      imageUrl: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
       nationality: "South Africa",
       achievements: "5000+ runs, 200+ wickets",
     },
@@ -114,8 +105,7 @@ const Squad = () => {
       matches: 134,
       average: 35.2,
       speciality: "Left-arm All-rounder",
-      imageUrl:
-        "https://public.readdy.ai/ai/img_res/8b6e0730c50cc3607120432e37b98316.jpg",
+      imageUrl: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
       nationality: "New Zealand",
       achievements: "4500+ runs, 180+ wickets",
     },
@@ -125,8 +115,7 @@ const Squad = () => {
       matches: 167,
       average: 41.5,
       speciality: "Left-handed Batsman & Right-arm Fast",
-      imageUrl:
-        "https://public.readdy.ai/ai/img_res/04b02b58d357a3e74ef32dced772df12.jpg",
+      imageUrl: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
       nationality: "England",
       achievements: "5500+ runs, 190+ wickets",
     },
@@ -136,8 +125,7 @@ const Squad = () => {
       matches: 156,
       average: 36.8,
       speciality: "Left-handed Batsman & Left-arm Spin",
-      imageUrl:
-        "https://public.readdy.ai/ai/img_res/8ed16934d015fb9c1b7a54aebf6b58e6.jpg",
+      imageUrl: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
       nationality: "India",
       achievements: "4000+ runs, 250+ wickets",
     },
@@ -147,8 +135,7 @@ const Squad = () => {
       matches: 142,
       average: 34.9,
       speciality: "Right-handed Batsman & Medium Fast",
-      imageUrl:
-        "https://public.readdy.ai/ai/img_res/a06c3f085c18c8270e12817c8e932ce6.jpg",
+      imageUrl: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
       nationality: "Australia",
       achievements: "3800+ runs, 160+ wickets",
     },
@@ -159,8 +146,7 @@ const Squad = () => {
       matches: 145,
       average: 24.3,
       speciality: "Right-arm Fast Bowler",
-      imageUrl:
-        "https://public.readdy.ai/ai/img_res/153f0777967c9ffbefcccad4fe5c9441.jpg",
+      imageUrl: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
       nationality: "England",
       achievements: "300+ wickets, Best figures: 7/42",
     },
@@ -170,8 +156,7 @@ const Squad = () => {
       matches: 128,
       average: 25.1,
       speciality: "Left-arm Spin Bowler",
-      imageUrl:
-        "https://public.readdy.ai/ai/img_res/8c29d2f94f28f6047f501a6d3369cbd8.jpg",
+      imageUrl: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
       nationality: "India",
       achievements: "250+ wickets, Best figures: 6/35",
     },
@@ -181,8 +166,7 @@ const Squad = () => {
       matches: 156,
       average: 22.8,
       speciality: "Right-arm Fast",
-      imageUrl:
-        "https://public.readdy.ai/ai/img_res/278e173da14c10dc0b83def33ddcda3a.jpg",
+      imageUrl: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
       nationality: "Australia",
       achievements: "320+ wickets, Best figures: 8/38",
     },
@@ -192,8 +176,7 @@ const Squad = () => {
       matches: 143,
       average: 23.4,
       speciality: "Right-arm Fast",
-      imageUrl:
-        "https://public.readdy.ai/ai/img_res/4d8bf8b8c13f7a0f834b76fab02405b6.jpg",
+      imageUrl: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
       nationality: "South Africa",
       achievements: "280+ wickets, Best figures: 7/32",
     },
@@ -229,10 +212,7 @@ const Squad = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#202626]">
-        <div
-          className="animate-spin rounded-full h-16 w-16 border-t-4 border"
-          style={{ borderColor: team?.color || "#0047AB" }} // Optional chaining with fallback // Use team.color if available, otherwise use default
-        ></div>
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border border-[#0047AB]"></div>
       </div>
     );
   }
@@ -248,7 +228,7 @@ const Squad = () => {
   if (!team) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#202626]">
-        <div className="text-[#E8EAF6]">No team data available.</div>
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border border-[#0047AB]"></div>
       </div>
     );
   }
@@ -270,10 +250,10 @@ const Squad = () => {
                 .map((player, index) => (
                   <div
                     key={index}
-                    className={`bg-gradient-to-b from-[#1F2937] to-[#111827] border rounded-2xl overflow-hidden relative group transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl`}
+                    className={`bg-gradient-to-r from-[#2C2F32] to-[#2C2F32] border rounded-2xl overflow-hidden relative group transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl`}
                     style={{
                       borderColor: team.color || "#0047AB",
-                      boxShadow: `0px 4px 20px ${team.color || "#0047AB"}40`, // Adding transparency
+                      boxShadow: `0px 4px 20px ${team.color || "#0047AB"}30`, // Adding transparency
                     }}
                   >
                     <div className="relative overflow-hidden">
@@ -283,12 +263,18 @@ const Squad = () => {
                         className="w-full h-[200px] sm:h-[250px] object-cover object-top transition-transform duration-500 group-hover:scale-110"
                       />
                     </div>
-                    <div className="p-6 bg-gradient-to-b from-transparent to-black/40">
+                    <div className="p-6 h-full bg-gradient-to-b from-transparent to-black/40">
                       <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-xl font-bold text-[#E8EAF6] group-hover:text-[#0047AB] transition-colors duration-300">
+                        <h3
+                          className="text-xl font-bold transition-colors duration-300 "
+                          style={{ color: team.color }}
+                        >
                           {player.name}
                         </h3>
-                        <span className="px-3 py-1 bg-[#0047AB]/10 text-[#0047AB] text-sm rounded-full border border-[#0047AB]/20 backdrop-blur-sm">
+                        <span
+                          className="px-3 py-1 bg-[#0047AB]/10  text-sm rounded-full border border-[#0047AB]/20 backdrop-blur-sm"
+                          style={{ borderColor: team.color, color: team.color }}
+                        >
                           {player.nationality}
                         </span>
                       </div>
@@ -299,9 +285,11 @@ const Squad = () => {
                         <p className="text-[#B0E0E6]/80 text-sm font-medium">
                           {player.achievements}
                         </p>
-                        <button className="w-8 h-8 rounded-full bg-[#0047AB]/10 flex items-center justify-center text-[#0047AB] hover:bg-[#0047AB]/20 transition-all duration-300 backdrop-blur-sm">
+                        <button
+                          className="w-8 h-8 rounded-full bg-[#0047AB]/10 flex items-center justify-center hover:bg-[#0047AB]/20 transition-all duration-300 backdrop-blur-sm border hover:cursor-pointer"
+                          style={{ borderColor: team.color, color: team.color }}
+                        >
                           <i className="fas fa-arrow-right">
-                            {" "}
                             <AiOutlineArrowRight />
                           </i>
                         </button>
@@ -325,10 +313,10 @@ const Squad = () => {
                 .map((player, index) => (
                   <div
                     key={index}
-                    className={`bg-gradient-to-b from-[#1F2937] to-[#111827] border rounded-2xl overflow-hidden relative group transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl`}
+                    className={`bg-gradient-to-b from-[#2C2F32] to-[#2C2F32] border rounded-2xl overflow-hidden relative group transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl`}
                     style={{
                       borderColor: team.color || "#0047AB",
-                      boxShadow: `0px 4px 20px ${team.color || "#0047AB"}40`, // Adding transparency
+                      boxShadow: `0px 4px 20px ${team.color || "#0047AB"}30`, // Adding transparency
                     }}
                   >
                     <div className="relative overflow-hidden">
@@ -338,12 +326,18 @@ const Squad = () => {
                         className="w-full h-[200px] sm:h-[250px] object-cover object-top transition-transform duration-500 group-hover:scale-110"
                       />
                     </div>
-                    <div className="p-6 bg-gradient-to-b from-transparent to-black/40">
+                    <div className="p-6 h-full bg-gradient-to-b from-transparent to-black/40">
                       <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-xl font-bold text-[#E8EAF6] group-hover:text-[#0047AB] transition-colors duration-300">
+                        <h3
+                          className="text-xl font-bold transition-colors duration-300 "
+                          style={{ color: team.color }}
+                        >
                           {player.name}
                         </h3>
-                        <span className="px-3 py-1 bg-[#0047AB]/10 text-[#0047AB] text-sm rounded-full border border-[#0047AB]/20 backdrop-blur-sm">
+                        <span
+                          className="px-3 py-1 bg-[#0047AB]/10  text-sm rounded-full border border-[#0047AB]/20 backdrop-blur-sm"
+                          style={{ borderColor: team.color, color: team.color }}
+                        >
                           {player.nationality}
                         </span>
                       </div>
@@ -354,9 +348,11 @@ const Squad = () => {
                         <p className="text-[#B0E0E6]/80 text-sm font-medium">
                           {player.achievements}
                         </p>
-                        <button className="w-8 h-8 rounded-full bg-[#0047AB]/10 flex items-center justify-center text-[#0047AB] hover:bg-[#0047AB]/20 transition-all duration-300 backdrop-blur-sm">
+                        <button
+                          className="w-8 h-8 rounded-full bg-[#0047AB]/10 flex items-center justify-center hover:bg-[#0047AB]/20 transition-all duration-300 backdrop-blur-sm border hover:cursor-pointer"
+                          style={{ borderColor: team.color, color: team.color }}
+                        >
                           <i className="fas fa-arrow-right">
-                            {" "}
                             <AiOutlineArrowRight />
                           </i>
                         </button>
@@ -378,10 +374,10 @@ const Squad = () => {
                 .map((player, index) => (
                   <div
                     key={index}
-                    className={`bg-gradient-to-b from-[#1F2937] to-[#111827] border rounded-2xl overflow-hidden relative group transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl`}
+                    className={`bg-gradient-to-b from-[#2C2F32] to-[#2C2F32] border rounded-2xl overflow-hidden relative group transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl`}
                     style={{
                       borderColor: team.color || "#0047AB",
-                      boxShadow: `0px 4px 20px ${team.color || "#0047AB"}40`, // Adding transparency
+                      boxShadow: `0px 4px 20px ${team.color || "#0047AB"}30`, // Adding transparency
                     }}
                   >
                     <div className="relative overflow-hidden">
@@ -391,12 +387,18 @@ const Squad = () => {
                         className="w-full h-[200px] sm:h-[250px] object-cover object-top transition-transform duration-500 group-hover:scale-110"
                       />
                     </div>
-                    <div className="p-6 bg-gradient-to-b from-transparent to-black/40">
+                    <div className="p-6 h-full  bg-gradient-to-b from-transparent to-black/40">
                       <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-xl font-bold text-[#E8EAF6] group-hover:text-[#0047AB] transition-colors duration-300">
+                        <h3
+                          className="text-xl font-bold transition-colors duration-300 "
+                          style={{ color: team.color }}
+                        >
                           {player.name}
                         </h3>
-                        <span className="px-3 py-1 bg-[#0047AB]/10 text-[#0047AB] text-sm rounded-full border border-[#0047AB]/20 backdrop-blur-sm">
+                        <span
+                          className="px-3 py-1 bg-[#0047AB]/10  text-sm rounded-full border border-[#0047AB]/20 backdrop-blur-sm"
+                          style={{ borderColor: team.color, color: team.color }}
+                        >
                           {player.nationality}
                         </span>
                       </div>
@@ -407,7 +409,10 @@ const Squad = () => {
                         <p className="text-[#B0E0E6]/80 text-sm font-medium">
                           {player.achievements}
                         </p>
-                        <button className="w-8 h-8 rounded-full bg-[#0047AB]/10 flex items-center justify-center text-[#0047AB] hover:bg-[#0047AB]/20 transition-all duration-300 backdrop-blur-sm">
+                        <button
+                          className="w-8 h-8 rounded-full bg-[#0047AB]/10 flex items-center justify-center hover:bg-[#0047AB]/20 transition-all duration-300 backdrop-blur-sm border hover:cursor-pointer"
+                          style={{ borderColor: team.color, color: team.color }}
+                        >
                           <i className="fas fa-arrow-right">
                             <AiOutlineArrowRight />
                           </i>

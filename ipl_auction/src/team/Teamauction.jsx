@@ -68,10 +68,7 @@ const Teamauction = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#202626]">
-        <div
-          className="animate-spin rounded-full h-16 w-16 border-t-4 border"
-          style={{ borderColor: team?.color || "#0047AB" }} // Optional chaining with fallback // Use team.color if available, otherwise use default
-        ></div>
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border border-[#0047AB]"></div>
       </div>
     );
   }
@@ -87,7 +84,7 @@ const Teamauction = () => {
   if (!team) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#202626]">
-        <div className="text-[#E8EAF6]">No team data available.</div>
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border border-[#0047AB]"></div>
       </div>
     );
   }
