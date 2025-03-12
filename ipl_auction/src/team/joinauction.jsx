@@ -2,50 +2,61 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTeamemail } from "../store/teamslice";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { fetchCurrentPlayer } from "../store/joinedPlayersSlice";
+
+import {
+  fetchCurrentPlayer,
+  fetchJoinedPlayers,
+  fetchUpcomingPlayersRealtime,
+  updateCurrentBid,
+} from "../store/joinedPlayersSlice";
 import { useParams } from "react-router-dom";
+import { fetchPlayers } from "../store/playerslice";
 
 const Teamjoinauction = () => {
-  const [currentBid, setCurrentBid] = useState(0); // Current bid amount
-  const [bidAmount, setBidAmount] = useState(0); // User's bid amount
-  const [showBidModal, setShowBidModal] = useState(false); // Bid confirmation modal
-  const [totalSpent, setTotalSpent] = useState(0); // Total spent by the team
-  const [userEmail, setUserEmail] = useState(null); // Logged-in user's email
-  const [timeLeft, setTimeLeft] = useState(30); // Timer for bidding
+  const [currentBid, setCurrentBid] = useState(0);
+  const [bidAmount, setBidAmount] = useState(0);
+  const [showBidModal, setShowBidModal] = useState(false);
+  const [totalSpent, setTotalSpent] = useState(0);
+  const [userEmail, setUserEmail] = useState(null);
+  const [timeLeft, setTimeLeft] = useState(30);
 
   const dispatch = useDispatch();
-  const { id } = useParams(); // Player ID from URL
+  const { id } = useParams();
 
-  // Fetch team and player data
   const { teams, loading, error } = useSelector((state) => state.team);
-  const { currentPlayer } = useSelector((state) => state.joinedPlayers);
+  const { players } = useSelector((state) => state.player);
+  const { currentPlayer, upcomingPlayers } = useSelector(
+    (state) => state.joinedPlayers
+  );
 
   // Fetch logged-in user's email
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setUserEmail(user.email); // Set user email
+        setUserEmail(user.email);
       } else {
-        setUserEmail(null); // No user logged in
+        setUserEmail(null);
       }
     });
-    return () => unsubscribe(); // Cleanup on unmount
+    return () => unsubscribe();
   }, []);
 
-  // Fetch team and player data when userEmail or id changes
+  // Fetch team and player data
   useEffect(() => {
     if (userEmail) {
       dispatch(fetchTeamemail(userEmail));
     }
     if (id) {
+      dispatch(fetchPlayers());
+      dispatch(fetchJoinedPlayers(id, players));
       dispatch(fetchCurrentPlayer(id));
+      dispatch(fetchUpcomingPlayersRealtime(id));
     }
   }, [dispatch, userEmail, id]);
 
-  // Set bidAmount when currentPlayer is available
-  const [prevPlayerId, setPrevPlayerId] = useState(null); // Track previous player ID
-
+  // Set bidAmount when currentPlayer changes
+  const [prevPlayerId, setPrevPlayerId] = useState(null);
   useEffect(() => {
     if (currentPlayer && currentPlayer.auction_detail?.base_price) {
       if (currentPlayer.id !== prevPlayerId) {
@@ -53,7 +64,7 @@ const Teamjoinauction = () => {
         setBidAmount(currentPlayer.auction_detail.base_price);
         setCurrentBid(currentPlayer.auction_detail.base_price);
         setTimeLeft(30);
-        setPrevPlayerId(currentPlayer.id); // Update previous player ID
+        setPrevPlayerId(currentPlayer.id);
       }
     }
   }, [currentPlayer]);
@@ -70,26 +81,51 @@ const Teamjoinauction = () => {
 
   // Find the user's team
   const userTeam = teams?.find((team) => team.email === userEmail);
-  const totalBudget = userTeam?.budget || 0; // Total budget
-  const remainingBudget = totalBudget - totalSpent; // Remaining budget
+  const totalBudget = userTeam?.budget || 0;
+  const remainingBudget = totalBudget - totalSpent;
 
   // Handle bid submission
-  const handleBid = () => {
+  const handleBid = async () => {
     if (bidAmount <= currentBid) {
       alert("Bid amount must be higher than the current bid.");
       return;
     }
-    setCurrentBid(bidAmount);
-    setTotalSpent((prevSpent) => prevSpent + bidAmount);
-    setShowBidModal(false);
-    setTimeLeft(30); // Reset timer
+
+    console.log("Placing bid with amount:", bidAmount); // Log bid amount
+
+    try {
+      // Update local state immediately
+      setCurrentBid(bidAmount);
+      setTotalSpent((prevSpent) => prevSpent + bidAmount);
+      setShowBidModal(false);
+      setTimeLeft(30); // Reset timer
+
+      // Update Firestore
+      console.log(
+        "Dispatching updateCurrentBid with auctionId:",
+        id,
+        "and bidAmount:",
+        bidAmount
+      );
+      await dispatch(updateCurrentBid({ auctionId: id, bidAmount }));
+      console.log("Bid placed successfully"); // Log success
+    } catch (error) {
+      console.error("Error updating bid:", error); // Log the full error object
+      alert("Failed to place bid. Please try again.");
+
+      // Revert local state if Firestore update fails
+      setCurrentBid((prev) => prev - bidAmount);
+      setTotalSpent((prevSpent) => prevSpent - bidAmount);
+    }
   };
 
-  // Loading and error states
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#202626]">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border border-[#0047AB]"></div>
+        <div
+          className="animate-spin rounded-full h-16 w-16 border-t-4 border"
+          style={{ borderColor: userTeam?.color || "#0047AB" }} // Optional chaining with fallback // Use team.color if available, otherwise use default
+        ></div>
       </div>
     );
   }
@@ -109,7 +145,6 @@ const Teamjoinauction = () => {
       </div>
     );
   }
-
   // Hardcoded data for demonstration
   const recentPurchases = [
     {
@@ -132,23 +167,23 @@ const Teamjoinauction = () => {
     },
   ];
 
-  const upcomingPlayers = [
-    {
-      name: "Virat Kohli",
-      basePrice: "₹2 Crore",
-      logo: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
-    },
-    {
-      name: "Rohit Sharma",
-      basePrice: "₹2 Crore",
-      logo: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
-    },
-    {
-      name: "KL Rahul",
-      basePrice: "₹1.5 Crore",
-      logo: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
-    },
-  ];
+  // const upcomingPlayers = [
+  //   {
+  //     name: "Virat Kohli",
+  //     basePrice: "₹2 Crore",
+  //     logo: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
+  //   },
+  //   {
+  //     name: "Rohit Sharma",
+  //     basePrice: "₹2 Crore",
+  //     logo: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
+  //   },
+  //   {
+  //     name: "KL Rahul",
+  //     basePrice: "₹1.5 Crore",
+  //     logo: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
+  //   },
+  // ];
 
   return (
     <div className="min-h-screen bg-[#202626] pt-20">
@@ -339,7 +374,11 @@ const Teamjoinauction = () => {
                         </div>
                       </div>
                       <span className="text-3xl font-bold text-[#B0E0E6]">
-                        ₹{(currentBid / 100000).toFixed(2)} L
+                        ₹
+                        {(
+                          currentPlayer.auction_detail.current_bid / 100000
+                        ).toFixed(2)}{" "}
+                        L
                       </span>
                     </div>
                     <div className="space-y-4 pb-5">
@@ -467,14 +506,16 @@ const Teamjoinauction = () => {
                 <div className="flex justify-center items-center mb-4">
                   <img
                     className="w-20 h-20 object-contain rounded-full"
-                    src={player.logo}
-                    alt=""
+                    src={player.image || "https://via.placeholder.com/150"}
+                    alt={player.name}
                   />
                   <div className="flex-col items-center justify-center mt-4 pl-5">
                     <h3 className="text-xl font-bold">{player.name}</h3>
                     <div className="flex items-center gap-2 mt-2">
                       <div className="px-3 py-1 bg-green-500/10 text-green-400 rounded-full text-sm font-semibold">
-                        {player.basePrice}
+                        ₹
+                        {(player.auction_detail.base_price / 100000).toFixed(2)}{" "}
+                        L
                       </div>
                     </div>
                   </div>
