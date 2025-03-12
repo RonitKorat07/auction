@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTeamemail } from "../store/teamslice";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { fetchCurrentPlayer, fetchJoinedPlayers, fetchUpcomingPlayersRealtime } from "../store/joinedPlayersSlice";
+
+import { fetchCurrentPlayer, fetchJoinedPlayers, fetchUpcomingPlayersRealtime,updateCurrentBid } from "../store/joinedPlayersSlice";
 import { useParams } from "react-router-dom";
 import { fetchPlayers } from "../store/playerslice";
 
@@ -52,9 +53,10 @@ const Teamjoinauction = () => {
   const [prevPlayerId, setPrevPlayerId] = useState(null);
   useEffect(() => {
     if (currentPlayer && currentPlayer.auction_detail?.base_price) {
-      if (currentPlayer.id !== prevPlayerId) {
-        setBidAmount(currentPlayer.auction_detail.base_price);
-        setCurrentBid(currentPlayer.auction_detail.base_price);
+      if (currentPlayer.id !== prevPlayerId) { // Reset only if new player comes
+        setBidAmount(currentPlayer.auction_detail.base_price );
+        setCurrentBid(currentPlayer.auction_detail.current_bid);
+
         setTimeLeft(30);
         setPrevPlayerId(currentPlayer.id);
       }
@@ -77,15 +79,34 @@ const Teamjoinauction = () => {
   const remainingBudget = totalBudget - totalSpent;
 
   // Handle bid submission
-  const handleBid = () => {
+  const handleBid = async () => {
     if (bidAmount <= currentBid) {
       alert("Bid amount must be higher than the current bid.");
       return;
     }
-    setCurrentBid(bidAmount);
-    setTotalSpent((prevSpent) => prevSpent + bidAmount);
-    setShowBidModal(false);
-    setTimeLeft(30);
+  
+    console.log("Placing bid with amount:", bidAmount); // Log bid amount
+  
+    try {
+      // Update local state immediately
+      setCurrentBid(bidAmount);
+      setTotalSpent((prevSpent) => prevSpent + bidAmount);
+      setShowBidModal(false);
+      setTimeLeft(30); // Reset timer
+  
+      // Update Firestore
+      console.log("Dispatching updateCurrentBid with auctionId:", id, "and bidAmount:", bidAmount);
+      await dispatch(updateCurrentBid({ auctionId: id, bidAmount }));
+      console.log("Bid placed successfully"); // Log success
+    } catch (error) {
+      console.error("Error updating bid:", error); // Log the full error object
+      alert("Failed to place bid. Please try again.");
+  
+      // Revert local state if Firestore update fails
+      setCurrentBid((prev) => prev - bidAmount);
+      setTotalSpent((prevSpent) => prevSpent - bidAmount);
+    }
+
   };
 
   if (loading) {
@@ -340,9 +361,8 @@ const Teamjoinauction = () => {
                           </span>
                         </div>
                       </div>
-                      <span className="text-3xl font-bold text-[#B0E0E6]">
-                        ₹{(currentBid / 100000).toFixed(2)} L
-                      </span>
+                      <span className="text-3xl font-bold text-[#B0E0E6]">₹{(currentPlayer.auction_detail.current_bid / 100000).toFixed(2)} L</span>
+
                     </div>
                     <div className="space-y-4 pb-5">
                       <input
