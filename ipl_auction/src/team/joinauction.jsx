@@ -48,7 +48,8 @@ const Teamjoinauction = () => {
 
   useEffect(() => {
     if (currentPlayer && currentPlayer.auction_detail?.base_price) {
-      if (currentPlayer.id !== prevPlayerId) { // Reset only if new player comes
+      if (currentPlayer.id !== prevPlayerId) {
+        // Reset only if new player comes
         setBidAmount(currentPlayer.auction_detail.base_price);
         setCurrentBid(currentPlayer.auction_detail.base_price);
         setTimeLeft(30);
@@ -56,7 +57,7 @@ const Teamjoinauction = () => {
       }
     }
   }, [currentPlayer]);
-  
+
   // Timer countdown
   useEffect(() => {
     if (timeLeft > 0) {
@@ -88,10 +89,7 @@ const Teamjoinauction = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#202626]">
-        <div
-          className="animate-spin rounded-full h-16 w-16 border-t-4 border"
-          style={{ borderColor: userTeam?.color || "#0047AB" }} // Optional chaining with fallback // Use team.color if available, otherwise use default
-        ></div>
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border border-[#0047AB]"></div>
       </div>
     );
   }
@@ -106,7 +104,9 @@ const Teamjoinauction = () => {
 
   if (!userTeam) {
     return (
-      <div className="text-center text-[#E8EAF6]">No team data available.</div>
+      <div className="min-h-screen flex items-center justify-center bg-[#202626]">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border border-[#0047AB]"></div>
+      </div>
     );
   }
 
