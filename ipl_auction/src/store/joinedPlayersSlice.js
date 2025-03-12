@@ -118,7 +118,7 @@ export const fetchCurrentPlayer = (auctionId) => (dispatch) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         dispatch(setCurrentPlayer(data.currentPlayer || null));
-        dispatch(setCurrentBid(data?.currentPlayer?.auction_detail?.base_price));
+        dispatch(setCurrentBid(data?.currentPlayer?.auction_details?.current_bid || data?.currentPlayer?.auction_detail?.base_price));
         dispatch(setTimeLeft(data.timeLeft || 30));
         dispatch(setAuctionStatus(data.auctionStatus || "not-started"));
       }
@@ -134,6 +134,26 @@ export const fetchCurrentPlayer = (auctionId) => (dispatch) => {
   return unsubscribe;
 };
 
+export const updateCurrentBid = ({ auctionId, bidAmount }) => async (dispatch, getState) => {
+  try {
+    dispatch(setLoading(true));
+    console.log("Updating Firestore with auctionId:", auctionId, "and bidAmount:", bidAmount);
+
+    const currentPlayerRef = doc(db, "currentplayer", auctionId);
+    await updateDoc(currentPlayerRef, {
+      "currentPlayer.auction_detail.current_bid": bidAmount,
+    });
+
+    console.log("Firestore update successful"); // Log success
+    dispatch(setCurrentBid(bidAmount));
+  } catch (error) {
+    console.error("Firestore update error:", error); // Log the full error object
+    throw error; // Re-throw the error to be caught by handleBid
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
+
 // Start auction
 export const startAuction = (auctionId, initialPlayer, players = []) => async (dispatch) => {
   try {
@@ -145,7 +165,7 @@ export const startAuction = (auctionId, initialPlayer, players = []) => async (d
       currentPlayerRef,
       {
         currentPlayer: initialPlayer,
-        currentBid: 165000000,
+        "currentPlayer.auction_details.current_bid": initialPlayer.auction_detail.base_price,
         timeLeft: 30,
         auctionStatus: "running",
       },
@@ -209,7 +229,7 @@ export const nextPlayer = (auctionId) => async (dispatch, getState) => {
     const currentPlayerRef = doc(db, "currentplayer", auctionId);
     await updateDoc(currentPlayerRef, {
       currentPlayer: nextPlayerData,
-      currentBid: 165000000,
+      "currentPlayer.auction_details.current_bid": nextPlayerData.auction_detail.base_price,
       timeLeft: 30,
     });
     dispatch(setCurrentPlayerIndex(newIndex));
@@ -217,7 +237,6 @@ export const nextPlayer = (auctionId) => async (dispatch, getState) => {
     dispatch(endAuction(auctionId));
   }
 };
-
 // Timer logic
 export const startTimer = (auctionId) => (dispatch, getState) => {
   const timer = setInterval(async () => {
