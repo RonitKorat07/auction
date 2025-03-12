@@ -2,11 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTeamemail } from "../store/teamslice";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-
-import { fetchCurrentPlayer, fetchJoinedPlayers, fetchUpcomingPlayersRealtime,updateCurrentBid } from "../store/joinedPlayersSlice";
+import { fetchCurrentPlayer, fetchJoinedPlayers, fetchUpcomingPlayersRealtime, updateCurrentBid } from "../store/joinedPlayersSlice";
 import { useParams } from "react-router-dom";
 import { fetchPlayers } from "../store/playerslice";
-
 
 const Teamjoinauction = () => {
   const [currentBid, setCurrentBid] = useState(0);
@@ -50,18 +48,14 @@ const Teamjoinauction = () => {
   }, [dispatch, userEmail, id]);
 
   // Set bidAmount when currentPlayer changes
-  const [prevPlayerId, setPrevPlayerId] = useState(null);
   useEffect(() => {
     if (currentPlayer && currentPlayer.auction_detail?.base_price) {
+      const { base_price, current_bid } = currentPlayer.auction_detail;
+      const newBidAmount = current_bid > base_price ? current_bid : base_price;
+      setBidAmount(newBidAmount);
+      setCurrentBid(current_bid);
+      setTimeLeft(30);
 
-      if (currentPlayer.id !== prevPlayerId) { // Reset only if new player comes
-        setBidAmount(currentPlayer.auction_detail.base_price );
-        setCurrentBid(currentPlayer.auction_detail.current_bid);
-
-
-        setTimeLeft(30);
-        setPrevPlayerId(currentPlayer.id);
-      }
     }
   }, [currentPlayer]);
 
@@ -86,29 +80,30 @@ const Teamjoinauction = () => {
       alert("Bid amount must be higher than the current bid.");
       return;
     }
-  
-    console.log("Placing bid with amount:", bidAmount); // Log bid amount
-  
+
     try {
       // Update local state immediately
       setCurrentBid(bidAmount);
       setTotalSpent((prevSpent) => prevSpent + bidAmount);
       setShowBidModal(false);
       setTimeLeft(30); // Reset timer
-  
+
       // Update Firestore
-      console.log("Dispatching updateCurrentBid with auctionId:", id, "and bidAmount:", bidAmount);
       await dispatch(updateCurrentBid({ auctionId: id, bidAmount }));
-      console.log("Bid placed successfully"); // Log success
     } catch (error) {
-      console.error("Error updating bid:", error); // Log the full error object
+      console.error("Error updating bid:", error);
       alert("Failed to place bid. Please try again.");
-  
+
       // Revert local state if Firestore update fails
       setCurrentBid((prev) => prev - bidAmount);
       setTotalSpent((prevSpent) => prevSpent - bidAmount);
     }
+  };
 
+  // Handle bid button clicks
+  const handleBidButtonClick = (amount) => {
+    const newBidAmount = currentBid + amount;
+    setBidAmount(newBidAmount);
   };
 
   if (loading) {
@@ -133,6 +128,7 @@ const Teamjoinauction = () => {
   }
 
   if (!userTeam) {
+
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#202626]">
         <div className="animate-spin rounded-full h-16 w-16 border-t-4 border border-[#0047AB]"></div>
@@ -367,13 +363,13 @@ const Teamjoinauction = () => {
                           </span>
                         </div>
                       </div>
-                      <span className="text-3xl font-bold text-[#B0E0E6]">₹{(currentPlayer.auction_detail.current_bid / 100000).toFixed(2)} L</span>
+                      <span className="text-3xl font-bold text-[#B0E0E6]">₹{( currentPlayer.auction_detail.current_bid/ 100000).toFixed(2)} L</span>
 
                     </div>
                     <div className="space-y-4 pb-5">
                       <input
                         type="number"
-                        value={bidAmount}
+                        value={currentPlayer.auction_detail.base_price <= currentPlayer.auction_detail.current_bid ? bidAmount:currentPlayer.auction_detail.base_price}
                         onChange={(e) => setBidAmount(Number(e.target.value))}
                         className="w-full p-4 border rounded-lg text-lg font-medium text-white bg-[#2C2F32] focus:outline-none focus:ring-2 focus:ring-[#0047AB] focus:border-transparent"
                         style={{ borderColor: userTeam.color || "#0047AB" }}
@@ -381,28 +377,23 @@ const Teamjoinauction = () => {
                         step={50000}
                       />
                       <div className="flex flex-wrap gap-2">
-                        {[
-                          { amount: 1000000, label: "₹10L" },
-                          { amount: 2500000, label: "₹25L" },
-                          { amount: 5000000, label: "₹50L" },
-                        ].map((button, index) => (
-                          <button
-                            key={index}
-                            onClick={() =>
-                              currentPlayer.auction_detail.base_price ==
-                              bidAmount
-                                ? setBidAmount(bidAmount + button.amount)
-                                : setBidAmount(currentBid + button.amount)
-                            }
-                            className="flex-1 px-4 py-2 text-base font-semibold text-black rounded-lg transition-colors"
-                            style={{
-                              backgroundColor: userTeam.color || "#B0E0E6",
-                            }}
-                          >
-                            <i className="fas fa-plus-circle mr-1"></i>
-                            {button.label}
-                          </button>
-                        ))}
+                      {[
+                        { amount: 1000000, label: "₹10L" },
+                        { amount: 2500000, label: "₹25L" },
+                        { amount: 5000000, label: "₹50L" },
+                      ].map((button, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleBidButtonClick(button.amount)}
+                          className="flex-1 px-4 py-2 text-base font-semibold text-black rounded-lg transition-colors"
+                          style={{
+                            backgroundColor: userTeam.color || "#B0E0E6",
+                          }}
+                        >
+                          <i className="fas fa-plus-circle mr-1"></i>
+                          {button.label}
+                        </button>
+                      ))}
                         <button
                           onClick={() => setShowBidModal(true)}
                           className="flex-1 bg-[#0047AB] text-white px-4 py-2 text-base font-semibold hover:bg-[#003A8C] rounded-lg transition-colors flex items-center justify-center"
