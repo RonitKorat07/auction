@@ -10,7 +10,7 @@ const initialState = {
   auctionStatus: "not-started",
   currentPlayerIndex: 0,
   timeLeft: 30,
-  currentBid: 2000000,
+  // currentBid: 2000000,
   auctionId: null,
   upcomingPlayers: [],
 };
@@ -122,7 +122,7 @@ export const fetchCurrentPlayer = (auctionId) => (dispatch) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         dispatch(setCurrentPlayer(data.currentPlayer || null));
-        dispatch(setCurrentBid(data?.currentPlayer?.auction_details?.current_bid || data?.currentPlayer?.auction_detail?.base_price));
+        dispatch(setCurrentBid(data?.currentPlayer?.auction_detail?.current_bid || data?.currentPlayer?.auction_detail?.base_price));
         dispatch(setTimeLeft(data.timeLeft || 30));
         dispatch(setAuctionStatus(data.auctionStatus || "not-started"));
       }
@@ -165,7 +165,7 @@ export const updateCurrentBid = ({ auctionId, bidAmount, teamName, teamLogo }) =
     // Update Firestore with the new bid and bid history
     await updateDoc(currentPlayerRef, {
       "currentPlayer.auction_detail.current_bid": bidAmount,
-      "currentPlayer.auction_detail.bidHistory": updatedBidHistory,
+      "currentPlayer.auction_detail.bid_history": updatedBidHistory,
     });
 
     console.log("Firestore update successful");
@@ -209,7 +209,6 @@ export const startAuction = (auctionId, initialPlayer, players = []) => async (d
       currentPlayerRef,
       {
         currentPlayer: initialPlayer,
-        "currentPlayer.auction_details.current_bid": initialPlayer.auction_detail.base_price,
         timeLeft: 30,
         auctionStatus: "running",
         upcomingPlayers:upcomingPlayers, // Store upcoming players in Firestore
@@ -293,7 +292,7 @@ export const nextPlayer = (auctionId) => async (dispatch, getState) => {
     const currentPlayerRef = doc(db, "currentplayer", auctionId);
     await updateDoc(currentPlayerRef, {
       currentPlayer: nextPlayerData,
-      "currentPlayer.auction_details.current_bid": nextPlayerData.auction_detail.base_price,
+      "currentPlayer.auction_detail.current_bid": nextPlayerData.auction_detail.base_price,
       timeLeft: 30,
       upcomingPlayers: newUpcomingPlayers, // Update upcoming players in Firestore
     });
