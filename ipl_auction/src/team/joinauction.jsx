@@ -9,6 +9,7 @@ import {
   fetchUpcomingPlayersRealtime,
   updateCurrentBid,
 } from "../store/joinedPlayersSlice";
+
 import { useParams } from "react-router-dom";
 import { fetchPlayers } from "../store/playerslice";
 
@@ -19,15 +20,19 @@ const Teamjoinauction = () => {
   const [totalSpent, setTotalSpent] = useState(0);
   const [userEmail, setUserEmail] = useState(null);
   const [timeLeft, setTimeLeft] = useState(30);
+  const [isManualBid, setIsManualBid] = useState(false);
 
   const dispatch = useDispatch();
   const { id } = useParams();
 
   const { teams, loading, error } = useSelector((state) => state.team);
   const { players } = useSelector((state) => state.player);
+
   const { currentPlayer, upcomingPlayers } = useSelector(
     (state) => state.joinedPlayers
   );
+  const bidHistory = currentPlayer?.auction_detail?.bidHistory || [];
+  const reversedBidHistory = [...bidHistory].reverse();
 
   // Fetch logged-in user's email
   useEffect(() => {
@@ -55,17 +60,21 @@ const Teamjoinauction = () => {
     }
   }, [dispatch, userEmail, id]);
 
-  // Set bidAmount when currentPlayer changes
-  const [prevPlayerId, setPrevPlayerId] = useState(null);
   useEffect(() => {
     if (currentPlayer && currentPlayer.auction_detail?.base_price) {
-      if (currentPlayer.id !== prevPlayerId) {
-        // Reset only if new player comes
-        setBidAmount(currentPlayer.auction_detail.base_price);
-        setCurrentBid(currentPlayer.auction_detail.base_price);
-        setTimeLeft(30);
-        setPrevPlayerId(currentPlayer.id);
+      const { base_price, current_bid } = currentPlayer.auction_detail;
+      const newBidAmount = current_bid > base_price ? current_bid : base_price;
+
+      // Reset isManualBid when a new player is up for auction
+      setIsManualBid(false);
+
+      // Only update bidAmount if it hasn't been manually set by the user
+      if (!isManualBid) {
+        setBidAmount(newBidAmount);
       }
+
+      setCurrentBid(current_bid);
+      setTimeLeft(30);
     }
   }, [currentPlayer]);
 
@@ -91,8 +100,6 @@ const Teamjoinauction = () => {
       return;
     }
 
-    console.log("Placing bid with amount:", bidAmount); // Log bid amount
-
     try {
       // Update local state immediately
       setCurrentBid(bidAmount);
@@ -101,22 +108,44 @@ const Teamjoinauction = () => {
       setTimeLeft(30); // Reset timer
 
       // Update Firestore
-      console.log(
-        "Dispatching updateCurrentBid with auctionId:",
-        id,
-        "and bidAmount:",
-        bidAmount
+      await dispatch(
+        updateCurrentBid({
+          auctionId: id,
+          bidAmount,
+          teamName: userTeam.name,
+          teamLogo: userTeam.logo,
+        })
       );
-      await dispatch(updateCurrentBid({ auctionId: id, bidAmount }));
-      console.log("Bid placed successfully"); // Log success
     } catch (error) {
-      console.error("Error updating bid:", error); // Log the full error object
-      alert("Failed to place bid. Please try again.");
+      console.error("Error updating bid:", error);
+
+      // Provide specific error messages
+      if (error.message.includes("Firestore update error")) {
+        alert("Failed to update Firestore. Please check your connection.");
+      } else if (
+        error.message.includes("Current player document does not exist")
+      ) {
+        alert("Auction data not found. Please refresh the page.");
+      } else {
+        alert("Failed to place bid. Please try again.");
+      }
 
       // Revert local state if Firestore update fails
       setCurrentBid((prev) => prev - bidAmount);
       setTotalSpent((prevSpent) => prevSpent - bidAmount);
     }
+  };
+
+  // Handle bid button clicks
+  const handleBidButtonClick = (amount) => {
+    setIsManualBid(true); // Mark bid as manual
+    setBidAmount((prevBidAmount) => prevBidAmount + amount);
+  };
+
+  // Handle input change
+  const handleBidInputChange = (e) => {
+    setIsManualBid(true); // Mark bid as manual
+    setBidAmount(Number(e.target.value));
   };
 
   if (loading) {
@@ -195,7 +224,7 @@ const Teamjoinauction = () => {
             className="col-span-12 lg:col-span-3 bg-[#2C2F32] rounded-lg shadow-lg p-6 border"
             style={{ borderColor: userTeam.color || "#0047AB" }}
           >
-            <div className="flex flex-col items-center mb-6">
+            <div className="flex flex-col items-center mb-6 ">
               <img
                 src={userTeam.logo}
                 alt={userTeam.teamName}
@@ -385,7 +414,7 @@ const Teamjoinauction = () => {
                       <input
                         type="number"
                         value={bidAmount}
-                        onChange={(e) => setBidAmount(Number(e.target.value))}
+                        onChange={handleBidInputChange}
                         className="w-full p-4 border rounded-lg text-lg font-medium text-white bg-[#2C2F32] focus:outline-none focus:ring-2 focus:ring-[#0047AB] focus:border-transparent"
                         style={{ borderColor: userTeam.color || "#0047AB" }}
                         min={currentBid + 50000}
@@ -396,24 +425,24 @@ const Teamjoinauction = () => {
                           { amount: 1000000, label: "₹10L" },
                           { amount: 2500000, label: "₹25L" },
                           { amount: 5000000, label: "₹50L" },
-                        ].map((button, index) => (
-                          <button
-                            key={index}
-                            onClick={() =>
-                              currentPlayer.auction_detail.base_price ==
-                              bidAmount
-                                ? setBidAmount(bidAmount + button.amount)
-                                : setBidAmount(currentBid + button.amount)
-                            }
-                            className="flex-1 px-4 py-2 text-base font-semibold text-black rounded-lg transition-colors"
-                            style={{
-                              backgroundColor: userTeam.color || "#B0E0E6",
-                            }}
-                          >
-                            <i className="fas fa-plus-circle mr-1"></i>
-                            {button.label}
-                          </button>
-                        ))}
+                        ].map((button, index) =>
+                          currentPlayer.auction_detail.base_price <=
+                          currentPlayer.auction_detail.current_bid ? (
+                            <button
+                              key={index}
+                              onClick={() =>
+                                handleBidButtonClick(button.amount)
+                              }
+                              className="flex-1 px-4 py-2 text-base font-semibold text-black rounded-lg transition-colors"
+                              style={{
+                                backgroundColor: userTeam.color || "#B0E0E6",
+                              }}
+                            >
+                              <i className="fas fa-plus-circle mr-1"></i>
+                              {button.label}
+                            </button>
+                          ) : null
+                        )}
                         <button
                           onClick={() => setShowBidModal(true)}
                           className="flex-1 bg-[#0047AB] text-white px-4 py-2 text-base font-semibold hover:bg-[#003A8C] rounded-lg transition-colors flex items-center justify-center"
@@ -438,52 +467,37 @@ const Teamjoinauction = () => {
               Bid History
             </h2>
             <div
-              className="max-h-130 overflow-y-auto scrollbar-hide space-y-4"
+              className="max-h-140 overflow-y-auto scrollbar-hide space-y-4"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
-              {[
-                {
-                  teamLogo:
-                    "https://upload.wikimedia.org/wikipedia/en/4/4c/Chennai_Super_Kings_logo.png",
-                  bidder: "Chennai Super Kings",
-                  amount: "₹16.50 Cr",
-                  time: "2 mins ago",
-                },
-                {
-                  teamLogo:
-                    "https://upload.wikimedia.org/wikipedia/en/6/6f/Royal_Challengers_Bangalore_logo.png",
-                  bidder: "Royal Challengers Bangalore",
-                  amount: "₹16.25 Cr",
-                  time: "5 mins ago",
-                },
-                {
-                  teamLogo:
-                    "https://upload.wikimedia.org/wikipedia/en/8/8e/Kolkata_Knight_Riders_logo.png",
-                  bidder: "Kolkata Knight Riders",
-                  amount: "₹16.00 Cr",
-                  time: "8 mins ago",
-                },
-              ].map((bid, index) => (
-                <div
-                  key={index}
-                  className="flex items-center p-3 bg-[#202626] rounded-lg border shadow-lg"
-                  style={{ borderColor: userTeam.color || "#0047AB" }}
-                >
-                  <img
-                    src={bid.teamLogo}
-                    alt={bid.bidder}
-                    className="w-10 h-10 mr-3 rounded-full"
-                  />
-                  <div className="flex flex-col flex-grow">
-                    <p className="font-medium text-white text-sm">
-                      {bid.bidder}
-                    </p>
+              {reversedBidHistory.length === 0 ? (
+                <p className="text-gray-400 text-center">No bids placed yet.</p>
+              ) : (
+                reversedBidHistory.map((bid, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center p-3 bg-[#202626] rounded-lg border shadow-lg"
+                    style={{ borderColor: userTeam.color || "#0047AB" }}
+                  >
+                    <img
+                      src={bid.teamLogo}
+                      alt={bid.teamName}
+                      className="w-10 h-10 mr-3 "
+                    />
+                    <div className="flex flex-col flex-grow">
+                      <p className="font-medium text-white text-sm">
+                        {bid.teamName}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {new Date(bid.timestamp).toLocaleTimeString()}
+                      </p>
+                    </div>
+                    <span className="font-semibold text-[#B0E0E6] text-sm whitespace-nowrap">
+                      ₹{(bid.bidAmount / 100000).toFixed(2)} L
+                    </span>
                   </div>
-                  <span className="font-semibold text-[#B0E0E6] text-sm whitespace-nowrap">
-                    {bid.amount}
-                  </span>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>
