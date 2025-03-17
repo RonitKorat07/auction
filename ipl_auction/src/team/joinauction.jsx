@@ -31,7 +31,8 @@ const Teamjoinauction = () => {
   const { currentPlayer, upcomingPlayers } = useSelector(
     (state) => state.joinedPlayers
   );
-  const bidHistory = currentPlayer?.auction_detail?.bidHistory || [];
+  const bidHistory = currentPlayer?.auction_detail?.bid_history || [];
+
   const reversedBidHistory = [...bidHistory].reverse();
 
   // Fetch logged-in user's email
@@ -63,20 +64,20 @@ const Teamjoinauction = () => {
   useEffect(() => {
     if (currentPlayer && currentPlayer.auction_detail?.base_price) {
       const { base_price, current_bid } = currentPlayer.auction_detail;
+      const newBidAmount = current_bid > base_price ? current_bid : base_price;
 
       // Reset isManualBid when a new player is up for auction
+      setIsManualBid(false);
 
       // Only update bidAmount if it hasn't been manually set by the user
       if (!isManualBid) {
-        const newBidAmount =
-          current_bid > base_price ? current_bid : base_price;
         setBidAmount(newBidAmount);
       }
 
       setCurrentBid(current_bid);
       setTimeLeft(30);
     }
-  }, [currentPlayer, isManualBid]);
+  }, [currentPlayer]);
 
   // Timer countdown
   useEffect(() => {
@@ -116,8 +117,6 @@ const Teamjoinauction = () => {
           teamLogo: userTeam.logo,
         })
       );
-
-      setIsManualBid(false);
     } catch (error) {
       console.error("Error updating bid:", error);
 
