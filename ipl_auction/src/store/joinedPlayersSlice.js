@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { doc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../config/firebaseconfig";
 
 const initialState = {
@@ -137,20 +137,41 @@ export const fetchCurrentPlayer = (auctionId) => (dispatch) => {
   return unsubscribe;
 };
 
-export const updateCurrentBid = ({ auctionId, bidAmount }) => async (dispatch, getState) => {
+export const updateCurrentBid = ({ auctionId, bidAmount, teamName, teamLogo }) => async (dispatch, getState) => {
   try {
     dispatch(setLoading(true));
     console.log("Updating Firestore with auctionId:", auctionId, "and bidAmount:", bidAmount);
 
     const currentPlayerRef = doc(db, "currentplayer", auctionId);
+
+    // Get the current bid history
+    const currentPlayerDoc = await getDoc(currentPlayerRef);
+    if (!currentPlayerDoc.exists()) {
+      throw new Error("Current player document does not exist.");
+    }
+
+    const currentBidHistory = currentPlayerDoc.data()?.currentPlayer?.auction_detail?.bidHistory || [];
+
+    // Add the new bid to the bid history
+    const newBidEntry = {
+      teamName,
+      teamLogo,
+      bidAmount,
+      timestamp: new Date().toISOString(),
+    };
+
+    const updatedBidHistory = [...currentBidHistory, newBidEntry];
+
+    // Update Firestore with the new bid and bid history
     await updateDoc(currentPlayerRef, {
       "currentPlayer.auction_detail.current_bid": bidAmount,
+      "currentPlayer.auction_detail.bidHistory": updatedBidHistory,
     });
 
-    console.log("Firestore update successful"); // Log success
+    console.log("Firestore update successful");
     dispatch(setCurrentBid(bidAmount));
   } catch (error) {
-    console.error("Firestore update error:", error); // Log the full error object
+    console.error("Firestore update error:", error);
     throw error; // Re-throw the error to be caught by handleBid
   } finally {
     dispatch(setLoading(false));
