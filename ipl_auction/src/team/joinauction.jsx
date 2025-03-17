@@ -389,7 +389,7 @@ const Teamjoinauction = () => {
                         <div className="ml-4 bg-[#FF4500] text-white px-3 py-1 rounded-full flex items-center">
                           <i className="fas fa-clock mr-2"></i>
                           <span id="timer" className="font-semibold">
-                            {timeLeft}s
+                            {timeLeft}s 
                           </span>
                         </div>
                       </div>
@@ -407,23 +407,25 @@ const Teamjoinauction = () => {
                         step={50000}
                       />
                       <div className="flex flex-wrap gap-2">
-                        {[
-                          { amount: 1000000, label: "₹10L" },
-                          { amount: 2500000, label: "₹25L" },
-                          { amount: 5000000, label: "₹50L" },
-                        ].map((button, index) => (
-                          <button
-                            key={index}
-                            onClick={() => handleBidButtonClick(button.amount)}
-                            className="flex-1 px-4 py-2 text-base font-semibold text-black rounded-lg transition-colors"
-                            style={{
-                              backgroundColor: userTeam.color || "#B0E0E6",
-                            }}
-                          >
-                            <i className="fas fa-plus-circle mr-1"></i>
-                            {button.label}
-                          </button>
-                        ))}
+
+                      {[
+                        { amount: 1000000, label: "₹10L" },
+                        { amount: 2500000, label: "₹25L" },
+                        { amount: 5000000, label: "₹50L" },
+                      ].map((button, index) => (
+                        currentPlayer.auction_detail.base_price <= currentPlayer.auction_detail.current_bid ? (
+                        <button
+                          key={index}
+                          onClick={() => handleBidButtonClick(button.amount)}
+                          className="flex-1 px-4 py-2 text-base font-semibold text-black rounded-lg transition-colors"
+                          style={{
+                            backgroundColor: userTeam.color || "#B0E0E6",
+                          }}
+                        >
+                          <i className="fas fa-plus-circle mr-1"></i>
+                          {button.label}
+                        </button>):null
+                      ))}
                         <button
                           onClick={() => setShowBidModal(true)}
                           className="flex-1 bg-[#0047AB] text-white px-4 py-2 text-base font-semibold hover:bg-[#003A8C] rounded-lg transition-colors flex items-center justify-center"
