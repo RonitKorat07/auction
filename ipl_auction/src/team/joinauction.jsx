@@ -63,20 +63,20 @@ const Teamjoinauction = () => {
   useEffect(() => {
     if (currentPlayer && currentPlayer.auction_detail?.base_price) {
       const { base_price, current_bid } = currentPlayer.auction_detail;
-      const newBidAmount = current_bid > base_price ? current_bid : base_price;
 
       // Reset isManualBid when a new player is up for auction
-      setIsManualBid(false);
 
       // Only update bidAmount if it hasn't been manually set by the user
       if (!isManualBid) {
+        const newBidAmount =
+          current_bid > base_price ? current_bid : base_price;
         setBidAmount(newBidAmount);
       }
 
       setCurrentBid(current_bid);
       setTimeLeft(30);
     }
-  }, [currentPlayer]);
+  }, [currentPlayer, isManualBid]);
 
   // Timer countdown
   useEffect(() => {
@@ -116,6 +116,8 @@ const Teamjoinauction = () => {
           teamLogo: userTeam.logo,
         })
       );
+
+      setIsManualBid(false);
     } catch (error) {
       console.error("Error updating bid:", error);
 
