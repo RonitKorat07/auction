@@ -12,7 +12,6 @@ const Teamjoinauction = () => {
   const [showBidModal, setShowBidModal] = useState(false);
   const [totalSpent, setTotalSpent] = useState(0);
   const [userEmail, setUserEmail] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(30);
   const [isManualBid, setIsManualBid] = useState(false);
   
 
@@ -21,7 +20,7 @@ const Teamjoinauction = () => {
 
   const { teams, loading, error } = useSelector((state) => state.team);
   const { players } = useSelector((state) => state.player);
-  const { currentPlayer, upcomingPlayers } = useSelector((state) => state.joinedPlayers);
+  const { currentPlayer, upcomingPlayers ,timeLeft} = useSelector((state) => state.joinedPlayers);
   const bidHistory = currentPlayer?.auction_detail?.bid_history || [];
   const reversedBidHistory = [...bidHistory].reverse();
 
@@ -51,10 +50,11 @@ const Teamjoinauction = () => {
       dispatch(fetchUpcomingPlayersRealtime(id));
     }
   }, [dispatch, userEmail, id]);
+  const [timeleft, setTimeLeft] = useState(30);
 
   useEffect(() => {
     if (currentPlayer && currentPlayer.auction_detail?.base_price) {
-      const { base_price, current_bid } = currentPlayer.auction_detail;
+      const { base_price, current_bid} = currentPlayer.auction_detail;
       const newBidAmount = current_bid > base_price ? current_bid : base_price;
 
       // Reset isManualBid when a new player is up for auction
@@ -66,19 +66,19 @@ const Teamjoinauction = () => {
       }
 
       setCurrentBid(current_bid);
-      setTimeLeft(30);
+      setTimeLeft(timeLeft);
     }
   }, [currentPlayer]);
 
   // Timer countdown
   useEffect(() => {
-    if (timeLeft > 0) {
+    if (timeleft > 0) {
       const timer = setInterval(() => {
         setTimeLeft((prev) => prev - 1);
       }, 1000);
       return () => clearInterval(timer);
     }
-  }, [timeLeft]);
+  }, [timeleft]);
 
   // Find the user's team
   const userTeam = teams?.find((team) => team.email === userEmail);
@@ -91,24 +91,26 @@ const Teamjoinauction = () => {
       alert("Bid amount must be higher than the current bid.");
       return;
     }
-
+  
     try {
       // Update local state immediately
       setCurrentBid(bidAmount);
       setTotalSpent((prevSpent) => prevSpent + bidAmount);
       setShowBidModal(false);
-      setTimeLeft(30); // Reset timer
-
+      setTimeLeft(30); // Reset timer locally
+  
       // Update Firestore
-      await dispatch(updateCurrentBid({
-        auctionId: id,
-        bidAmount,
-        teamName: userTeam.name,
-        teamLogo: userTeam.logo,
-      }));
+      await dispatch(
+        updateCurrentBid({
+          auctionId: id,
+          bidAmount,
+          teamName: userTeam.name,
+          teamLogo: userTeam.logo,
+        })
+      );
     } catch (error) {
       console.error("Error updating bid:", error);
-
+  
       // Provide specific error messages
       if (error.message.includes("Firestore update error")) {
         alert("Failed to update Firestore. Please check your connection.");
@@ -117,7 +119,7 @@ const Teamjoinauction = () => {
       } else {
         alert("Failed to place bid. Please try again.");
       }
-
+  
       // Revert local state if Firestore update fails
       setCurrentBid((prev) => prev - bidAmount);
       setTotalSpent((prevSpent) => prevSpent - bidAmount);
@@ -389,7 +391,7 @@ const Teamjoinauction = () => {
                         <div className="ml-4 bg-[#FF4500] text-white px-3 py-1 rounded-full flex items-center">
                           <i className="fas fa-clock mr-2"></i>
                           <span id="timer" className="font-semibold">
-                            {timeLeft}s 
+                            {timeleft}s 
                           </span>
                         </div>
                       </div>
