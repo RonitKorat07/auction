@@ -9,7 +9,6 @@ const initialState = {
   error: null,
   auctionStatus: "not-started",
   currentPlayerIndex: 0,
-  timeLeft: 30,
   auctionId: null,
   upcomingPlayers: [],
 };
@@ -36,9 +35,6 @@ const joinedPlayersSlice = createSlice({
     setCurrentPlayerIndex: (state, action) => {
       state.currentPlayerIndex = action.payload;
     },
-    setTimeLeft: (state, action) => {
-      state.timeLeft = action.payload;
-    },
     setCurrentBid: (state, action) => {
       state.currentBid = action.payload;
     },
@@ -48,15 +44,11 @@ const joinedPlayersSlice = createSlice({
     setUpcomingPlayers: (state, action) => {
       state.upcomingPlayers = action.payload;
     },
-    decrementTimeLeft: (state) => {
-      if (state.timeLeft > 0) state.timeLeft -= 1;
-    },
     resetAuctionState: (state) => {
       state.joinedPlayers = [];
       state.currentPlayer = null;
       state.auctionStatus = "not-started";
       state.currentPlayerIndex = 0;
-      state.timeLeft = 30;
       state.currentBid = 165000000;
       state.auctionId = null;
       state.upcomingPlayers = [];
@@ -71,11 +63,9 @@ export const {
   setError,
   setAuctionStatus,
   setCurrentPlayerIndex,
-  setTimeLeft,
   setCurrentBid,
   setAuctionId,
   setUpcomingPlayers,
-  decrementTimeLeft,
   resetAuctionState,
 } = joinedPlayersSlice.actions;
 
@@ -122,7 +112,6 @@ export const fetchCurrentPlayer = (auctionId) => (dispatch) => {
         const data = docSnap.data();
         dispatch(setCurrentPlayer(data.currentPlayer || null));
         dispatch(setCurrentBid(data?.currentPlayer?.auction_detail?.current_bid || data?.currentPlayer?.auction_detail?.base_price));
-        dispatch(setTimeLeft(data.timeLeft || 30));
         dispatch(setAuctionStatus(data.auctionStatus || "not-started"));
       }
       dispatch(setLoading(false));
@@ -158,11 +147,11 @@ export const updateCurrentBid = ({ auctionId, bidAmount, teamName, teamLogo }) =
     await updateDoc(currentPlayerRef, {
       "currentPlayer.auction_detail.current_bid": bidAmount,
       "currentPlayer.auction_detail.bid_history": [...currentBidHistory, newBidEntry],
-      timeLeft: 30, // Reset timer
+      timeLeft: 30, // Reset timer for the next player
+      lastUpdated: Date.now()
     });
 
     dispatch(setCurrentBid(bidAmount));
-    dispatch(setTimeLeft(30));
   } catch (error) {
     console.error("Firestore update error:", error);
     dispatch(setError("Failed to update bid. Please try again."));
@@ -195,7 +184,6 @@ export const startAuction = (auctionId, initialPlayer, players = []) => async (d
       currentPlayerRef,
       {
         currentPlayer: initialPlayer,
-        timeLeft: 30,
         auctionStatus: "running",
         upcomingPlayers,
       },
@@ -237,8 +225,6 @@ export const resumeAuction = (auctionId) => async (dispatch, getState) => {
       dispatch(setUpcomingPlayers(newUpcomingPlayers));
       await updateDoc(currentPlayerRef, { upcomingPlayers: newUpcomingPlayers });
     }
-
-    dispatch(startTimer(auctionId));
   } catch (error) {
     handleFirestoreError(error, dispatch);
   } finally {
@@ -273,36 +259,15 @@ export const nextPlayer = (auctionId) => async (dispatch, getState) => {
     await updateDoc(currentPlayerRef, {
       currentPlayer: nextPlayerData,
       "currentPlayer.auction_details.current_bid": nextPlayerData.auction_detail.base_price,
-      timeLeft: 30,
       upcomingPlayers: newUpcomingPlayers,
+      timeLeft: 30, // Reset timer for the next player
     });
 
     dispatch(setCurrentPlayer(nextPlayerData));
     dispatch(setUpcomingPlayers(newUpcomingPlayers));
-    dispatch(setTimeLeft(30));
   } else {
     dispatch(endAuction(auctionId));
   }
-};
-
-export const startTimer = (auctionId) => (dispatch, getState) => {
-  const timer = setInterval(async () => {
-    const { auctionStatus, timeLeft } = getState().joinedPlayers;
-
-    if (auctionStatus !== "running") {
-      clearInterval(timer);
-      return;
-    }
-
-    if (timeLeft > 0) {
-      dispatch(decrementTimeLeft());
-      const currentPlayerRef = doc(db, "currentplayer", auctionId);
-      await updateDoc(currentPlayerRef, { timeLeft: timeLeft - 1 });
-    } else {
-      clearInterval(timer);
-      dispatch(nextPlayer(auctionId));
-    }
-  }, 1000);
 };
 
 export default joinedPlayersSlice.reducer;
