@@ -24,7 +24,8 @@ const Squad = () => {
       matches: 142,
       average: 45.8,
       speciality: "Left-handed Middle Order",
-      imageUrl: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
+      imageUrl:
+        "https://scores.iplt20.com/ipl/playerimages/Ruturaj%20Gaikwad.png?v=1",
       nationality: "Australia",
       achievements: "4800+ runs, Average: 45.8",
     },
@@ -34,7 +35,8 @@ const Squad = () => {
       matches: 198,
       average: 49.2,
       speciality: "Right-handed Opening Batsman",
-      imageUrl: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
+      imageUrl:
+        "https://scores.iplt20.com/ipl/playerimages/Shivam%20Dube.png?v=1",
       nationality: "India",
       achievements: "6500+ runs, Average: 49.2",
     },
@@ -44,7 +46,8 @@ const Squad = () => {
       matches: 165,
       average: 52.3,
       speciality: "Right-handed Top Order",
-      imageUrl: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
+      imageUrl:
+        "https://scores.iplt20.com/ipl/playerimages/Ajinkya%20Rahane.png?v=1",
       nationality: "New Zealand",
       achievements: "7000+ runs, Average: 52.3",
     },
