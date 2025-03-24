@@ -2,12 +2,14 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTeamemail } from "../store/teamslice";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+
 import {
   fetchCurrentPlayer,
   fetchJoinedPlayers,
   fetchUpcomingPlayersRealtime,
   updateCurrentBid,
 } from "../store/joinedPlayersSlice";
+
 import { useParams } from "react-router-dom";
 import { fetchPlayers } from "../store/playerslice";
 import Timer from "../components/Timer";
@@ -97,6 +99,7 @@ const Teamjoinauction = () => {
   const totalBudget = useMemo(() => userTeam?.budget || 0, [userTeam]);
   const remainingBudget = useMemo(() => totalBudget - totalSpent, [totalBudget, totalSpent]);
 
+
   // Fetch logged-in user's email
   useEffect(() => {
     const auth = getAuth();
@@ -161,6 +164,7 @@ const Teamjoinauction = () => {
       console.error("Error updating bid:", error);
       alert("Failed to place bid. Please try again.");
       setTotalSpent((prev) => prev - bidAmount);
+
     }
   }, [bidAmount, currentBid, dispatch, id, userTeam]);
 
@@ -180,7 +184,7 @@ const Teamjoinauction = () => {
       <div className="min-h-screen flex items-center justify-center bg-[#202626]">
         <div
           className="animate-spin rounded-full h-16 w-16 border-t-4 border"
-          style={{ borderColor: userTeam?.color || "#0047AB" }}
+          style={{ borderColor: userTeam?.color || "#0047AB" }} // Optional chaining with fallback // Use team.color if available, otherwise use default
         ></div>
       </div>
     );
@@ -409,6 +413,7 @@ const Teamjoinauction = () => {
                         <span className="text-3xl font-bold text-[#B0E0E6]">₹{(currentPlayer.auction_detail.current_bid / 100000).toFixed(2)} L</span>
                         <Timer auctionId={id} />
                       </div>
+
                     </div>
                     <div className="space-y-4 pb-5">
                       <input
@@ -430,6 +435,7 @@ const Teamjoinauction = () => {
                             <button
                               key={index}
                               onClick={() => handleBidButtonClick(button.amount)}
+
                               className="flex-1 px-4 py-2 text-base font-semibold text-black rounded-lg transition-colors"
                               style={{
                                 backgroundColor: userTeam.color || "#B0E0E6",
@@ -440,6 +446,7 @@ const Teamjoinauction = () => {
                             </button>
                           ) : null
                         ))}
+
                         <button
                           onClick={() => setShowBidModal(true)}
                           className="flex-1 bg-[#0047AB] text-white px-4 py-2 text-base font-semibold hover:bg-[#003A8C] rounded-lg transition-colors flex items-center justify-center"
@@ -460,7 +467,9 @@ const Teamjoinauction = () => {
             className="col-span-12 lg:col-span-3 bg-[#2C2F32] rounded-lg shadow-lg border p-3"
             style={{ borderColor: userTeam.color || "#0047AB" }}
           >
-            <h2 className="text-xl font-semibold mb-4 text-white">Bid History</h2>
+            <h2 className="text-xl font-semibold mb-4 text-white">
+              Bid History
+            </h2>
             <div
               className="max-h-140 overflow-y-auto scrollbar-hide space-y-4"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
@@ -480,7 +489,9 @@ const Teamjoinauction = () => {
                       className="w-10 h-10 mr-3 "
                     />
                     <div className="flex flex-col flex-grow">
-                      <p className="font-medium text-white text-sm">{bid.teamName}</p>
+                      <p className="font-medium text-white text-sm">
+                        {bid.teamName}
+                      </p>
                       <p className="text-xs text-gray-400">
                         {new Date(bid.timestamp).toLocaleTimeString()}
                       </p>
@@ -520,7 +531,9 @@ const Teamjoinauction = () => {
                     <h3 className="text-xl font-bold">{player.name}</h3>
                     <div className="flex items-center gap-2 mt-2">
                       <div className="px-3 py-1 bg-green-500/10 text-green-400 rounded-full text-sm font-semibold">
-                        ₹{(player.auction_detail.base_price / 100000).toFixed(2)} L
+                        ₹
+                        {(player.auction_detail.base_price / 100000).toFixed(2)}{" "}
+                        L
                       </div>
                     </div>
                   </div>
@@ -705,3 +718,4 @@ const Teamjoinauction = () => {
 };
 
 export default Teamjoinauction;
+

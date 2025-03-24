@@ -177,7 +177,7 @@ const Auction = () => {
                     ].map((stat, index) => (
                       <div
                         key={index}
-                        className="bg-[#2C2F32] rounded-lg p-3 text-center"
+                        className="bg-[#2C2F32] rounded-lg p-3 text-center border border-[#0047AB]"
                       >
                         <p className="text-sm sm:text-base text-gray-400">
                           {stat.label}
@@ -327,7 +327,7 @@ const Auction = () => {
 
         {/* Teams Status */}
         <div className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-4 sm:p-6 border border-[#0047AB]">
-          <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
+          <h3 className="text-2xl font-bold mb-6 flex items-center gap-3 text-white">
             <FaShieldAlt className="text-[#0047AB]" />
             Teams Status
           </h3>

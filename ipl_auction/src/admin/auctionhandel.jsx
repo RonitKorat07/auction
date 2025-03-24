@@ -20,6 +20,7 @@ import {
 import { fetchPlayers } from "../store/playerslice";
 import { fetchAuctions } from "../store/auctionslice";
 import Timer from "../components/Timer"; // Import the Timer component
+import { fetchTeam } from "../store/teamslice";
 
 const Auctionhandel = () => {
   const { id } = useParams();
@@ -43,13 +44,33 @@ const Auctionhandel = () => {
   } = useSelector((state) => state.joinedPlayers);
 
   const [showBidModal, setShowBidModal] = useState(false);
-  const [selectedTeam, setSelectedTeam] = useState(null);
+  // const [selectedTeam, setSelectedTeam] = useState(null);
 
+  const {
+    teams,
+    loading: teamsLoading,
+    error: teamsError,
+  } = useSelector((state) => state.team);
+  const [joinedteams, setJoinedteams] = useState([]);
+  const selectedauction = auctions.find(
+    (auction) => auction.id.toString() === id
+  );
   useEffect(() => {
     dispatch(fetchPlayers());
     dispatch(fetchAuctions());
+    dispatch(fetchTeam());
   }, [dispatch, id]);
 
+  useEffect(() => {
+    if (selectedauction && teams.length > 0) {
+      // Recompute joinedteams whenever selectedauction or teams changes
+      const allteams = selectedauction.teams || [];
+      const updatedJoinedteams = allteams.map((teamname) =>
+        teams.find((team) => team.name === teamname)
+      );
+      setJoinedteams(updatedJoinedteams);
+    }
+  }, [selectedauction, teams]);
   useEffect(() => {
     if (id && players.length > 0) {
       dispatch(fetchJoinedPlayers(id, players));
@@ -89,33 +110,6 @@ const Auctionhandel = () => {
     );
   }
 
-  const teams = [
-    {
-      name: "Mumbai Indians",
-      budget: "₹45.5 Cr",
-      playersBought: 15,
-      slotsLeft: 10,
-    },
-    {
-      name: "Chennai Kings",
-      budget: "₹38.8 Cr",
-      playersBought: 18,
-      slotsLeft: 7,
-    },
-    {
-      name: "Delhi Capitals",
-      budget: "₹52.2 Cr",
-      playersBought: 12,
-      slotsLeft: 13,
-    },
-    {
-      name: "Royal Challengers",
-      budget: "₹29.9 Cr",
-      playersBought: 20,
-      slotsLeft: 5,
-    },
-  ];
-
   const recentPurchases = [
     {
       name: "Shahrukh Khan",
@@ -142,11 +136,11 @@ const Auctionhandel = () => {
       <main className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-25">
         {/* Auction Controls */}
         <div className="mb-8 bg-[#2C2F32] rounded-lg shadow-lg p-6 border border-[#0047AB]">
-          <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
+          <h3 className="text-2xl font-bold mb-6 flex items-center gap-3 text-white">
             <FaGavel className="text-[#0047AB]" />
             Auction Controls
           </h3>
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-4 item-centure">
             <button
               onClick={handleStartAuction}
               className={`bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300 ${
@@ -154,7 +148,11 @@ const Auctionhandel = () => {
                   ? "opacity-50 cursor-not-allowed"
                   : ""
               }`}
-              disabled={auctionStatus === "running" || !joinedPlayers.length}
+              disabled={
+                auctionStatus === "running" ||
+                !joinedPlayers.length ||
+                auctionStatus === "paused"
+              }
             >
               Start Auction
             </button>
@@ -227,7 +225,7 @@ const Auctionhandel = () => {
                   </div>
                 </div>
                 <div className="p-4 sm:p-6 space-y-6">
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4  ">
                     {[
                       {
                         label: "Matches",
@@ -274,7 +272,7 @@ const Auctionhandel = () => {
                     ].map((stat, index) => (
                       <div
                         key={index}
-                        className="bg-[#2C2F32] rounded-lg p-3 text-center"
+                        className="bg-[#2C2F32] rounded-lg p-3 text-center border border-[#0047AB]"
                       >
                         <p className="text-sm sm:text-base text-gray-400">
                           {stat.label}
@@ -407,23 +405,20 @@ const Auctionhandel = () => {
 
         {/* Teams Status */}
         <div className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-4 sm:p-6 border border-[#0047AB]">
-          <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
+          <h3 className="text-2xl font-bold mb-6 flex items-center gap-3 text-white">
             <FaShieldAlt className="text-[#0047AB]" />
             Teams Status
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-            {teams.map((team, index) => (
+            {joinedteams.map((team, index) => (
               <div
                 key={index}
-                className={`flex flex-col items-center bg-[#2C2F32] rounded-lg p-4 border border-[#0047AB] cursor-pointer hover:bg-[#0047AB]/10 transition-all ${
-                  selectedTeam === team.name ? "ring-2 ring-[#0047AB]" : ""
-                }`}
-                onClick={() => setSelectedTeam(team.name)}
+                className={`flex flex-col items-center bg-[#2C2F32] rounded-lg p-4 border border-[#0047AB] cursor-pointer hover:bg-[#0047AB]/10 transition-all "ring-2 ring-[#0047AB]" : ""}`}
               >
                 <img
-                  src={`https://readdy.ai/api/search-image?query=modern minimalist cricket team logo design with ${team.name} theme, professional sports branding on dark background, centered composition&width=200&height=200&orientation=squarish`}
+                  src={team?.logo}
                   alt={team.name}
-                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-2 border-[#0047AB] mb-4"
+                  className="w-20 h-20 sm:w-24 sm:h-24 mb-4"
                 />
                 <h4 className="font-bold text-base sm:text-lg text-white text-center mb-4">
                   {team.name}
@@ -438,7 +433,7 @@ const Auctionhandel = () => {
                     },
                     {
                       label: "Players",
-                      value: team.playersBought,
+                      value: "0",
                       icon: <FaUsers className="text-[#0047AB]" />,
                     },
                     {
