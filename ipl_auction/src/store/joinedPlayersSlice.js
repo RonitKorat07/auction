@@ -150,7 +150,7 @@ export const updateCurrentBid = ({ auctionId, bidAmount, teamName, teamLogo }) =
       throw new Error("Current player document does not exist.");
     }
 
-    const currentBidHistory = currentPlayerDoc.data()?.currentPlayer?.auction_detail?.bidHistory || [];
+    const currentBidHistory = currentPlayerDoc.data()?.currentPlayer?.auction_detail?.bid_history || [];
 
     // Add the new bid to the bid history
     const newBidEntry = {
@@ -268,15 +268,32 @@ export const resumeAuction = (auctionId) => async (dispatch, getState) => {
 export const endAuction = (auctionId) => async (dispatch) => {
   try {
     dispatch(setLoading(true));
+
+    // Update the currentplayer document to mark the auction as ended
     const currentPlayerRef = doc(db, "currentplayer", auctionId);
-    await updateDoc(currentPlayerRef, { auctionStatus: "ended" });
+    await updateDoc(currentPlayerRef, {
+      auctionStatus: "ended",
+      timeLeft: 0, // Reset timer
+      currentPlayer: null, // Clear current player
+      upcomingPlayers: [], // Clear upcoming players
+    });
+
+    // Update the auctions document to mark the auction as completed
+    const auctionRef = doc(db, "auctions", auctionId);
+    await updateDoc(auctionRef, {
+      status: "completed",
+      isLive: false,
+    });
+
+    // Reset the Redux state for the auction
+    dispatch(resetAuctionState());
+
   } catch (error) {
     handleFirestoreError(error, dispatch);
   } finally {
     dispatch(setLoading(false));
   }
 };
-
 export const nextPlayer = (auctionId) => async (dispatch, getState) => {
   const { joinedPlayers, currentPlayerIndex } = getState().joinedPlayers;
   
@@ -292,7 +309,7 @@ export const nextPlayer = (auctionId) => async (dispatch, getState) => {
     const currentPlayerRef = doc(db, "currentplayer", auctionId);
     await updateDoc(currentPlayerRef, {
       currentPlayer: nextPlayerData,
-      "currentPlayer.auction_detail.current_bid": nextPlayerData.auction_detail.base_price,
+      "currentPlayer.auction_details.current_bid": nextPlayerData.auction_detail.base_price,
       timeLeft: 30,
       upcomingPlayers: newUpcomingPlayers, // Update upcoming players in Firestore
     });
@@ -300,9 +317,10 @@ export const nextPlayer = (auctionId) => async (dispatch, getState) => {
     dispatch(setCurrentPlayer(nextPlayerData));
     dispatch(setUpcomingPlayers(newUpcomingPlayers));
 
-  } else {
-    dispatch(endAuction(auctionId));
   }
+  //  else {
+  //   dispatch(endAuction(auctionId));
+  // }
 };
 
 export const startTimer = (auctionId) => (dispatch, getState) => {

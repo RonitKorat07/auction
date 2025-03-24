@@ -88,6 +88,7 @@ const players = [
     team: "Royal Challengers",
   },
 ];
+
 const TeamCard = ({ team }) => (
   <div className="bg-[#202626] rounded-xl shadow-lg overflow-hidden transform transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-[#0047AB]/20 border border-[#0047AB] p-4">
     <div className="flex flex-col items-center mb-4">
@@ -136,132 +137,129 @@ const Filters = ({
   setSelectedTeam,
 }) => (
   <div className="bg-[#202626] backdrop-blur-sm rounded-lg p-6 mb-8 border border-[#0047AB]">
-    <div className="flex flex-wrap gap-4 items-center">
-      <div className="flex-1">
-        <div className="relative">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="flex">
+        <div className="relative flex-1">
           <input
             type="text"
             placeholder="Search players..."
-            className="w-full pl-10 pr-4 py-2 border border-[#E8EAF6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0047AB] bg-[#202626] text-[#E8EAF6] placeholder-[#B0E0E6]"
+            className="w-full pl-4 pr-4 py-2 border border-[#E8EAF6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0047AB] bg-[#202626] text-[#E8EAF6] placeholder-[#B0E0E6]"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-[#B0E0E6]"></i>
         </div>
       </div>
-      <div className="flex items-center space-x-4">
-        <select
-          className="border border-[#E8EAF6] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#0047AB] bg-[#202626] text-[#E8EAF6] hover:cursor-pointer"
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-        >
-          <option value="name">Sort by Name</option>
-          <option value="basePrice">Sort by Base Price</option>
-          <option value="finalBid">Sort by Final Bid</option>
-        </select>
-        <select
-          className="border border-[#E8EAF6] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#0047AB] bg-[#202626] text-[#E8EAF6] hover:cursor-pointer"
-          value={selectedRole}
-          onChange={(e) => setSelectedRole(e.target.value)}
-        >
-          <option value="All">All Roles</option>
-          <option value="Batsman">Batsman</option>
-          <option value="Bowler">Bowler</option>
-          <option value="All-rounder">All-rounder</option>
-          <option value="Wicket-keeper">Wicket-keeper</option>
-        </select>
-        <select
-          className="border border-[#E8EAF6] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#0047AB] bg-[#202626] text-[#E8EAF6] hover:cursor-pointer"
-          value={selectedTeam || ""}
-          onChange={(e) =>
-            setSelectedTeam(e.target.value ? Number(e.target.value) : null)
-          }
-        >
-          <option value="">All Teams</option>
-          {teams.map((team) => (
-            <option key={team.id} value={team.id}>
-              {team.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      <select
+        className="border border-[#E8EAF6] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#0047AB] bg-[#202626] text-[#E8EAF6] hover:cursor-pointer"
+        value={sortBy}
+        onChange={(e) => setSortBy(e.target.value)}
+      >
+        <option value="name">Sort by Name</option>
+        <option value="basePrice">Sort by Base Price</option>
+        <option value="finalBid">Sort by Final Bid</option>
+      </select>
+      <select
+        className="border border-[#E8EAF6] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#0047AB] bg-[#202626] text-[#E8EAF6] hover:cursor-pointer"
+        value={selectedRole}
+        onChange={(e) => setSelectedRole(e.target.value)}
+      >
+        <option value="All">All Roles</option>
+        <option value="Batsman">Batsman</option>
+        <option value="Bowler">Bowler</option>
+        <option value="All-rounder">All-rounder</option>
+        <option value="Wicket-keeper">Wicket-keeper</option>
+      </select>
+      <select
+        className="border border-[#E8EAF6] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#0047AB] bg-[#202626] text-[#E8EAF6] hover:cursor-pointer"
+        value={selectedTeam || ""}
+        onChange={(e) =>
+          setSelectedTeam(e.target.value ? Number(e.target.value) : null)
+        }
+      >
+        <option value="">All Teams</option>
+        {teams.map((team) => (
+          <option key={team.id} value={team.id}>
+            {team.name}
+          </option>
+        ))}
+      </select>
     </div>
   </div>
 );
 
 const PlayerTable = ({ filteredPlayers, setSelectedPlayer }) => (
-  <div className="bg-[#202626] backdrop-blur-sm rounded-lg shadow-md overflow-hidden border border-[#0047AB]">
-    <table className="w-full">
-      <thead className="bg-[#202626]">
-        <tr>
-          <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase tracking-wider">
-            Player
-          </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase tracking-wider">
-            Role
-          </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase tracking-wider">
-            Team
-          </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase tracking-wider">
-            Base Price
-          </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase tracking-wider">
-            Final Bid
-          </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase tracking-wider">
-            Actions
-          </th>
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-[#0047AB]">
-        {filteredPlayers.map((player) => (
-          <tr
-            key={player.id}
-            // className="hover:bg-[#0047AB] transition-all duration-300"
-          >
-            <td className="px-6 py-4 whitespace-nowrap">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 h-10 w-10">
-                  <img
-                    className="h-10 w-10 rounded-full object-cover"
-                    src={player.imageUrl}
-                    alt={player.name}
-                  />
-                </div>
-                <div className="ml-4">
-                  <div className="text-sm font-medium text-[#E8EAF6]">
-                    {player.name}
+  <div className="bg-[#202626] backdrop-blur-sm rounded-lg shadow-md overflow-hidden border border-[#0047AB] max-h-[400px] overflow-y-auto">
+    <div className="overflow-x-auto">
+      <table className="min-w-full">
+        <thead className="bg-[#202626]">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase tracking-wider">
+              Player
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase tracking-wider">
+              Role
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase tracking-wider">
+              Team
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase tracking-wider">
+              Base Price
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase tracking-wider">
+              Final Bid
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-[#0047AB]">
+          {filteredPlayers.map((player) => (
+            <tr key={player.id}>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0 h-10 w-10">
+                    <img
+                      className="h-10 w-10 rounded-full object-cover"
+                      src={player.imageUrl}
+                      alt={player.name}
+                    />
+                  </div>
+                  <div className="ml-4">
+                    <div className="text-sm font-medium text-[#E8EAF6]">
+                      {player.name}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-[#0047AB]/10 text-[#0047AB]">
-                {player.role}
-              </span>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-[#E8EAF6]">
-              {player.team}
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-[#E8EAF6]">
-              ${player.basePrice.toLocaleString()}
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-emerald-400">
-              ${player.finalBid.toLocaleString()}
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-[#B0E0E6]">
-              <button
-                onClick={() => setSelectedPlayer(player)}
-                className="text-[#0047AB] hover:text-[#FF4500] transition-colors duration-300 !rounded-button whitespace-nowrap hover:cursor-pointer"
-              >
-                View Bid History
-              </button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-[#0047AB]/10 text-[#0047AB]">
+                  {player.role}
+                </span>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-[#E8EAF6]">
+                {player.team}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-[#E8EAF6]">
+                ${player.basePrice.toLocaleString()}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-emerald-400">
+                ${player.finalBid.toLocaleString()}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-[#B0E0E6]">
+                <button
+                  onClick={() => setSelectedPlayer(player)}
+                  className="text-[#0047AB] hover:text-[#FF4500] transition-colors duration-300 !rounded-button whitespace-nowrap hover:cursor-pointer"
+                >
+                  View Bid History
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   </div>
 );
 
