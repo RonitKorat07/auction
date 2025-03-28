@@ -16,10 +16,10 @@ import {
   resumeAuction,
   endAuction,
   nextPlayer,
-  startTimer,
 } from "../store/joinedPlayersSlice";
 import { fetchPlayers } from "../store/playerslice";
 import { fetchAuctions } from "../store/auctionslice";
+import Timer from "../components/Timer"; // Import the Timer component
 import { fetchTeam } from "../store/teamslice";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
@@ -41,7 +41,6 @@ const Auctionhandel = () => {
     error: joinedPlayersError,
     currentPlayer,
     currentBid,
-    timeLeft,
     auctionStatus,
   } = useSelector((state) => state.joinedPlayers);
 
@@ -96,12 +95,6 @@ const Auctionhandel = () => {
       dispatch(fetchCurrentPlayer(id));
     }
   }, [dispatch, id, players]);
-
-  useEffect(() => {
-    if (auctionStatus === "running" && id) {
-      dispatch(startTimer(id));
-    }
-  }, [auctionStatus, dispatch, id]);
 
   const handleStartAuction = () => {
     if (joinedPlayers.length > 0) {
@@ -309,9 +302,8 @@ const Auctionhandel = () => {
                       <span className="text-lg sm:text-xl text-white">
                         Current Bid
                       </span>
-                      <div className="bg-[#FF4500] text-white px-4 py-2 rounded-full flex items-center">
-                        <span className="font-semibold">{timeLeft}s</span>
-                      </div>
+                      {/* Timer Component */}
+                      <Timer auctionId={id} />
                     </div>
                     <span className="text-2xl sm:text-3xl font-bold text-[#0047AB]">
                       ₹{(currentBid / 100000).toFixed(2)} L
