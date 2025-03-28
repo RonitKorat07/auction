@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 import { fetchAuctions } from "../store/auctionslice";
 import { fetchTeam } from "../store/teamslice";
 import { fetchCurrentPlayer } from "../store/joinedPlayersSlice";
-
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 const Auction = () => {
   const [currentBid, setCurrentBid] = useState(165000000);
   const [showBidModal, setShowBidModal] = useState(false);
@@ -26,6 +26,21 @@ const Auction = () => {
   } = useSelector((state) => state.team);
 
   const { currentPlayer } = useSelector((state) => state.joinedPlayers);
+  const [userEmail, setUserEmail] = useState(null);
+  const bidHistory = currentPlayer?.auction_detail?.bid_history || [];
+  const reversedBidHistory = [...bidHistory].reverse();
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserEmail(user.email);
+      } else {
+        setUserEmail(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+  const userTeam = teams?.find((team) => team.email === userEmail);
 
   // Find the selected auction based on the ID
   const selectedauction = auctions.find(
@@ -204,76 +219,44 @@ const Auction = () => {
           </div>
 
           {/* Right Column - Bid History */}
-          <div className="lg:col-span-4 w-full h-full">
-            <div className="bg-[#2C2F32] rounded-lg shadow-lg border border-[#0047AB] p-4 sm:p-6 h-full">
-              <h2 className="text-xl font-semibold mb-4 text-white">
-                Bid History
-              </h2>
-              <div
-                className="max-h-130 overflow-y-auto scrollbar-hide space-y-4"
-                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-              >
-                {[
-                  {
-                    teamLogo:
-                      "https://upload.wikimedia.org/wikipedia/en/4/4c/Chennai_Super_Kings_logo.png",
-                    bidder: "Chennai Super Kings",
-                    amount: "₹16.5 Crore",
-                    time: "2 mins ago",
-                  },
-                  {
-                    teamLogo:
-                      "https://upload.wikimedia.org/wikipedia/en/6/6f/Royal_Challengers_Bangalore_logo.png",
-                    bidder: "Royal Challengers Bangalore",
-                    amount: "₹16.25 Crore",
-                    time: "5 mins ago",
-                  },
-                  {
-                    teamLogo:
-                      "https://upload.wikimedia.org/wikipedia/en/8/8e/Kolkata_Knight_Riders_logo.png",
-                    bidder: "Kolkata Knight Riders",
-                    amount: "₹16 Crore",
-                    time: "8 mins ago",
-                  },
-                  {
-                    teamLogo:
-                      "https://upload.wikimedia.org/wikipedia/en/3/3e/Delhi_Capitals_logo.png",
-                    bidder: "Delhi Capitals",
-                    amount: "₹15.75 Crore",
-                    time: "12 mins ago",
-                  },
-                  {
-                    teamLogo:
-                      "https://upload.wikimedia.org/wikipedia/en/3/3e/Rajasthan_Royals_logo.png",
-                    bidder: "Rajasthan Royals",
-                    amount: "₹15.5 Crore",
-                    time: "15 mins ago",
-                  },
-                ].map((bid, index) => (
+          <div className="col-span-12 lg:col-span-4 bg-[#2C2F32] rounded-lg shadow-lg border border-[#0047AB] p-5">
+            <h2 className="text-xl font-semibold mb-4 text-white">
+              Bid History
+            </h2>
+            <div
+              className="max-h-140 overflow-y-auto scrollbar-hide space-y-3"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
+              {reversedBidHistory.length === 0 ? (
+                <p className="text-gray-400 text-center">No bids placed yet.</p>
+              ) : (
+                reversedBidHistory.map((bid, index) => (
                   <div
                     key={index}
-                    className="flex items-center p-3 bg-[#202626] rounded-lg border border-blue-700 shadow-lg"
+                    className="flex items-center p-4 bg-[#202626] rounded-lg border border-[#0047AB] shadow-lg"
                   >
                     <img
                       src={bid.teamLogo}
-                      alt={bid.bidder}
-                      className="w-10 h-10 mr-3 rounded-full"
+                      alt={bid.teamName}
+                      className="w-10 h-10 mr-3 "
                     />
                     <div className="flex flex-col flex-grow">
                       <p className="font-medium text-white text-sm">
-                        {bid.bidder}
+                        {bid.teamName}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {new Date(bid.timestamp).toLocaleTimeString()}
                       </p>
                     </div>
                     <span className="font-semibold text-[#B0E0E6] text-sm whitespace-nowrap">
-                      {bid.amount}
+                      ₹{(bid.bidAmount / 100000).toFixed(2)} L
                     </span>
                   </div>
-                ))}
-              </div>
+                ))
+              )}
             </div>
           </div>
         </div>
-
         {/* Recent Purchases Section */}
         <div className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-4 sm:p-6 border border-[#0047AB]">
           <h2 className="text-2xl font-semibold mb-6 text-white">
