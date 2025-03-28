@@ -135,7 +135,7 @@ const Adminauction = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#202626] text-[#E8EAF6] pt-20">
+    <div className="min-h-screen bg-[#202626] text-[#E8EAF6] pt-20 md:pt-25">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold">Auctions</h1>
@@ -251,7 +251,7 @@ const Adminauction = () => {
 
         {/* Create Auction Modal */}
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="fixed inset-0 bg-[rgb(0,0,0,0.5)] bg-opacity-50 flex items-center justify-center p-4 z-2">
             <div className="bg-[#2D3748] rounded-lg p-6 w-full max-w-md">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">Create New Auction</h2>
@@ -344,7 +344,7 @@ const Adminauction = () => {
 
         {/* Player Selection Modal */}
         {showPlayerModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="fixed inset-0 bg-[rgb(0,0,0,0.5)] bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-[#2D3748] rounded-lg p-6 w-full max-w-2xl max-h-[90vh] flex flex-col">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">Select Players</h2>

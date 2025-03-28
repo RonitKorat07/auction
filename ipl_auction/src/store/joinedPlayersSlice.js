@@ -236,8 +236,26 @@ export const resumeAuction = (auctionId) => async (dispatch, getState) => {
 export const endAuction = (auctionId) => async (dispatch) => {
   try {
     dispatch(setLoading(true));
+
+    // Update the currentplayer document to mark the auction as ended
     const currentPlayerRef = doc(db, "currentplayer", auctionId);
-    await updateDoc(currentPlayerRef, { auctionStatus: "ended" });
+    await updateDoc(currentPlayerRef, {
+      auctionStatus: "ended",
+      timeLeft: 0, // Reset timer
+      currentPlayer: null, // Clear current player
+      upcomingPlayers: [], // Clear upcoming players
+    });
+
+    // Update the auctions document to mark the auction as completed
+    const auctionRef = doc(db, "auctions", auctionId);
+    await updateDoc(auctionRef, {
+      status: "completed",
+      isLive: false,
+    });
+
+    // Reset the Redux state for the auction
+    dispatch(resetAuctionState());
+
   } catch (error) {
     handleFirestoreError(error, dispatch);
   } finally {
