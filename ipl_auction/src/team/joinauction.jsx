@@ -127,21 +127,24 @@ const Teamjoinauction = () => {
   }, [dispatch, userEmail, id]);
 
   // Update bid amount when currentPlayer changes
-  
   useEffect(() => {
-    if (currentPlayer?.auction_detail) {
+    if (currentPlayer && currentPlayer.auction_detail?.base_price) {
       const { base_price, current_bid } = currentPlayer.auction_detail;
-      const newBidAmount = Math.max(base_price, current_bid);
+      const newBidAmount = current_bid > base_price ? current_bid : base_price;
 
-      if (!isManualBid) setBidAmount(newBidAmount);
-      setCurrentBid(current_bid);
+      if (!isManualBid && bidAmount !== newBidAmount) {
+        setBidAmount(newBidAmount);
+      }
+        setCurrentBid(current_bid);
+      
     }
-  }, [currentPlayer, isManualBid]);
+  }, [currentPlayer, isManualBid, bidAmount, currentBid]);
 
   useEffect(() => {
     setBidAmount(currentBid);
   }, [currentBid]);
 
+  // Handle bid submission
   const handleBid = useCallback(async () => {
     if (bidAmount <= currentBid) {
       alert("Bid amount must be higher than the current bid.");
@@ -150,34 +153,41 @@ const Teamjoinauction = () => {
 
     try {
       setCurrentBid(bidAmount);
-      setTotalSpent((prev) => prev + bidAmount);
+      setTotalSpent((prevSpent) => prevSpent + bidAmount);
       setShowBidModal(false);
 
-      await dispatch(updateCurrentBid({
-        auctionId: id,
-        bidAmount,
-        teamName: userTeam.name,
-        teamLogo: userTeam.logo,
-        timeLeft: 30,
-      }));
+      await dispatch(
+        updateCurrentBid({
+          auctionId: id,
+          bidAmount,
+          teamName: userTeam.name,
+          teamLogo: userTeam.logo,
+        })
+      );
     } catch (error) {
       console.error("Error updating bid:", error);
+<<<<<<< Updated upstream
       alert("Failed to place bid. Please try again.");
       setTotalSpent((prev) => prev - bidAmount);
 
+=======
+      setCurrentBid((prev) => prev - bidAmount);
+      setTotalSpent((prevSpent) => prevSpent - bidAmount);
+>>>>>>> Stashed changes
     }
   }, [bidAmount, currentBid, dispatch, id, userTeam]);
 
+  // Handle bid button clicks
   const handleBidButtonClick = useCallback((amount) => {
     setIsManualBid(true);
-    setBidAmount((prev) => prev + amount);
+    setBidAmount((prevBidAmount) => prevBidAmount + amount);
   }, []);
 
+  // Handle input change
   const handleBidInputChange = useCallback((e) => {
     setIsManualBid(true);
     setBidAmount(Number(e.target.value));
   }, []);
-
 
   if (loading) {
     return (
@@ -410,10 +420,13 @@ const Teamjoinauction = () => {
                     <div className="flex flex-col sm:flex-row justify-between items-center">
                       <div className="flex items-center mb-4 sm:mb-0">
                         <span className="text-xl text-white">Current Bid</span>
-                        <span className="text-3xl font-bold text-[#B0E0E6]">₹{(currentPlayer.auction_detail.current_bid / 100000).toFixed(2)} L</span>
                         <Timer auctionId={id} />
                       </div>
+<<<<<<< Updated upstream
 
+=======
+                        <span className="text-3xl font-bold text-[#B0E0E6]">₹{(currentPlayer.auction_detail.current_bid / 100000).toFixed(2)} L</span>
+>>>>>>> Stashed changes
                     </div>
                     <div className="space-y-4 pb-5">
                       <input
