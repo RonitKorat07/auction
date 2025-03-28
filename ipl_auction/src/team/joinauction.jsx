@@ -167,9 +167,14 @@ const Teamjoinauction = () => {
     } catch (error) {
       console.error("Error updating bid:", error);
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       alert("Failed to place bid. Please try again.");
       setTotalSpent((prev) => prev - bidAmount);
 
+=======
+      setCurrentBid((prev) => prev - bidAmount);
+      setTotalSpent((prevSpent) => prevSpent - bidAmount);
+>>>>>>> Stashed changes
 =======
       setCurrentBid((prev) => prev - bidAmount);
       setTotalSpent((prevSpent) => prevSpent - bidAmount);
@@ -422,7 +427,11 @@ const Teamjoinauction = () => {
                         <Timer auctionId={id} />
                       </div>
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
+=======
+                        <span className="text-3xl font-bold text-[#B0E0E6]">₹{(currentPlayer.auction_detail.current_bid / 100000).toFixed(2)} L</span>
+>>>>>>> Stashed changes
 =======
                         <span className="text-3xl font-bold text-[#B0E0E6]">₹{(currentPlayer.auction_detail.current_bid / 100000).toFixed(2)} L</span>
 >>>>>>> Stashed changes
