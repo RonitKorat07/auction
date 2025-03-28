@@ -197,24 +197,6 @@ const Teamjoinauction = () => {
     },
   ];
 
-  // const upcomingPlayers = [
-  //   {
-  //     name: "Virat Kohli",
-  //     basePrice: "₹2 Crore",
-  //     logo: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
-  //   },
-  //   {
-  //     name: "Rohit Sharma",
-  //     basePrice: "₹2 Crore",
-  //     logo: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
-  //   },
-  //   {
-  //     name: "KL Rahul",
-  //     basePrice: "₹1.5 Crore",
-  //     logo: "https://scores.iplt20.com/ipl/playerimages/MS%20Dhoni.png?v=1",
-  //   },
-  // ];
-
   return (
     <div className="min-h-screen bg-[#202626] pt-20">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

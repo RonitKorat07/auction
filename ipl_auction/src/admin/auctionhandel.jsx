@@ -21,6 +21,7 @@ import {
 import { fetchPlayers } from "../store/playerslice";
 import { fetchAuctions } from "../store/auctionslice";
 import { fetchTeam } from "../store/teamslice";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const Auctionhandel = () => {
   const { id } = useParams();
@@ -46,7 +47,23 @@ const Auctionhandel = () => {
 
   const [showBidModal, setShowBidModal] = useState(false);
   // const [selectedTeam, setSelectedTeam] = useState(null);
+  const [userEmail, setUserEmail] = useState(null);
+  const bidHistory = currentPlayer?.auction_detail?.bid_history || [];
 
+  const reversedBidHistory = [...bidHistory].reverse();
+
+  // Fetch logged-in user's email
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserEmail(user.email);
+      } else {
+        setUserEmail(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
   const {
     teams,
     loading: teamsLoading,
@@ -56,6 +73,7 @@ const Auctionhandel = () => {
   const selectedauction = auctions.find(
     (auction) => auction.id.toString() === id
   );
+  const userTeam = teams?.find((team) => team.email === userEmail);
   useEffect(() => {
     dispatch(fetchPlayers());
     dispatch(fetchAuctions());
@@ -155,11 +173,7 @@ const Auctionhandel = () => {
                   ? "opacity-50 cursor-not-allowed"
                   : ""
               }`}
-              disabled={
-                auctionStatus === "running" ||
-                !joinedPlayers.length ||
-                auctionStatus === "paused"
-              }
+              disabled={auctionStatus === "running" || !joinedPlayers.length}
             >
               Start Auction
             </button>
@@ -308,53 +322,43 @@ const Auctionhandel = () => {
             </div>
 
             {/* Bid History */}
-            <div className="lg:col-span-4 w-full h-full">
-              <div className="bg-[#2C2F32] rounded-lg shadow-lg border border-[#0047AB] p-4 sm:p-6 h-full">
-                <h2 className="text-xl font-semibold mb-6 text-white">
-                  Bid History
-                </h2>
-                <div className="space-y-4">
-                  {[
-                    {
-                      bidder: "Chennai Super Kings",
-                      amount: "₹16.5 Crore",
-                      time: "2 mins ago",
-                    },
-                    {
-                      bidder: "Royal Challengers Bangalore",
-                      amount: "₹16.25 Crore",
-                      time: "5 mins ago",
-                    },
-                    {
-                      bidder: "Kolkata Knight Riders",
-                      amount: "₹16 Crore",
-                      time: "8 mins ago",
-                    },
-                    {
-                      bidder: "Delhi Capitals",
-                      amount: "₹15.75 Crore",
-                      time: "12 mins ago",
-                    },
-                    {
-                      bidder: "Rajasthan Royals",
-                      amount: "₹15.5 Crore",
-                      time: "15 mins ago",
-                    },
-                  ].map((bid, index) => (
+            <div className="col-span-12 lg:col-span-4 bg-[#2C2F32] rounded-lg shadow-lg border border-[#0047AB] p-5">
+              <h2 className="text-xl font-semibold mb-4 text-white">
+                Bid History
+              </h2>
+              <div
+                className="max-h-140 overflow-y-auto scrollbar-hide space-y-3"
+                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+              >
+                {reversedBidHistory.length === 0 ? (
+                  <p className="text-gray-400 text-center">
+                    No bids placed yet.
+                  </p>
+                ) : (
+                  reversedBidHistory.map((bid, index) => (
                     <div
                       key={index}
-                      className="flex justify-between items-center p-3 bg-[#2C2F32] rounded-lg hover:bg-[#353839] transition-colors"
+                      className="flex items-center p-4 bg-[#202626] rounded-lg border border-[#0047AB] shadow-lg"
                     >
-                      <div className="flex-1">
-                        <p className="font-medium text-white">{bid.bidder}</p>
-                        <p className="text-sm text-gray-400">{bid.time}</p>
+                      <img
+                        src={bid.teamLogo}
+                        alt={bid.teamName}
+                        className="w-10 h-10 mr-3 "
+                      />
+                      <div className="flex flex-col flex-grow">
+                        <p className="font-medium text-white text-sm">
+                          {bid.teamName}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {new Date(bid.timestamp).toLocaleTimeString()}
+                        </p>
                       </div>
-                      <span className="font-semibold text-white">
-                        {bid.amount}
+                      <span className="font-semibold text-[#B0E0E6] text-sm whitespace-nowrap">
+                        ₹{(bid.bidAmount / 100000).toFixed(2)} L
                       </span>
                     </div>
-                  ))}
-                </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
