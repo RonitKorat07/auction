@@ -210,7 +210,7 @@ const Auction = () => {
                       </span>
                     </div>
                     <span className="text-2xl sm:text-3xl font-bold text-[#0047AB]">
-                      ₹{(currentBid / 100000).toFixed(2)} Crore
+                      ₹{(currentPlayer.auction_detail.current_bid / 100000).toFixed(2)} L
                     </span>
                   </div>
                 </div>
@@ -238,7 +238,7 @@ const Auction = () => {
                     <img
                       src={bid.teamLogo}
                       alt={bid.teamName}
-                      className="w-10 h-10 mr-3 "
+                      className="w-10 h-10 mr-3 bg-transparent "
                     />
                     <div className="flex flex-col flex-grow">
                       <p className="font-medium text-white text-sm">

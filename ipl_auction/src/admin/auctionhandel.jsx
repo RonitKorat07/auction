@@ -16,6 +16,7 @@ import {
   resumeAuction,
   endAuction,
   nextPlayer,
+  updateSoldStatus,
 } from "../store/joinedPlayersSlice";
 import { fetchPlayers } from "../store/playerslice";
 import { fetchAuctions } from "../store/auctionslice";
@@ -106,6 +107,7 @@ const Auctionhandel = () => {
   const handleResumeAuction = () => dispatch(resumeAuction(id));
   const handleEndAuction = () => dispatch(endAuction(id));
   const handleNextPlayer = () => dispatch(nextPlayer(id));
+ const handlesoldunsold = () => dispatch(updateSoldStatus(id));
 
   const handleBid = () => {
     setShowBidModal(false);
@@ -208,6 +210,13 @@ const Auctionhandel = () => {
               >
                 Next Player
               </button>
+            )}{auctionStatus === "running" && currentPlayer &&  (
+               <button
+                  onClick={handlesoldunsold}
+                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold"
+               >
+                  Sold/Unsold
+               </button>
             )}
           </div>
         </div>
@@ -306,7 +315,7 @@ const Auctionhandel = () => {
                       <Timer auctionId={id} />
                     </div>
                     <span className="text-2xl sm:text-3xl font-bold text-[#0047AB]">
-                      ₹{(currentBid / 100000).toFixed(2)} L
+                      ₹{(currentPlayer.auction_detail.current_bid  / 100000).toFixed(2)} L
                     </span>
                   </div>
                 </div>

@@ -138,9 +138,11 @@ const Teamjoinauction = () => {
   }, [currentPlayer, isManualBid, bidAmount, currentBid]);
 
   useEffect(() => {
-    setBidAmount(currentBid);
+    if (currentBid > 0) {
+      setBidAmount(currentBid);
+    }
   }, [currentBid]);
-
+  
   // Handle bid submission
   const handleBid = useCallback(async () => {
     if (bidAmount <= currentBid) {
