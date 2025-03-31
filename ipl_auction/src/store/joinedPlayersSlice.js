@@ -11,6 +11,7 @@ const initialState = {
   currentPlayerIndex: 0,
   auctionId: null,
   upcomingPlayers: [],
+  soldStatus: "", // Add this new field
 };
 
 const joinedPlayersSlice = createSlice({
@@ -44,6 +45,9 @@ const joinedPlayersSlice = createSlice({
     setUpcomingPlayers: (state, action) => {
       state.upcomingPlayers = action.payload;
     },
+    setSoldStatus: (state, action) => {
+      state.soldStatus = action.payload;
+    },
     resetAuctionState: (state) => {
       state.joinedPlayers = [];
       state.currentPlayer = null;
@@ -52,6 +56,7 @@ const joinedPlayersSlice = createSlice({
       state.currentBid = 165000000;
       state.auctionId = null;
       state.upcomingPlayers = [];
+      state.soldStatus = ""; // Reset this too
     },
   },
 });
@@ -67,12 +72,58 @@ export const {
   setAuctionId,
   setUpcomingPlayers,
   resetAuctionState,
+  setSoldStatus, // Add this
+
 } = joinedPlayersSlice.actions;
 
 const handleFirestoreError = (error, dispatch) => {
   console.error("Firestore error:", error);
   dispatch(setError(error.message));
 };
+
+export const updateSoldStatus = (auctionId) => async (dispatch, getState) => {
+  try {
+    const { currentPlayer } = getState().joinedPlayers;
+    
+    if (!currentPlayer) {
+      alert("No current player selected!");
+      return;
+    }
+    
+    const bidHistory = currentPlayer?.auction_detail?.bid_history || [];
+    const hasBids = bidHistory.length > 0;
+    const lastBid = hasBids ? bidHistory[bidHistory.length - 1] : null;
+    const status = hasBids ? "sold" : "unsold";
+    
+    // Update local state
+    dispatch(setSoldStatus(status));
+
+    // Update Firestore
+    const currentPlayerRef = doc(db, "currentplayer", auctionId);
+    
+    // If unsold, update only the status
+    if (status === "unsold") {
+      await updateDoc(currentPlayerRef, {
+        "currentPlayer.auction_detail.auction_status": status,
+      });
+    } else {
+      // If sold, update status, team, and bid amount
+      await updateDoc(currentPlayerRef, {
+        "currentPlayer.auction_detail.auction_status": status,
+        "currentPlayer.auction_detail.sold_price": lastBid.bidAmount || null,
+        "currentPlayer.auction_detail.team": lastBid.teamName || null,
+      });
+    }
+
+    // Show alert with the new status
+    alert(`Player status updated to: ${status.toUpperCase()}`);
+
+  } catch (error) {
+    handleFirestoreError(error, dispatch);
+    alert("Failed to update status. Please try again.");
+  }
+};
+
 
 export const fetchJoinedPlayers = (auctionId, players = []) => (dispatch) => {
   dispatch(setLoading(true));
@@ -181,12 +232,13 @@ export const startAuction = (auctionId, initialPlayer, players = []) => async (d
     const upcomingPlayers = players.slice(1, 5);
     const currentPlayerRef = doc(db, "currentplayer", auctionId);
 
-    await setDoc(
+    await setDoc( 
       currentPlayerRef,
       {
         currentPlayer: initialPlayer,
         auctionStatus: "running",
         upcomingPlayers,
+        timeLeft : 30,
       },
       { merge: true }
     );
@@ -277,7 +329,7 @@ export const nextPlayer = (auctionId) => async (dispatch, getState) => {
 
     await updateDoc(currentPlayerRef, {
       currentPlayer: nextPlayerData,
-      "currentPlayer.auction_details.current_bid": nextPlayerData.auction_detail.base_price,
+      // "currentPlayer.auction_details.current_bid": nextPlayerData.auction_detail.base_price,
       upcomingPlayers: newUpcomingPlayers,
       timeLeft: 30, // Reset timer for the next player
     });

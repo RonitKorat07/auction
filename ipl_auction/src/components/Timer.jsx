@@ -1,47 +1,54 @@
 import React, { useEffect, useState } from "react";
 import { doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { db } from "../config/firebaseconfig";
-import { useDispatch } from "react-redux";
-import { nextPlayer } from "../store/joinedPlayersSlice";
 
 const Timer = ({ auctionId }) => {
   const [timeLeft, setTimeLeft] = useState(30);
-  const dispatch = useDispatch();
+  const [isTimerActive, setIsTimerActive] = useState(true);
 
-  // Fetch real-time updates for the timer
+  // 1. Sync with Firebase
   useEffect(() => {
     const currentPlayerRef = doc(db, "currentplayer", auctionId);
     const unsubscribe = onSnapshot(currentPlayerRef, (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
-        setTimeLeft(data.timeLeft || 30); // Sync timer from Firebase
+        setTimeLeft(data.timeLeft ?? 30);
+        setIsTimerActive(data.timeLeft > 0);
       }
     });
-
-    return () => unsubscribe(); // Cleanup on unmount
+    return () => unsubscribe();
   }, [auctionId]);
 
-  // Decrement timer every second
+  // 2. Countdown logic
   useEffect(() => {
-    if (timeLeft > 0) {
-      const timer = setInterval(async () => {
-        const currentPlayerRef = doc(db, "currentplayer", auctionId);
-        await updateDoc(currentPlayerRef, { timeLeft: timeLeft - 1 }); // Update Firebase
-      }, 1000);
+    if (!isTimerActive || timeLeft <= 0) return;
 
-      return () => clearInterval(timer); // Cleanup on unmount
-    } else if (timeLeft === 0) {
-      // Trigger next player when timer reaches 0
-      dispatch(nextPlayer(auctionId));
-    }
-  }, [timeLeft, auctionId, dispatch]);
+    const timer = setInterval(async () => {
+      const newTime = timeLeft - 1;
+      const currentPlayerRef = doc(db, "currentplayer", auctionId);
+
+      if (newTime > 0) {
+        await updateDoc(currentPlayerRef, { timeLeft: newTime });
+      } else {
+        // When reaching 0, set both timeLeft and isTimerActive
+        await updateDoc(currentPlayerRef, { 
+          timeLeft: 0,
+          isTimerActive: false 
+        });
+        clearInterval(timer);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeLeft, auctionId, isTimerActive]);
 
   return (
     <div className="flex items-center">
-      {/* <span className="text-xl text-white">Time Left:</span> */}
       <div className="ml-2 bg-[#FF4500] text-white px-2 py-1 rounded-full flex items-center">
         <i className="fas fa-clock mr-2"></i>
-        <span className="font-semibold">{timeLeft}s</span>
+        <span className="font-semibold">
+          {timeLeft > 0 ? `${timeLeft}s` : "0s"}
+        </span>
       </div>
     </div>
   );
