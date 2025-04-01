@@ -213,7 +213,7 @@ const Auctionhandel = () => {
             )}{auctionStatus === "running" && currentPlayer &&  (
                <button
                   onClick={handlesoldunsold}
-                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold"
+                  className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded w-full sm:w-auto transition-all duration-300"
                >
                   Sold/Unsold
                </button>
@@ -224,7 +224,7 @@ const Auctionhandel = () => {
         {/* Player Profile */}
         {auctionStatus === "running" && currentPlayer && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div className="lg:col-span-8 w-full h-full">
+            <div className="col-span-10 lg:col-span-8  h-full">
               <div className="bg-[#2C2F32] rounded-lg shadow-lg overflow-hidden border-2 border-[#0047AB] h-full">
                 <div className="flex flex-col sm:flex-row items-center justify-center p-4 sm:p-6">
                   <img
@@ -323,7 +323,7 @@ const Auctionhandel = () => {
             </div>
 
             {/* Bid History */}
-            <div className="col-span-12 lg:col-span-4 bg-[#2C2F32] rounded-lg shadow-lg border border-[#0047AB] p-5">
+            <div className="col-span-10 lg:col-span-4 bg-[#2C2F32] rounded-lg shadow-lg border border-[#0047AB] p-5">
               <h2 className="text-xl font-semibold mb-4 text-white">
                 Bid History
               </h2>
