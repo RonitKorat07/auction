@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTeamemail } from "../store/teamslice";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -10,7 +10,59 @@ import {
 } from "../store/joinedPlayersSlice";
 import { useParams } from "react-router-dom";
 import { fetchPlayers } from "../store/playerslice";
-import Timer from "../components/Timer";
+import { doc, onSnapshot, updateDoc } from "firebase/firestore";
+import { db } from "../config/firebaseconfig";
+
+// Timer Component
+const Timer = ({ auctionId, onTimeUpdate }) => {
+  const [timeLeft, setTimeLeft] = useState(30);
+  const [isTimerActive, setIsTimerActive] = useState(true);
+
+  useEffect(() => {
+    const currentPlayerRef = doc(db, "currentplayer", auctionId);
+    const unsubscribe = onSnapshot(currentPlayerRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setTimeLeft(data.timeLeft ?? 30);
+        setIsTimerActive(data.timeLeft > 0);
+        if (onTimeUpdate) onTimeUpdate(data.timeLeft ?? 30);
+      }
+    });
+    return () => unsubscribe();
+  }, [auctionId, onTimeUpdate]);
+
+  useEffect(() => {
+    if (!isTimerActive || timeLeft <= 0) return;
+
+    const timer = setInterval(async () => {
+      const newTime = timeLeft - 1;
+      const currentPlayerRef = doc(db, "currentplayer", auctionId);
+
+      if (newTime > 0) {
+        await updateDoc(currentPlayerRef, { timeLeft: newTime });
+      } else {
+        await updateDoc(currentPlayerRef, {
+          timeLeft: 0,
+          isTimerActive: false,
+        });
+        clearInterval(timer);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeLeft, auctionId, isTimerActive]);
+
+  return (
+    <div className="flex items-center">
+      <div className="ml-2 bg-[#FF4500] text-white px-2 py-1 rounded-full flex items-center">
+        <i className="fas fa-clock mr-2"></i>
+        <span className="font-semibold">
+          {timeLeft > 0 ? `${timeLeft}s` : "0s"}
+        </span>
+      </div>
+    </div>
+  );
+};
 
 // Memoized Bid History Component
 const BidHistory = React.memo(({ reversedBidHistory, userTeam }) => {
@@ -33,7 +85,11 @@ const BidHistory = React.memo(({ reversedBidHistory, userTeam }) => {
               className="flex items-center p-3 bg-[#202626] rounded-lg border shadow-lg"
               style={{ borderColor: userTeam.color || "#0047AB" }}
             >
-              <img src={bid.teamLogo} alt={bid.teamName} className="w-10 h-10 mr-3" />
+              <img
+                src={bid.teamLogo}
+                alt={bid.teamName}
+                className="w-10 h-10 mr-3"
+              />
               <div className="flex flex-col flex-grow">
                 <p className="font-medium text-white text-sm">{bid.teamName}</p>
                 <p className="text-xs text-gray-400">
@@ -62,7 +118,9 @@ const PlayerStats = React.memo(({ stats, userTeam }) => {
           style={{ borderColor: userTeam.color || "#0047AB" }}
         >
           <p className="text-sm sm:text-base text-gray-400">{stat.label}</p>
-          <p className="text-lg sm:text-xl font-bold text-white">{stat.value}</p>
+          <p className="text-lg sm:text-xl font-bold text-white">
+            {stat.value}
+          </p>
         </div>
       ))}
     </div>
@@ -77,13 +135,16 @@ const Teamjoinauction = () => {
   const [totalSpent, setTotalSpent] = useState(0);
   const [userEmail, setUserEmail] = useState(null);
   const [isManualBid, setIsManualBid] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(30);
 
   const dispatch = useDispatch();
   const { id } = useParams();
 
   const { teams, loading, error } = useSelector((state) => state.team);
   const { players } = useSelector((state) => state.player);
-  const { currentPlayer, upcomingPlayers } = useSelector((state) => state.joinedPlayers);
+  const { currentPlayer, upcomingPlayers } = useSelector(
+    (state) => state.joinedPlayers
+  );
 
   // Memoized derived data
   const reversedBidHistory = useMemo(() => {
@@ -95,7 +156,14 @@ const Teamjoinauction = () => {
   }, [teams, userEmail]);
 
   const totalBudget = useMemo(() => userTeam?.budget || 0, [userTeam]);
-  const remainingBudget = useMemo(() => totalBudget - totalSpent, [totalBudget, totalSpent]);
+  const remainingBudget = useMemo(
+    () => totalBudget - totalSpent,
+    [totalBudget, totalSpent]
+  );
+
+  const handleTimeUpdate = useCallback((newTime) => {
+    setTimeLeft(newTime);
+  }, []);
 
   // Fetch logged-in user's email
   useEffect(() => {
@@ -132,8 +200,7 @@ const Teamjoinauction = () => {
       if (!isManualBid && bidAmount !== newBidAmount) {
         setBidAmount(newBidAmount);
       }
-        setCurrentBid(current_bid);
-      
+      setCurrentBid(current_bid);
     }
   }, [currentPlayer, isManualBid, bidAmount, currentBid]);
 
@@ -142,9 +209,14 @@ const Teamjoinauction = () => {
       setBidAmount(currentBid);
     }
   }, [currentBid]);
-  
+
   // Handle bid submission
   const handleBid = useCallback(async () => {
+    if (timeLeft <= 0) {
+      alert("Auction time has ended. Bidding is closed.");
+      return;
+    }
+
     if (bidAmount <= currentBid) {
       alert("Bid amount must be higher than the current bid.");
       return;
@@ -168,19 +240,27 @@ const Teamjoinauction = () => {
       setCurrentBid((prev) => prev - bidAmount);
       setTotalSpent((prevSpent) => prevSpent - bidAmount);
     }
-  }, [bidAmount, currentBid, dispatch, id, userTeam]);
+  }, [bidAmount, currentBid, dispatch, id, userTeam, timeLeft]);
 
   // Handle bid button clicks
-  const handleBidButtonClick = useCallback((amount) => {
-    setIsManualBid(true);
-    setBidAmount((prevBidAmount) => prevBidAmount + amount);
-  }, []);
+  const handleBidButtonClick = useCallback(
+    (amount) => {
+      if (timeLeft <= 0) return;
+      setIsManualBid(true);
+      setBidAmount((prevBidAmount) => prevBidAmount + amount);
+    },
+    [timeLeft]
+  );
 
   // Handle input change
-  const handleBidInputChange = useCallback((e) => {
-    setIsManualBid(true);
-    setBidAmount(Number(e.target.value));
-  }, []);
+  const handleBidInputChange = useCallback(
+    (e) => {
+      if (timeLeft <= 0) return;
+      setIsManualBid(true);
+      setBidAmount(Number(e.target.value));
+    },
+    [timeLeft]
+  );
 
   if (loading) {
     return (
@@ -230,7 +310,6 @@ const Teamjoinauction = () => {
       date: "February 23, 2024",
     },
   ];
-
 
   return (
     <div className="min-h-screen bg-[#202626] pt-20">
@@ -413,9 +492,15 @@ const Teamjoinauction = () => {
                     <div className="flex flex-col sm:flex-row justify-between items-center">
                       <div className="flex items-center mb-4 sm:mb-0">
                         <span className="text-xl text-white">Current Bid</span>
-                        <Timer auctionId={id} />
+                        <Timer auctionId={id} onTimeUpdate={handleTimeUpdate} />
                       </div>
-                        <span className="text-3xl font-bold text-[#B0E0E6]">₹{(currentPlayer.auction_detail.current_bid / 100000).toFixed(2)} L</span>
+                      <span className="text-3xl font-bold text-[#B0E0E6]">
+                        ₹
+                        {(
+                          currentPlayer.auction_detail.current_bid / 100000
+                        ).toFixed(2)}{" "}
+                        L
+                      </span>
                     </div>
                     <div className="space-y-4 pb-5">
                       <input
@@ -426,17 +511,22 @@ const Teamjoinauction = () => {
                         style={{ borderColor: userTeam.color || "#0047AB" }}
                         min={currentBid + 50000}
                         step={50000}
+                        disabled={timeLeft <= 0}
                       />
                       <div className="flex flex-wrap gap-2">
                         {[
                           { amount: 1000000, label: "₹10L" },
                           { amount: 2500000, label: "₹25L" },
                           { amount: 5000000, label: "₹50L" },
-                        ].map((button, index) => (
-                          currentPlayer.auction_detail.base_price <= currentPlayer.auction_detail.current_bid ? (
+                        ].map((button, index) =>
+                          currentPlayer.auction_detail.base_price <=
+                            currentPlayer.auction_detail.current_bid &&
+                          timeLeft > 0 ? (
                             <button
                               key={index}
-                              onClick={() => handleBidButtonClick(button.amount)}
+                              onClick={() =>
+                                handleBidButtonClick(button.amount)
+                              }
                               className="flex-1 px-4 py-2 text-base font-semibold text-black rounded-lg transition-colors"
                               style={{
                                 backgroundColor: userTeam.color || "#B0E0E6",
@@ -446,13 +536,18 @@ const Teamjoinauction = () => {
                               {button.label}
                             </button>
                           ) : null
-                        ))}
+                        )}
                         <button
-                          onClick={() => setShowBidModal(true)}
-                          className="flex-1 bg-[#0047AB] text-white px-4 py-2 text-base font-semibold hover:bg-[#003A8C] rounded-lg transition-colors flex items-center justify-center"
+                          onClick={() => timeLeft > 0 && setShowBidModal(true)}
+                          disabled={timeLeft <= 0}
+                          className={`flex-1 px-4 py-2 text-base font-semibold rounded-lg transition-colors flex items-center justify-center ${
+                            timeLeft <= 0
+                              ? "bg-gray-500 cursor-not-allowed"
+                              : "bg-[#0047AB] text-white hover:bg-[#003A8C] cursor-pointer"
+                          }`}
                         >
                           <i className="fas fa-gavel mr-2"></i>
-                          Place Bid
+                          {timeLeft <= 0 ? "Bid Closed" : "Place Bid"}
                         </button>
                       </div>
                     </div>
@@ -463,43 +558,10 @@ const Teamjoinauction = () => {
           </div>
 
           {/* Right Column - Bid History */}
-          <div
-            className="col-span-12 lg:col-span-3 bg-[#2C2F32] rounded-lg shadow-lg border p-3"
-            style={{ borderColor: userTeam.color || "#0047AB" }}
-          >
-            <h2 className="text-xl font-semibold mb-4 text-white">Bid History</h2>
-            <div
-              className="max-h-140 overflow-y-auto scrollbar-hide space-y-4"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-            >
-              {reversedBidHistory.length === 0 ? (
-                <p className="text-gray-400 text-center">No bids placed yet.</p>
-              ) : (
-                reversedBidHistory.map((bid, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center p-3 bg-[#202626] rounded-lg border shadow-lg"
-                    style={{ borderColor: userTeam.color || "#0047AB" }}
-                  >
-                    <img
-                      src={bid.teamLogo}
-                      alt={bid.teamName}
-                      className="w-10 h-10 mr-3 "
-                    />
-                    <div className="flex flex-col flex-grow">
-                      <p className="font-medium text-white text-sm">{bid.teamName}</p>
-                      <p className="text-xs text-gray-400">
-                        {new Date(bid.timestamp).toLocaleTimeString()}
-                      </p>
-                    </div>
-                    <span className="font-semibold text-[#B0E0E6] text-sm whitespace-nowrap">
-                      ₹{(bid.bidAmount / 100000).toFixed(2)} L
-                    </span>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
+          <BidHistory
+            reversedBidHistory={reversedBidHistory}
+            userTeam={userTeam}
+          />
         </div>
 
         {/* Upcoming Players */}
@@ -527,7 +589,9 @@ const Teamjoinauction = () => {
                     <h3 className="text-xl font-bold">{player.name}</h3>
                     <div className="flex items-center gap-2 mt-2">
                       <div className="px-3 py-1 bg-green-500/10 text-green-400 rounded-full text-sm font-semibold">
-                        ₹{(player.auction_detail.base_price / 100000).toFixed(2)} L
+                        ₹
+                        {(player.auction_detail.base_price / 100000).toFixed(2)}{" "}
+                        L
                       </div>
                     </div>
                   </div>

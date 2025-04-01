@@ -127,7 +127,7 @@ const Auction = () => {
       <main className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-25">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Middle Column - Player Profile */}
-          <div className="lg:col-span-8 w-full h-full">
+          <div className="col-span-10 lg:col-span-8 w-full h-full">
             {currentPlayer && (
               <div className="bg-[#2C2F32] rounded-lg shadow-lg overflow-hidden border-2 border-[#0047AB] h-full">
                 <div className="flex flex-col sm:flex-row items-center justify-center p-4 sm:p-6">
@@ -219,7 +219,7 @@ const Auction = () => {
           </div>
 
           {/* Right Column - Bid History */}
-          <div className="col-span-12 lg:col-span-4 bg-[#2C2F32] rounded-lg shadow-lg border border-[#0047AB] p-5">
+          <div className="col-span-10 lg:col-span-4 bg-[#2C2F32] rounded-lg shadow-lg border border-[#0047AB] p-5">
             <h2 className="text-xl font-semibold mb-4 text-white">
               Bid History
             </h2>
