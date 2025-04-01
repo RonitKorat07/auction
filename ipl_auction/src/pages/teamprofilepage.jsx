@@ -30,7 +30,7 @@ const Teamprofile = () => {
       dispatch(fetchPlayersByTeam(teamName));
     
     console.log(players)
-  }, [dispatch, teams]);
+  }, [dispatch,selectedteam]);
 
   const batsmen = players.filter((p) => p.player_role === "Batsman"  );
   const allRounders = players.filter((p) => p.player_role === "All-rounder");
