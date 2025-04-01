@@ -1,15 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as echarts from "echarts";
-import { FaTimes } from "react-icons/fa"; // Importing the close icon from react-icons
-
-// Mock Data
-const bidHistory = [
-  { team: "Royal Challengers", amount: 850000, time: "10:15 AM" },
-  { team: "Mumbai Indians", amount: 800000, time: "10:14 AM" },
-  { team: "Chennai Super Kings", amount: 750000, time: "10:13 AM" },
-  { team: "Royal Challengers", amount: 700000, time: "10:12 AM" },
-  { team: "Mumbai Indians", amount: 650000, time: "10:11 AM" },
-];
+import { FaTimes } from "react-icons/fa";
+import { useSelector, useDispatch } from "react-redux";
+import { history_fetchPlayers } from "../store/auction_historyslice";
 
 const teams = [
   {
@@ -56,39 +49,6 @@ const teams = [
   },
 ];
 
-const players = [
-  {
-    id: 1,
-    name: "Christopher Anderson",
-    basePrice: 200000,
-    finalBid: 850000,
-    role: "Batsman",
-    imageUrl:
-      "https://public.readdy.ai/ai/img_res/8126475ef044edf2a503db1efd68e3db.jpg",
-    team: "Royal Challengers",
-  },
-  {
-    id: 2,
-    name: "James Richardson",
-    basePrice: 150000,
-    finalBid: 750000,
-    role: "Bowler",
-    imageUrl:
-      "https://public.readdy.ai/ai/img_res/95997fa4c6e9f45ecf631bfead93518f.jpg",
-    team: "Royal Challengers",
-  },
-  {
-    id: 3,
-    name: "Michael Thompson",
-    basePrice: 300000,
-    finalBid: 1200000,
-    role: "All-rounder",
-    imageUrl:
-      "https://public.readdy.ai/ai/img_res/d73ab2d2c70c3b247676ac54a046599e.jpg",
-    team: "Royal Challengers",
-  },
-];
-
 const TeamCard = ({ team }) => (
   <div className="bg-[#202626] rounded-xl shadow-lg overflow-hidden transform transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-[#0047AB]/20 border border-[#0047AB] p-4">
     <div className="flex flex-col items-center mb-4">
@@ -126,6 +86,7 @@ const TeamCard = ({ team }) => (
     </div>
   </div>
 );
+
 const Filters = ({
   searchTerm,
   setSearchTerm,
@@ -192,9 +153,9 @@ const PlayerTable = ({ filteredPlayers, setSelectedPlayer }) => (
   <div className="bg-[#202626] backdrop-blur-sm rounded-lg shadow-md overflow-hidden border border-[#0047AB] max-h-[400px] overflow-y-auto">
     <div className="overflow-x-auto">
       <table className="min-w-full">
-        <thead className="bg-[#202626]">
+        <thead className="bg-[#202626] ">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase tracking-wider ">
               Player
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase tracking-wider">
@@ -203,9 +164,9 @@ const PlayerTable = ({ filteredPlayers, setSelectedPlayer }) => (
             <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase tracking-wider">
               Team
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase tracking-wider">
+            {/* <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase tracking-wider">
               Base Price
-            </th>
+            </th> */}
             <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase tracking-wider">
               Final Bid
             </th>
@@ -229,6 +190,16 @@ const PlayerTable = ({ filteredPlayers, setSelectedPlayer }) => (
                   <div className="ml-4">
                     <div className="text-sm font-medium text-[#E8EAF6]">
                       {player.name}
+                      <span
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                        ${
+                          player.auctionStatus === "sold"
+                            ? " bg-[#0047AB]/10 text-green-700"
+                            : " bg-[#0047AB]/10 text-red-700"
+                        }`}
+                      >
+                        {player.auctionStatus}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -241,11 +212,11 @@ const PlayerTable = ({ filteredPlayers, setSelectedPlayer }) => (
               <td className="px-6 py-4 whitespace-nowrap text-sm text-[#E8EAF6]">
                 {player.team}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-[#E8EAF6]">
-                ${player.basePrice.toLocaleString()}
-              </td>
+              {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-[#E8EAF6]">
+                ${player.basePrice?.toLocaleString() || "0"}
+              </td> */}
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-emerald-400">
-                ${player.finalBid.toLocaleString()}
+                {player.finalBid?.toLocaleString() || "0"} L
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-[#B0E0E6]">
                 <button
@@ -262,55 +233,111 @@ const PlayerTable = ({ filteredPlayers, setSelectedPlayer }) => (
     </div>
   </div>
 );
+const BidHistoryModal = ({ selectedPlayer, setSelectedPlayer }) => {
+  const isUnsold =
+    !selectedPlayer?.bidHistory ||
+    (Array.isArray(selectedPlayer.bidHistory) &&
+      selectedPlayer.bidHistory.length === 0);
 
-const BidHistoryModal = ({ selectedPlayer, setSelectedPlayer }) => (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div className="bg-[#202626] backdrop-blur-sm rounded-lg p-6 max-w-2xl w-full mx-4 border border-[#0047AB]">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-[#E8EAF6]">Bid History</h2>
-        <button
-          onClick={() => setSelectedPlayer(null)}
-          className="text-[#B0E0E6] hover:text-[#E8EAF6] !rounded-button whitespace-nowrap hover:cursor-pointer"
-        >
-          <FaTimes size={20} /> {/* Using the React icon for close */}
-        </button>
-      </div>
-      <div className="flex items-center space-x-4 mb-6">
-        <img
-          src={selectedPlayer.imageUrl}
-          alt={selectedPlayer.name}
-          className="w-16 h-16 rounded-full object-cover"
-        />
-        <div>
-          <h3 className="text-lg font-bold text-[#E8EAF6]">
-            {selectedPlayer.name}
-          </h3>
-          <p className="text-sm text-[#B0E0E6]">
-            {selectedPlayer.role} - {selectedPlayer.team}
-          </p>
+  return (
+    <div className="fixed inset-0 bg-[rgb(0,0,0,0.5)] bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-[#202626] backdrop-blur-sm rounded-lg p-4 md:p-6 w-full max-w-md md:max-w-2xl mx-4 border border-[#0047AB]">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-4 md:mb-6">
+          <h2 className="text-xl md:text-2xl font-bold text-[#E8EAF6]">
+            Bid History
+          </h2>
+          <button
+            onClick={() => setSelectedPlayer(null)}
+            className="text-[#B0E0E6] hover:text-[#E8EAF6] !rounded-button whitespace-nowrap hover:cursor-pointer"
+          >
+            <FaTimes size={20} />
+          </button>
+        </div>
+
+        {/* Player Info */}
+        <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4 mb-4 md:mb-6">
+          <img
+            src={selectedPlayer?.imageUrl || ""}
+            alt={selectedPlayer?.name || "Player"}
+            className="w-14 h-14 md:w-16 md:h-16 rounded-full object-cover"
+          />
+          <div className="text-center sm:text-left">
+            <h3 className="text-base md:text-lg font-bold text-[#E8EAF6]">
+              {selectedPlayer?.name || "Unknown Player"}
+            </h3>
+            <p className="text-xs md:text-sm text-[#B0E0E6]">
+              {selectedPlayer?.role || "Unknown Role"} -{" "}
+              {selectedPlayer?.team || "No Team"}
+            </p>
+          </div>
+        </div>
+
+        {/* Bid History Content */}
+        <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-2">
+          {/* Custom scrollbar styling */}
+          <style jsx>{`
+            div::-webkit-scrollbar {
+              width: 4px;
+            }
+            div::-webkit-scrollbar-track {
+              background: #2a2f36;
+              border-radius: 10px;
+            }
+            div::-webkit-scrollbar-thumb {
+              background: #0047ab;
+              border-radius: 10px;
+            }
+            div::-webkit-scrollbar-thumb:hover {
+              background: #0066ff;
+            }
+          `}</style>
+
+          {isUnsold ? (
+            <div className="text-center p-3 md:p-4 bg-[#2A2F36] rounded-lg">
+              <p className="text-base md:text-lg font-bold text-red-400">
+                Player Unsold
+              </p>
+              <p className="text-xs md:text-sm text-[#B0E0E6] mt-1 md:mt-2">
+                This player did not receive any bids during the auction.
+              </p>
+            </div>
+          ) : Array.isArray(selectedPlayer.bidHistory) ? (
+            selectedPlayer.bidHistory.map((bid, index) => (
+              <div
+                key={index}
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-3 md:p-4 bg-[#2A2F36] rounded-lg space-y-2 sm:space-y-0"
+              >
+                <div className="flex items-center space-x-2 md:space-x-3">
+                  <img
+                    src={bid.teamLogo || "/default-team-logo.png"}
+                    alt={bid.teamName || "Team"}
+                    className="w-10 h-10 md:w-12 md:h-12 rounded-full object-contain border-2 border-[#0047AB] p-0.5 md:p-1"
+                  />
+                  <div>
+                    <p className="text-sm md:text-base font-medium text-[#E8EAF6]">
+                      {bid.teamName || "Unknown Team"}
+                    </p>
+                    <p className="text-xs text-[#B0E0E6]">
+                      {new Date(bid.timestamp).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-base md:text-lg font-bold text-emerald-400 sm:pl-4">
+                  {bid.bidAmount?.toLocaleString() || "0"} L
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-center text-sm md:text-base text-[#B0E0E6] py-3 md:py-4">
+              No bid history data available.
+            </p>
+          )}
         </div>
       </div>
-      <div className="space-y-4">
-        {bidHistory.map((bid, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-between p-4 bg-[#202626] rounded-lg"
-          >
-            <div>
-              <p className="font-medium text-[#E8EAF6]">{bid.team}</p>
-              <p className="text-sm text-[#B0E0E6]">{bid.time}</p>
-            </div>
-            <div className="text-lg font-bold text-emerald-400">
-              ${bid.amount.toLocaleString()}
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
-  </div>
-);
-
-// Main App Component
+  );
+};
 const AuctionHistory = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("name");
@@ -318,6 +345,16 @@ const AuctionHistory = () => {
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const chartRef = useRef(null);
+
+  // Redux state management
+  const dispatch = useDispatch();
+  const { players, status, error } = useSelector(
+    (state) => state.historyplayer
+  );
+
+  useEffect(() => {
+    dispatch(history_fetchPlayers());
+  }, [dispatch]);
 
   useEffect(() => {
     if (chartRef.current) {
@@ -353,26 +390,48 @@ const AuctionHistory = () => {
     }
   }, []);
 
-  const filteredPlayers = players
-    .filter(
-      (player) =>
-        player.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        (selectedRole === "All" || player.role === selectedRole) &&
+  // Safe filtering with null checks
+  const filteredPlayers = (players || [])
+    .filter((player) => {
+      const playerName = player?.name?.toLowerCase() || "";
+      const playerRole = player?.role || "";
+      const playerTeam = player?.team || "";
+
+      return (
+        playerName.includes(searchTerm.toLowerCase()) &&
+        (selectedRole === "All" || playerRole === selectedRole) &&
         (selectedTeam === null ||
-          player.team === teams.find((t) => t.id === selectedTeam)?.name)
-    )
+          playerTeam === teams.find((t) => t.id === selectedTeam)?.name)
+      );
+    })
     .sort((a, b) => {
       switch (sortBy) {
         case "name":
-          return a.name.localeCompare(b.name);
-        case "basePrice":
-          return b.basePrice - a.basePrice;
+          return (a?.name || "").localeCompare(b?.name || "");
+        // case "basePrice":
+        //   return (b?.basePrice || 0) - (a?.basePrice || 0);
         case "finalBid":
-          return b.finalBid - a.finalBid;
+          return (b?.finalBid || 0) - (a?.finalBid || 0);
         default:
           return 0;
       }
     });
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#202626]">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-[#0047AB]"></div>
+      </div>
+    );
+  }
+
+  if (status === "failed") {
+    return (
+      <div className="min-h-screen bg-[#202626] text-gray-100 flex items-center justify-center">
+        <div className="text-2xl text-red-500">Error: {error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#202626] text-gray-100">
