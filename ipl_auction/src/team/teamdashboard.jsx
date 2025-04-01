@@ -1,41 +1,70 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FaTrophy, FaChartLine, FaUsers } from "react-icons/fa";
-import { fetchTeamemail } from "../store/teamslice"; // Adjust the import path
-import { getAuth, onAuthStateChanged } from "firebase/auth"; // Add onAuthStateChanged
+import { fetchTeamemail } from "../store/teamslice";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { FaMapMarkerAlt, FaCalendar, FaRulerCombined } from "react-icons/fa";
+import { fetchPlayersByTeam } from "../store/playerslice";
 
 const Teamdashboard = () => {
   const dispatch = useDispatch();
   const { teams, loading, error } = useSelector((state) => state.team);
-  const [activeTab, setActiveTab] = useState("batsmen");
-  const [userEmail, setUserEmail] = useState(null); // Track user email
+  const [activeTab, setActiveTab] = useState("batsmen"); // Default to batsmen
+  const [userEmail, setUserEmail] = useState(null);
+  const { players = [], loading: playerLoading, error: playerError } = useSelector((state) => state.players);
 
-  // Get the logged-in user's email using onAuthStateChanged
+  // Get the logged-in user's email
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUserEmail(user.email); // Set user email
-      } else {
-        setUserEmail(null); // No user logged in
-      }
+      setUserEmail(user?.email || null);
     });
-
-    return () => unsubscribe(); // Cleanup on unmount
+    return unsubscribe;
   }, []);
 
   // Fetch team data when the userEmail changes
   useEffect(() => {
     if (userEmail) {
-      dispatch(fetchTeamemail(userEmail)); // Pass the email to fetchTeam
+      dispatch(fetchTeamemail(userEmail));
     }
   }, [dispatch, userEmail]);
 
-  // Use the first team in the array (or handle multiple teams as needed)
-  const team = teams.length > 0 ? teams[0] : null;
+  // Fetch players when teams data is available
+  useEffect(() => {
+    if (teams?.length > 0) {
+      const teamName = teams[0].name;
+      dispatch(fetchPlayersByTeam(teamName));
+    }
+  }, [dispatch, teams]);
 
-  if (loading) {
+  const team = teams?.length > 0 ? teams[0] : null;
+  const teamColor = team?.color || "#0047AB";
+
+  // Filter players based on role
+  const batsmen = players.filter((p) => p.player_role === "Batsman");
+  const allRounders = players.filter((p) => p.player_role === "All-rounder");
+  const bowlers = players.filter((p) => p.player_role === "Bowler");
+  const wicketKeepers = players.filter((p) => p.player_role === "Wicket-keeper");
+
+  // Get players to display based on active tab
+  const getPlayersToDisplay = () => {
+    switch (activeTab) {
+      case "batsmen":
+        return batsmen;
+      case "bowlers":
+        return bowlers;
+      case "all-rounders":
+        return allRounders;
+      case "wicket-keepers":
+        return wicketKeepers;
+      default:
+        return batsmen;
+    }
+  };
+
+  const playersToDisplay = getPlayersToDisplay();
+
+  if (loading || playerLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#202626]">
         <div className="animate-spin rounded-full h-16 w-16 border-t-4 border border-[#0047AB]"></div>
@@ -43,10 +72,10 @@ const Teamdashboard = () => {
     );
   }
 
-  if (error) {
+  if (error || playerError) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#202626]">
-        <div className="text-[#FF4500] text-xl">Error: {error}</div>
+        <div className="text-[#FF4500] text-xl">Error: {error || playerError}</div>
       </div>
     );
   }
@@ -59,16 +88,12 @@ const Teamdashboard = () => {
     );
   }
 
-  const teamColor = team ? team.color : "#0047AB"; // Default color
-
   return (
     <div className="min-h-screen bg-[#202626] text-[#E8EAF6] mt-20">
       {/* Hero Section */}
       <div className="relative h-[600px]">
         <img
-          src={
-            "https://media.istockphoto.com/id/1466876589/photo/3d-technology-abstract-neon-light-background-empty-space-scene-spotlight-dark-night-virtual.jpg?s=612x612&w=0&k=20&c=aEIDxz-b5QWHwpynKWBXW7das2C5q6Jhaz-2MVnUy3I="
-          }
+          src="https://media.istockphoto.com/id/1466876589/photo/3d-technology-abstract-neon-light-background-empty-space-scene-spotlight-dark-night-virtual.jpg?s=612x612&w=0&k=20&c=aEIDxz-b5QWHwpynKWBXW7das2C5q6Jhaz-2MVnUy3I="
           alt="Stadium"
           className="w-full h-full object-cover"
         />
@@ -82,7 +107,7 @@ const Teamdashboard = () => {
               <div className="flex flex-col md:flex-row gap-4 text-[#E8EAF6] mt-4">
                 <div>
                   <p className="text-sm">Total Players</p>
-                  <p className="text-2xl font-bold">{team.players.length}</p>
+                  <p className="text-2xl font-bold">{players.length}</p>
                 </div>
                 <div>
                   <p className="text-sm">Remaining Budget</p>
@@ -106,7 +131,7 @@ const Teamdashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
           {/* Ownership Details */}
           <div
-            className="bg-[#202626] rounded-lg  p-6 md:p-8 border text-center"
+            className="bg-[#202626] rounded-lg p-6 md:p-8 border text-center"
             style={{ borderColor: teamColor }}
           >
             <h2 className="text-2xl font-bold mb-6 text-[#E8EAF6]">
@@ -145,7 +170,7 @@ const Teamdashboard = () => {
               </div>
             </div>
             <div
-              className="mt-4 pt-4  border-t  text-center "
+              className="mt-4 pt-4 border-t text-center"
               style={{ borderColor: teamColor }}
             >
               <p className="text-sm text-[#B0E0E6] font-semibold">
@@ -186,23 +211,23 @@ const Teamdashboard = () => {
 
                 <div className="mt-4 space-y-2">
                   <div className="flex items-center justify-center">
-                    <FaMapMarkerAlt className=" mr-2" />
+                    <FaMapMarkerAlt className="mr-2" />
                     <p className="text-[#B0E0E6]">{team.homeVenue.location}</p>
                   </div>
                   <div className="flex items-center justify-center">
-                    <FaUsers className=" mr-2" />
+                    <FaUsers className="mr-2" />
                     <p className="text-[#B0E0E6]">
                       Capacity: {team.homeVenue.capacity}
                     </p>
                   </div>
                   <div className="flex items-center justify-center">
-                    <FaCalendar className=" mr-2" />
+                    <FaCalendar className="mr-2" />
                     <p className="text-[#B0E0E6]">
                       Established: {team.homeVenue.established}
                     </p>
                   </div>
                   <div className="flex items-center justify-center">
-                    <FaRulerCombined className=" mr-2" />
+                    <FaRulerCombined className="mr-2" />
                     <p className="text-[#B0E0E6]">
                       Dimensions: {team.homeVenue.dimensions}
                     </p>
@@ -211,7 +236,7 @@ const Teamdashboard = () => {
               </div>
             </div>
             <div
-              className="mt-4 pt-4 border-t "
+              className="mt-4 pt-4 border-t"
               style={{ borderColor: teamColor }}
             >
               <h4 className="text-sm font-semibold text-[#E8EAF6] mb-2">
@@ -232,115 +257,76 @@ const Teamdashboard = () => {
           </div>
         </div>
 
-        {/* Top Auction Buys */}
-        <div className="mb-16">
-          <h2 className="text-2xl font-bold mb-8 text-[#E8EAF6]">
-            Top Auction Buys
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {team.players.slice(0, 3).map((player, index) => (
-              <div
-                key={index}
-                className="bg-[#202626] rounded-lg shadow-lg overflow-hidden border"
-                style={{ borderColor: teamColor }}
-              >
-                <img
-                  src={player.image}
-                  alt={`Player ${index + 1}`}
-                  className="w-full h-64 object-cover"
-                />
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold text-[#E8EAF6]">
-                    {player.name}
-                  </h3>
-                  <p className="text-[#0047AB] font-bold text-lg">
-                    ${(player.price / 1000000).toFixed(1)}M
-                  </p>
-                  <p className="text-[#B0E0E6]">{player.role}</p>
-                  <p className="text-sm text-[#B0E0E6]">
-                    Previous: {player.previousTeam}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Team Gallery */}
-        <div className="mb-16">
-          <h2 className="text-2xl font-bold mb-8 text-[#E8EAF6]">
-            Team Gallery
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {team.teamGallery.map((image, index) => (
-              <div
-                key={index}
-                className="rounded-lg overflow-hidden shadow-lg border"
-                style={{ borderColor: teamColor }}
-              >
-                <img
-                  src={image}
-                  alt={`Gallery ${index + 1}`}
-                  className="w-full h-64 object-cover"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Complete Squad */}
         <div>
           <h2 className="text-2xl font-bold mb-8 text-[#E8EAF6]">
             Complete Squad
           </h2>
           <div className="flex flex-wrap gap-4 mb-8 overflow-x-auto">
-            {["Batsmen", "Bowlers", "All-rounders", "Wicket-keepers"].map(
-              (tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab.toLowerCase())}
-                  className={`px-4 py-2 sm:px-6 sm:py-3 rounded-full whitespace-nowrap border ${
-                    activeTab === tab.toLowerCase()
-                      ? "text-white"
-                      : "bg-[#202626] text-[#B0E0E6]"
-                  }`}
-                  style={{
-                    backgroundColor:
-                      activeTab === tab.toLowerCase() ? teamColor : "",
-                    borderColor: teamColor,
-                  }}
-                >
-                  {tab}
-                </button>
-              )
-            )}
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {team.players.map((player, index) => (
-              <div
-                key={index}
-                className="bg-[#202626] rounded-lg shadow-lg overflow-hidden border"
-                style={{ borderColor: teamColor }}
+            {[
+              { label: "Batsmen", value: "batsmen" },
+              { label: "Bowlers", value: "bowlers" },
+              { label: "All-rounders", value: "all-rounders" },
+              { label: "Wicket-keepers", value: "wicket-keepers" }
+            ].map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => setActiveTab(tab.value)}
+                className={`px-4 py-2 sm:px-6 sm:py-3 rounded-full whitespace-nowrap border ${
+                  activeTab === tab.value
+                    ? "text-white"
+                    : "bg-[#202626] text-[#B0E0E6]"
+                }`}
+                style={{
+                  backgroundColor: activeTab === tab.value ? teamColor : "",
+                  borderColor: teamColor,
+                }}
               >
-                <img
-                  src={player.image}
-                  alt={`Player ${index + 1}`}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-[#E8EAF6]">
-                    {player.name}
-                  </h3>
-                  <p className="text-[#B0E0E6]">{player.role}</p>
-                  <p className="text-sm text-[#B0E0E6]">
-                    {player.battingStyle}
-                  </p>
-                  <p className="text-[#0047AB] font-bold mt-2">
-                    ${(player.price / 1000000).toFixed(1)}M
-                  </p>
-                </div>
-              </div>
+                {tab.label}
+              </button>
             ))}
+          </div>
+          
+          {/* Players Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {playersToDisplay.length > 0 ? (
+              playersToDisplay.map((player, index) => (
+                <div
+                  key={index}
+                  className="bg-[#202626] rounded-lg shadow-lg overflow-hidden border"
+                  style={{ borderColor: teamColor }}
+                >
+                  <img
+                    src={player.image || "https://via.placeholder.com/300x200?text=Player"}
+                    alt={player.name}
+                    className="w-full  object-cover"
+                    onError={(e) => {
+                      e.target.src = "https://via.placeholder.com/300x200?text=Player";
+                    }}
+                  />
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold text-[#E8EAF6]">
+                      {player.name}
+                    </h3>
+                    <p className="text-[#B0E0E6] capitalize">{player.player_role}</p>
+                    {player.battingStyle && (
+                      <p className="text-sm text-[#B0E0E6]">
+                        {player.battingStyle}
+                      </p>
+                    )}
+                    {player.price && (
+                      <p className="text-[#0047AB] font-bold mt-2">
+                        ₹{(player.price / 10000000).toFixed(2)} Cr
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-8 text-[#B0E0E6]">
+                No {activeTab} found in the squad.
+              </div>
+            )}
           </div>
         </div>
       </div>

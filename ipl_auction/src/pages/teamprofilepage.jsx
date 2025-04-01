@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTeam } from "../store/teamslice";
+import { fetchPlayersByTeam } from "../store/playerslice";
 
 const Teamprofile = () => {
   const [selectedRole, setSelectedRole] = useState("All");
@@ -9,6 +10,8 @@ const Teamprofile = () => {
   const dispatch = useDispatch();
   const { teams, loading, error } = useSelector((state) => state.team);
   const [selectedteam, setSelectedTeam] = useState(null);
+  const { players = [], loading: playerLoading, error: playerError } = useSelector((state) => state.players);
+
 
   useEffect(() => {
     dispatch(fetchTeam());
@@ -21,37 +24,49 @@ const Teamprofile = () => {
     }
   }, [teams, id]);
 
-  const players = [
-    {
-      name: "Rohit Sharma",
-      role: "Batsman",
-      number: "45",
-      nationality: "India",
-      image:
-        "https://public.readdy.ai/ai/img_res/b28f424fb204624038f5d466baad5634.jpg",
-    },
-    {
-      name: "Jasprit Bumrah",
-      role: "Bowler",
-      number: "93",
-      nationality: "India",
-      image:
-        "https://public.readdy.ai/ai/img_res/cb731038623ddd329f0101ff9a12e621.jpg",
-    },
-    {
-      name: "Kieron Pollard",
-      role: "All-rounder",
-      number: "55",
-      nationality: "West Indies",
-      image:
-        "https://public.readdy.ai/ai/img_res/d0398943506165fe470f32206953efe4.jpg",
-    },
-  ];
+  useEffect(() => {
+   
+      const teamName = selectedteam?.name
+      dispatch(fetchPlayersByTeam(teamName));
+    
+    console.log(players)
+  }, [dispatch, teams]);
+
+  const batsmen = players.filter((p) => p.player_role === "Batsman"  );
+  const allRounders = players.filter((p) => p.player_role === "All-rounder");
+  const bowlers = players.filter((p) => p.player_role === "Bowler");
+
+  // const players = [
+  //   {
+  //     name: "Rohit Sharma",
+  //     role: "Batsman",
+  //     number: "45",
+  //     nationality: "India",
+  //     image:
+  //       "https://public.readdy.ai/ai/img_res/b28f424fb204624038f5d466baad5634.jpg",
+  //   },
+  //   {
+  //     name: "Jasprit Bumrah",
+  //     role: "Bowler",
+  //     number: "93",
+  //     nationality: "India",
+  //     image:
+  //       "https://public.readdy.ai/ai/img_res/cb731038623ddd329f0101ff9a12e621.jpg",
+  //   },
+  //   {
+  //     name: "Kieron Pollard",
+  //     role: "All-rounder",
+  //     number: "55",
+  //     nationality: "West Indies",
+  //     image:
+  //       "https://public.readdy.ai/ai/img_res/d0398943506165fe470f32206953efe4.jpg",
+  //   },
+  // ];
 
   const filteredPlayers =
     selectedRole === "All"
       ? players
-      : players.filter((player) => player.role === selectedRole);
+      : players.filter((player) => player.player_role === selectedRole);
 
   if (loading) {
     return (
@@ -202,7 +217,7 @@ const Teamprofile = () => {
               <img
                 src={player.image}
                 alt={player.name}
-                className="w-full h-48 sm:h-56 md:h-64 object-cover"
+                className="w-full h-full sm:h-56 md:h-64 object-contain"
               />
               <div className="p-4 sm:p-6">
                 <h3 className="text-lg sm:text-xl font-bold text-[#0047AB]">
@@ -210,14 +225,12 @@ const Teamprofile = () => {
                 </h3>
                 <div className="flex justify-between items-center mt-2">
                   <span className="text-[#B0E0E6] text-sm sm:text-base">
-                    {player.role}
+                    {player.player_role}
                   </span>
-                  <span className="text-[#B0E0E6] text-sm sm:text-base">
-                    #{player.number}
-                  </span>
+                 
                 </div>
                 <p className="text-[#B0E0E6] mt-2 text-sm sm:text-base">
-                  {player.nationality}
+                  {player.country}
                 </p>
               </div>
             </div>
