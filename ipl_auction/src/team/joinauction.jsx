@@ -9,9 +9,10 @@ import {
   updateCurrentBid,
 } from "../store/joinedPlayersSlice";
 import { useParams } from "react-router-dom";
-import { fetchPlayers } from "../store/playerslice";
+import { fetchPlayers, fetchPlayersByTeam } from "../store/playerslice";
 import { doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { db } from "../config/firebaseconfig";
+import TopBuyers from "../components/TopBuyer";
 
 // Timer Component
 const Timer = ({ auctionId, onTimeUpdate }) => {
@@ -97,7 +98,12 @@ const BidHistory = React.memo(({ reversedBidHistory, userTeam }) => {
                 </p>
               </div>
               <span className="font-semibold text-[#B0E0E6] text-sm whitespace-nowrap">
-                ₹{(bid.bidAmount / 100000).toFixed(2)} L
+                ₹{
+                  bid.bidAmount < 10000000
+                    ? (bid.bidAmount / 100000).toFixed(2) + ' Lakh'
+                    : (bid.bidAmount / 10000000).toFixed(2) + ' Cr'
+                }
+
               </span>
             </div>
           ))
@@ -132,10 +138,10 @@ const Teamjoinauction = () => {
   const [currentBid, setCurrentBid] = useState(0);
   const [bidAmount, setBidAmount] = useState(0);
   const [showBidModal, setShowBidModal] = useState(false);
-  const [totalSpent, setTotalSpent] = useState(0);
   const [userEmail, setUserEmail] = useState(null);
   const [isManualBid, setIsManualBid] = useState(false);
   const [timeLeft, setTimeLeft] = useState(30);
+  const [teamData, setTeamData] = useState(null); // To store team data from Firebase
 
   const dispatch = useDispatch();
   const { id } = useParams();
@@ -155,15 +161,27 @@ const Teamjoinauction = () => {
     return teams?.find((team) => team.email === userEmail);
   }, [teams, userEmail]);
 
-  const totalBudget = useMemo(() => userTeam?.budget || 0, [userTeam]);
-  const remainingBudget = useMemo(
-    () => totalBudget - totalSpent,
-    [totalBudget, totalSpent]
-  );
+
+  const totalBudget = useMemo(() => teamData?.budget || 0, [teamData]);
+  const remainingBudget = useMemo(() => teamData?.remainingBudget || 0, [teamData]);
+  const totalSpent = useMemo(() => teamData?.totalSpent || 0, [teamData]);
 
   const handleTimeUpdate = useCallback((newTime) => {
     setTimeLeft(newTime);
   }, []);
+
+  useEffect(() => {
+    if (userTeam) {
+      const teamRef = doc(db, "teams", userTeam.id); // Assuming team has an id field
+      const unsubscribe = onSnapshot(teamRef, (doc) => {
+        if (doc.exists()) {
+          const data = doc.data();
+          setTeamData(data);
+        }
+      });
+      return () => unsubscribe();
+    }
+  }, [userTeam]);
 
   // Fetch logged-in user's email
   useEffect(() => {
@@ -191,6 +209,10 @@ const Teamjoinauction = () => {
     }
   }, [dispatch, userEmail, id]);
 
+    useEffect(() => {
+    setIsManualBid(false);
+  }, [currentPlayer?.id]); 
+
   // Update bid amount when currentPlayer changes
   useEffect(() => {
     if (currentPlayer && currentPlayer.auction_detail?.base_price) {
@@ -209,6 +231,37 @@ const Teamjoinauction = () => {
       setBidAmount(currentBid);
     }
   }, [currentBid]);
+  
+    useEffect(() => {
+      if (teams?.length > 0) {
+        const teamName = teams[0].name;
+        dispatch(fetchPlayersByTeam(teamName));
+      }
+    }, [dispatch, teams , players]);
+  // In the Teamdashboard component, update the player counting logic:
+
+  const batsman = useMemo(() => 
+    players.filter((p) => p.player_role === "Batsman" || p.player_role === "Wicket-keeper batsman"), 
+    [players]
+  );
+  
+  const allRounders = useMemo(() => 
+    players.filter((p) => p.player_role === "All-rounder"), 
+    [players]
+  );
+  
+  const bowlers = useMemo(() => 
+    players.filter((p) => p.player_role === "Bowler"), 
+    [players]
+  );
+
+// Then create counts for each category
+const playerCounts = {
+  batsman: batsman.length,
+  bowlers: bowlers.length,
+  allRounders: allRounders.length,
+  total: players.length
+};
 
   // Handle bid submission
   const handleBid = useCallback(async () => {
@@ -224,7 +277,7 @@ const Teamjoinauction = () => {
 
     try {
       setCurrentBid(bidAmount);
-      setTotalSpent((prevSpent) => prevSpent + bidAmount);
+      // setTotalSpent((prevSpent) => prevSpent + bidAmount);
       setShowBidModal(false);
 
       await dispatch(
@@ -238,7 +291,7 @@ const Teamjoinauction = () => {
     } catch (error) {
       console.error("Error updating bid:", error);
       setCurrentBid((prev) => prev - bidAmount);
-      setTotalSpent((prevSpent) => prevSpent - bidAmount);
+      // setTotalSpent((prevSpent) => prevSpent - bidAmount);
     }
   }, [bidAmount, currentBid, dispatch, id, userTeam, timeLeft]);
 
@@ -260,7 +313,7 @@ const Teamjoinauction = () => {
       setBidAmount(Number(e.target.value));
     },
     [timeLeft]
-  );
+  );  
 
   if (loading) {
     return (
@@ -289,27 +342,6 @@ const Teamjoinauction = () => {
     );
   }
 
-  // Hardcoded data for demonstration
-  const recentPurchases = [
-    {
-      name: "Shahrukh Khan",
-      from: "Punjab Kings",
-      price: "₹6 Crore",
-      date: "February 25, 2024",
-    },
-    {
-      name: "Vishnu Vinod",
-      from: "Delhi Capitals",
-      price: "₹50 Lakhs",
-      date: "February 24, 2024",
-    },
-    {
-      name: "Tymal Mills",
-      from: "Rajasthan Royals",
-      price: "₹1 Crore",
-      date: "February 23, 2024",
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-[#202626] pt-20">
@@ -339,10 +371,11 @@ const Teamjoinauction = () => {
                 <div className="text-sm text-gray-800">Remaining Budget</div>
                 <div className="flex items-baseline">
                   <span className="text-2xl font-bold text-green-600 mr-1">
-                    ₹{(remainingBudget / 100000).toFixed(2)}
-                  </span>
-                  <span className="text-2xl font-semibold text-green-600">
-                    L
+                    ₹{
+                     remainingBudget < 10000000
+                      ? (remainingBudget / 100000).toFixed(2) + ' Lakh'
+                      : (remainingBudget / 10000000).toFixed(2) + ' CR'
+                    } 
                   </span>
                 </div>
               </div>
@@ -352,13 +385,21 @@ const Teamjoinauction = () => {
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-400">Total Budget</span>
                   <span className="font-semibold text-white">
-                    ₹{(totalBudget / 100000).toFixed(2)} L
+                    ₹{
+                     totalBudget < 10000000
+                      ? (totalBudget / 100000).toFixed(2) + ' Lakh'
+                      : (totalBudget / 10000000).toFixed(2) + ' Cr'
+                    } 
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Spent</span>
                   <span className="font-semibold text-[#B0E0E6]">
-                    ₹{(totalSpent / 100000).toFixed(2)} L
+                  ₹{
+                     totalSpent < 10000000
+                      ? (totalSpent / 100000).toFixed(2) + ' Lakh'
+                      : (totalSpent / 10000000).toFixed(2) + ' Cr'
+                    }   
                   </span>
                 </div>
               </div>
@@ -370,30 +411,30 @@ const Teamjoinauction = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <i className="fas fa-bat-ball mr-2 text-[#0047AB]"></i>
-                      <span className="text-white">Batsmen</span>
+                      <span className="text-white">Batsman</span>
                     </div>
-                    <span className="font-semibold text-white">8</span>
+                    <span className="font-semibold text-white">{playerCounts.batsman}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <i className="fas fa-bowling-ball mr-2 text-[#0047AB]"></i>
                       <span className="text-white">Bowlers</span>
                     </div>
-                    <span className="font-semibold text-white">9</span>
+                    <span className="font-semibold text-white">{playerCounts.bowlers}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <i className="fas fa-running mr-2 text-[#0047AB]"></i>
                       <span className="text-white">All-rounders</span>
                     </div>
-                    <span className="font-semibold text-white">5</span>
+                    <span className="font-semibold text-white">{playerCounts.allRounders}</span>
                   </div>
                   <div className="flex items-center justify-between pt-2 border-t border-gray-600">
                     <div className="flex items-center">
                       <i className="fas fa-users mr-2 text-[#0047AB]"></i>
                       <span className="text-white">Total Players</span>
                     </div>
-                    <span className="font-semibold text-white">22/25</span>
+                    <span className="font-semibold text-white">{playerCounts.total}/25</span>
                   </div>
                 </div>
               </div>
@@ -495,11 +536,11 @@ const Teamjoinauction = () => {
                         <Timer auctionId={id} onTimeUpdate={handleTimeUpdate} />
                       </div>
                       <span className="text-3xl font-bold text-[#B0E0E6]">
-                        ₹
-                        {(
-                          currentPlayer.auction_detail.current_bid / 100000
-                        ).toFixed(2)}{" "}
-                        L
+                      ₹
+                        {currentPlayer.auction_detail.current_bid < 10000000
+                          ? (currentPlayer.auction_detail.current_bid / 100000).toFixed(2) + ' L'
+                          : (currentPlayer.auction_detail.current_bid / 10000000).toFixed(2) + ' Cr'
+                        }
                       </span>
                     </div>
                     <div className="space-y-4 pb-5">
@@ -589,9 +630,12 @@ const Teamjoinauction = () => {
                     <h3 className="text-xl font-bold">{player.name}</h3>
                     <div className="flex items-center gap-2 mt-2">
                       <div className="px-3 py-1 bg-green-500/10 text-green-400 rounded-full text-sm font-semibold">
-                        ₹
-                        {(player.auction_detail.base_price / 100000).toFixed(2)}{" "}
-                        L
+                          ₹{
+                            player.auction_detail.base_price  < 10000000
+                              ? (player.auction_detail.base_price  / 100000).toFixed(2) + ' Lakh'
+                              : (player.auction_detail.base_price  / 10000000).toFixed(2) + ' Cr'
+                          }
+
                       </div>
                     </div>
                   </div>
@@ -602,145 +646,100 @@ const Teamjoinauction = () => {
         </div>
 
         {/* Recent Purchases Section */}
-        <div
-          className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-6 border"
-          style={{ borderColor: userTeam.color || "#0047AB" }}
-        >
-          <h2 className="text-2xl font-semibold mb-6 text-white">
-            Recent Purchases
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {recentPurchases.map((purchase, index) => (
-              <div
-                key={index}
-                className="bg-[#2C2F32] rounded-lg overflow-hidden border"
-                style={{ borderColor: userTeam.color || "#0047AB" }}
-              >
-                <img
-                  src={`https://readdy.ai/api/search-image?query=professional soccer player in manchester united red jersey celebrating goal victory moment dramatic stadium lighting&width=400&height=300&orientation=landscape&flag=912fa8b416ec5d3215e35a8d058b0af7`}
-                  alt={purchase.name}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-white">
-                    {purchase.name}
-                  </h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">From</span>
-                      <span className="font-medium text-white">
-                        {purchase.from}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Transfer Fee</span>
-                      <span className="font-medium text-[#0047AB]">
-                        {purchase.price}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Date</span>
-                      <span className="font-medium text-white">
-                        {purchase.date}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      
+        <TopBuyers userTeam={userTeam} />
 
         {/* Team Squad Section */}
-        <div
-          className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-6 border"
-          style={{ borderColor: userTeam.color || "#0047AB" }}
-        >
-          <h2 className="text-2xl font-semibold mb-6 text-white">Team Squad</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-lg">
-              <thead>
-                <tr className="bg-[#2C2F32]">
-                  <th className="px-6 py-5 text-left text-white">Player</th>
-                  <th className="px-6 py-5 text-left text-white">Role</th>
-                  <th className="px-6 py-5 text-left text-white">Age</th>
-                  <th className="px-6 py-5 text-left text-white">
-                    Nationality
-                  </th>
-                  <th className="px-6 py-5 text-left text-white">Matches</th>
-                  <th className="px-6 py-5 text-left text-white">Runs</th>
-                  <th className="px-6 py-5 text-left text-white">Wickets</th>
-                  <th className="px-6 py-5 text-left text-white">
-                    Strike Rate
-                  </th>
-                  <th className="px-6 py-5 text-left text-white">Economy</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {[
-                  {
-                    name: "Rohit Sharma",
-                    position: "Batsman",
-                    age: 36,
-                    nationality: "India",
-                    matches: 243,
-                    runs: 6211,
-                    wickets: 0,
-                    strikeRate: 130.5,
-                    economy: 0,
-                  },
-                  {
-                    name: "Virat Kohli",
-                    position: "Batsman",
-                    age: 34,
-                    nationality: "India",
-                    matches: 250,
-                    runs: 7500,
-                    wickets: 0,
-                    strikeRate: 135.0,
-                    economy: 0,
-                  },
-                ].map((player, index) => (
+          <div
+            className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-6 border"
+            style={{ borderColor: userTeam?.color || "#0047AB" }}
+          >
+            <h2 className="text-2xl font-semibold mb-6 text-white">
+              Current Auction Squad
+            </h2>
+            <div className="overflow-x-auto">
+              <table
+                className="w-full text-lg border"
+                style={{ borderColor: userTeam?.color || "#0047AB" }}
+              >
+                <thead>
                   <tr
-                    key={index}
-                    style={{ borderColor: userTeam.color || "#0047AB" }}
+                    className="bg-[#2C2F32] border"
+                    style={{ borderColor: userTeam?.color || "#0047AB" }}
                   >
-                    <td className="px-6 py-5">
-                      <div className="flex items-center space-x-4">
-                        <img
-                          src="https://public.readdy.ai/ai/img_res/7ef4f29068f1540d64cc7eb86183279f.jpg"
-                          alt={player.name}
-                          className="w-12 h-12 rounded-full object-cover border-2"
-                          style={{ borderColor: userTeam.color || "#0047AB" }}
-                        />
-                        <div>
-                          <span className="font-medium text-white">
-                            {player.name}
-                          </span>
-                          <p className="text-sm text-gray-400">
-                            {player.nationality}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-5 text-white">{player.position}</td>
-                    <td className="px-6 py-5 text-white">{player.age}</td>
-                    <td className="px-6 py-5 text-white">
-                      {player.nationality}
-                    </td>
-                    <td className="px-6 py-5 text-white">{player.matches}</td>
-                    <td className="px-6 py-5 text-white">{player.runs}</td>
-                    <td className="px-6 py-5 text-white">{player.wickets}</td>
-                    <td className="px-6 py-5 text-white">
-                      {player.strikeRate}
-                    </td>
-                    <td className="px-6 py-5 text-white">{player.economy}</td>
+                    <th className="px-6 py-5 text-left text-white">Player</th>
+                    <th className="px-6 py-5 text-left text-white">Role</th>
+                    <th className="px-6 py-5 text-left text-white">Price</th>
+                    <th className="px-6 py-5 text-left text-white">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y">
+                  {players
+                    .filter((player) => {
+                      // Check if player has auction details and is sold to current team
+                      return (
+                        player.auction_detail && 
+                        player.auction_detail.team === userTeam?.name &&
+                        player.auction_detail.auction_status === "sold"
+                      );
+                    })
+                    .map((player) => (
+                      <tr
+                        key={`${player.id}-${player.auction_detail?.sold_price}`}
+                        className="border-b"
+                        style={{ borderColor: userTeam?.color || "#0047AB" }}
+                      >
+                        <td className="px-6 py-5">
+                          <div className="flex items-center space-x-4">
+                            <img
+                              src={player.image || "https://via.placeholder.com/150"}
+                              alt={player.name}
+                              className="w-12 h-12 rounded-full object-cover border-2"
+                              style={{ borderColor: userTeam?.color || "#0047AB" }}
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = "https://via.placeholder.com/150";
+                              }}
+                            />
+                            <div>
+                              <span className="font-medium text-white">
+                                {player.name}
+                              </span>
+                              <p className="text-sm text-gray-400">
+                                {player.country || "N/A"}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-5 text-white capitalize">
+                          {player.player_role?.toLowerCase() || "N/A"}
+                        </td>
+                        <td className="px-6 py-5 text-white">
+                          {player.auction_detail?.sold_price < 10000000
+                            ? `₹${(player.auction_detail?.sold_price / 100000).toFixed(2)} L`
+                            : `₹${(player.auction_detail?.sold_price / 10000000).toFixed(2)} Cr`}
+                        </td>
+                        <td className="px-6 py-5">
+                          <span className="px-3 py-1 rounded-full bg-green-500/20 text-green-500 text-xs">
+                            Purchased
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  {players.filter(player => 
+                    player.auction_detail?.team === userTeam?.name &&
+                    player.auction_detail?.auction_status === "sold"
+                  ).length === 0 && (
+                    <tr>
+                      <td colSpan="4" className="px-6 py-5 text-center text-white">
+                        No players purchased in current auction
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
       </main>
 
       {/* Bid Confirmation Modal */}

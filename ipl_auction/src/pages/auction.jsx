@@ -6,6 +6,9 @@ import { fetchAuctions } from "../store/auctionslice";
 import { fetchTeam } from "../store/teamslice";
 import { fetchCurrentPlayer } from "../store/joinedPlayersSlice";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import cricket_logo from "../assets/cricklogo.png";
+import TopBuyers from "../components/TopBuyer";
+
 const Auction = () => {
   const [currentBid, setCurrentBid] = useState(165000000);
   const [showBidModal, setShowBidModal] = useState(false);
@@ -84,26 +87,7 @@ const Auction = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const recentPurchases = [
-    {
-      name: "Shahrukh Khan",
-      from: "Punjab Kings",
-      price: "₹6 Crore",
-      date: "February 25, 2024",
-    },
-    {
-      name: "Vishnu Vinod",
-      from: "Delhi Capitals",
-      price: "₹50 Lakhs",
-      date: "February 24, 2024",
-    },
-    {
-      name: "Tymal Mills",
-      from: "Rajasthan Royals",
-      price: "₹1 Crore",
-      date: "February 23, 2024",
-    },
-  ];
+ 
 
   const handleBid = () => {
     // Logic to handle the bid
@@ -210,7 +194,11 @@ const Auction = () => {
                       </span>
                     </div>
                     <span className="text-2xl sm:text-3xl font-bold text-[#0047AB]">
-                      ₹{(currentPlayer.auction_detail.current_bid / 100000).toFixed(2)} L
+                    ₹
+                      {currentPlayer.auction_detail.current_bid < 10000000
+                        ? (currentPlayer.auction_detail.current_bid / 100000).toFixed(2) + ' L'
+                        : (currentPlayer.auction_detail.current_bid / 10000000).toFixed(2) + ' Cr'
+                      }
                     </span>
                   </div>
                 </div>
@@ -249,7 +237,11 @@ const Auction = () => {
                       </p>
                     </div>
                     <span className="font-semibold text-[#B0E0E6] text-sm whitespace-nowrap">
-                      ₹{(bid.bidAmount / 100000).toFixed(2)} L
+                    ₹{
+                        bid.bidAmount < 10000000
+                          ? (bid.bidAmount / 100000).toFixed(2) + ' Lakh'
+                          : (bid.bidAmount / 10000000).toFixed(2) + ' Cr'
+                      }
                     </span>
                   </div>
                 ))
@@ -257,56 +249,11 @@ const Auction = () => {
             </div>
           </div>
         </div>
+
         {/* Recent Purchases Section */}
-        <div className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-4 sm:p-6 border border-[#0047AB]">
-          <h2 className="text-2xl font-semibold mb-6 text-white">
-            Recent Purchases
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recentPurchases.map((purchase, index) => (
-              <div
-                key={index}
-                className="bg-[#2C2F32] rounded-lg overflow-hidden border border-[#0047AB] hover:shadow-xl transition-shadow"
-              >
-                <img
-                  src={`https://readdy.ai/api/search-image?query=professional soccer player in manchester united red jersey celebrating goal victory moment dramatic stadium lighting&width=400&height=300&orientation=landscape&flag=912fa8b416ec5d3215e35a8d058b0af7`}
-                  alt={purchase.name}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-white mb-4">
-                    {purchase.name}
-                  </h3>
-                  <div className="space-y-3">
-                    {[
-                      { label: "From", value: purchase.from },
-                      {
-                        label: "Transfer Fee",
-                        value: purchase.price,
-                        highlight: true,
-                      },
-                      { label: "Date", value: purchase.date },
-                    ].map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="flex justify-between items-center"
-                      >
-                        <span className="text-gray-400">{item.label}</span>
-                        <span
-                          className={`font-medium ${
-                            item.highlight ? "text-[#0047AB]" : "text-white"
-                          }`}
-                        >
-                          {item.value}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+     
+        <TopBuyers />
+
 
         {/* Teams Status */}
         <div className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-4 sm:p-6 border border-[#0047AB]">
@@ -322,7 +269,7 @@ const Auction = () => {
               >
                 <img
                   src={team?.logo}
-                  alt={team.name}
+                  alt={team?.name}
                   className="w-20 h-20 sm:w-24 sm:h-24 mb-4"
                 />
                 <h4 className="font-bold text-base sm:text-lg text-white text-center mb-4">

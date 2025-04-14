@@ -131,6 +131,34 @@ export const updateSoldStatus = (auctionId) => async (dispatch, getState) => {
 
       alert(`Player marked as UNSOLD.`);
     } else {
+      
+      // If sold, we need to update the team's budget
+      // First find the team that won the bid
+
+      const teamsQuery = query(
+        collection(db, "teams"),
+        where("name", "==", lastBid.teamName)
+      );
+      const teamQuerySnapshot = await getDocs(teamsQuery);
+      
+      if (teamQuerySnapshot.empty) {
+        throw new Error(`Team ${lastBid.teamName} not found`);
+      }
+
+      const teamDoc = teamQuerySnapshot.docs[0];
+      const teamRef = doc(db, "teams", teamDoc.id);
+      const teamData = teamDoc.data();
+      
+      // Calculate new budget values
+      const newTotalSpent = (teamData.totalSpent || 0) + lastBid.bidAmount;
+      const newRemainingBudget = (teamData.budget || 0) - newTotalSpent;
+
+      // Update team's budget
+      await updateDoc(teamRef, {
+        totalSpent: newTotalSpent,
+        remainingBudget: newRemainingBudget
+      });
+
       // If sold, update status, team, and bid amount
       await updateDoc(currentPlayerRef, {
         "currentPlayer.auction_detail.auction_status": status,
@@ -357,23 +385,71 @@ export const endAuction = (auctionId) => async (dispatch) => {
   try {
     dispatch(setLoading(true));
 
-    // Update the currentplayer document to mark the auction as ended
+    // 1. Get all teams participating in the auction
+    const teamsQuery = query(collection(db, "teams"));
+    const teamsSnapshot = await getDocs(teamsQuery);
+    const auctionHistoryRef = doc(db, "auction_history", auctionId);
+
+    for (const teamDoc of teamsSnapshot.docs) {
+      const teamData = teamDoc.data();
+      
+      // **Step 2: Count Players by Role**
+      const playersQuery = query(collection(db, "players"), where("auction_detail.team", "==", teamData.name));
+      const playerSnapshot = await getDocs(playersQuery);
+
+      let playerCounts = { batsman: 0, bowlers: 0, allRounders: 0, total: 0 };
+
+      playerSnapshot.forEach((doc) => {
+        const player = doc.data();
+        if (player.player_role === "Batsman" || player.player_role === "Wicket-keeper batsman") {
+          playerCounts.batsman++;
+        } else if (player.player_role === "Bowler") {
+          playerCounts.bowlers++;
+        } else if (player.player_role === "All-rounder") {
+          playerCounts.allRounders++;
+        }
+        playerCounts.total++;
+      });
+
+      const teamHistoryData = {
+        teamId: teamDoc.id,
+        name: teamData.name,
+        logo: teamData.logo,
+        owner: teamData.owner,
+        budgetDetails: {
+          initialBudget: teamData.budget,
+          totalSpent: teamData.totalSpent || 0,
+          remainingBudget: teamData.remainingBudget || teamData.budget,
+        },
+        totalPlayers: playerCounts.total,
+        roleCounts: {
+          batsman: playerCounts.batsman,
+          bowlers: playerCounts.bowlers,
+          allRounders: playerCounts.allRounders,
+        }
+      };
+
+      await updateDoc(auctionHistoryRef, {
+        teams: arrayUnion(teamHistoryData),
+      });
+    }
+
+    // **Step 3: End Auction**
     const currentPlayerRef = doc(db, "currentplayer", auctionId);
     await updateDoc(currentPlayerRef, {
       auctionStatus: "ended",
-      timeLeft: 0, // Reset timer
-      currentPlayer: null, // Clear current player
-      upcomingPlayers: [], // Clear upcoming players
+      timeLeft: 0,
+      currentPlayer: null,
+      upcomingPlayers: [],
     });
 
-    // Update the auctions document to mark the auction as completed
+    // **Step 4: Mark Auction as Completed**
     const auctionRef = doc(db, "auctions", auctionId);
     await updateDoc(auctionRef, {
       status: "completed",
       isLive: false,
     });
 
-    // Reset the Redux state for the auction
     dispatch(resetAuctionState());
 
   } catch (error) {

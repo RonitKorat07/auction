@@ -248,12 +248,12 @@ const PlayerProfile = () => {
                     <StatCard
                       icon="fas fa-chart-line"
                       label="Average"
-                      value={formatStats?.bowling?.average || "N/A"}
+                      value={formatStats?.bowling?.avg || "N/A"}
                     />
                     <StatCard
                       icon="fas fa-coins"
                       label="Economy"
-                      value={formatStats?.bowling?.economy || "N/A"}
+                      value={formatStats?.bowling?.eco || "N/A"}
                     />
                     <StatCard
                       icon="fas fa-award"

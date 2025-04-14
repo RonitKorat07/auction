@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { db } from "../config/firebaseconfig";
-import { collection, addDoc, doc, updateDoc, onSnapshot } from "firebase/firestore";
+import { collection, addDoc, doc, updateDoc, onSnapshot, query, getDocs } from "firebase/firestore";
 
 // Fetch Auctions from Firestore with real-time updates
 export const fetchAuctions = createAsyncThunk(
@@ -14,26 +14,58 @@ export const fetchAuctions = createAsyncThunk(
             id: doc.id,
             ...doc.data(),
           }));
-          dispatch(setAuctions(auctions)); // Update Redux state
+          dispatch(setAuctions(auctions));
           resolve(auctions);
         },
         (error) => reject(error)
       );
-
       return () => unsubscribe();
     });
   }
 );
 
-// ✅ FIXED: Create Auction in Firestore
 export const createAuction = createAsyncThunk(
   "auctions/createAuction",
   async (auctionData, { rejectWithValue }) => {
     try {
       const docRef = await addDoc(collection(db, "auctions"), auctionData);
-      return { id: docRef.id, ...auctionData }; // Return new auction data
+      return { id: docRef.id, ...auctionData };
     } catch (error) {
-      console.error("Error creating auction:", error);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const resetPreviousAuctionData = createAsyncThunk(
+  "auctions/resetData",
+  async (_, { rejectWithValue }) => {
+    try {
+      // Reset players
+      const playersQuery = query(collection(db, "players"));
+      const playersSnapshot = await getDocs(playersQuery);
+      
+      const playerPromises = playersSnapshot.docs.map(doc => 
+        updateDoc(doc.ref, {
+          "auction_detail.auction_status": "",
+          "auction_detail.sold_price": 0,
+          "auction_detail.team": "",
+        })
+      );
+      
+      // Reset teams
+      const teamsQuery = query(collection(db, "teams"));
+      const teamsSnapshot = await getDocs(teamsQuery);
+      
+      const teamPromises = teamsSnapshot.docs.map(doc => 
+        updateDoc(doc.ref, {
+          "totalSpent": 0,
+          "remainingBudget": 1200000000
+        })
+      );
+      
+      await Promise.all([...playerPromises, ...teamPromises]);
+      return true;
+    } catch (error) {
       return rejectWithValue(error.message);
     }
   }
@@ -41,13 +73,17 @@ export const createAuction = createAsyncThunk(
 
 export const updateAuctionStatus = createAsyncThunk(
   "auctions/updateAuctionStatus",
-  async ({ id, status }, { rejectWithValue }) => {
+  async ({ id, status }, { rejectWithValue, dispatch }) => {
     try {
       const auctionRef = doc(db, "auctions", id);
       await updateDoc(auctionRef, { status, isLive: status === "live" });
+
+      if (status === "live") {
+        await dispatch(resetPreviousAuctionData()).unwrap();
+      }
+
       return { id, status };
     } catch (error) {
-      console.error("Error updating auction:", error);
       return rejectWithValue(error.message);
     }
   }
@@ -62,7 +98,7 @@ const auctionSlice = createSlice({
   },
   reducers: {
     setAuctions: (state, action) => {
-      state.auctions = action.payload; // Update state with new auctions
+      state.auctions = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -78,8 +114,6 @@ const auctionSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
-      // ✅ Handle Create Auction Cases
       .addCase(createAuction.pending, (state) => {
         state.loading = true;
       })
@@ -91,8 +125,6 @@ const auctionSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
-      // ✅ Handle Update Auction Status Cases
       .addCase(updateAuctionStatus.pending, (state) => {
         state.loading = true;
       })
