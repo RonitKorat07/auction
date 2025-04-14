@@ -22,7 +22,7 @@ export const Homepage = () => {
     error: playersError,
   } = useSelector((state) => state.player);
 
-  const [topBatsmen, setTopBatsmen] = useState([]);
+  const [topBatsman, setTopBatsman] = useState([]);
   const [topBowlers, setTopBowlers] = useState([]);
   const [topAllRounders, setTopAllRounders] = useState([]);
 
@@ -33,7 +33,7 @@ export const Homepage = () => {
 
   useEffect(() => {
     if (players.length > 0) {
-      const sortedBatsmen = players
+      const sortedBatsman = players
         .filter(
           (player) =>
             (player.player_role === "Batsman" ||
@@ -41,7 +41,7 @@ export const Homepage = () => {
             player.state?.ipl?.batting?.runs !== undefined
         )
         .sort((a, b) => b.state.ipl.batting.runs - a.state.ipl.batting.runs);
-      setTopBatsmen(sortedBatsmen.slice(0, 3));
+      setTopBatsman(sortedBatsman.slice(0, 3));
 
       const sortedBowlers = players
         .filter(
@@ -207,7 +207,7 @@ export const Homepage = () => {
                 className="start-auction-btn group relative px-8 py-4 bg-gradient-to-r from-purple-500 to-blue-600 rounded-xl text-xl font-bold text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden hover:cursor-pointer"
               >
                 <span className="relative z-10 flex items-center">
-                  Start Auction <FaArrowRight className="ml-2" />
+                  Join Auction <FaArrowRight className="ml-2" />
                 </span>
               </Link>
             </motion.div>
@@ -271,14 +271,14 @@ export const Homepage = () => {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 py-12">
-          {/* Top Batsmen Section */}
+          {/* Top Batsman Section */}
           <motion.div
             initial={{ opacity: 0, y: 100 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0 mb-8 sm:mb-12"
           >
-            <h1 className="text-4xl font-bold text-blue-400">Top 3 Batsmen</h1>
+            <h1 className="text-4xl font-bold text-blue-400">Top 3 Batsman</h1>
             <button
               onClick={() => handleNavigate("/players")}
               className="flex items-center justify-center bg-[#0047AB] text-white px-4 py-2 rounded-full hover:bg-blue-700 transition hover:cursor-pointer"
@@ -291,10 +291,10 @@ export const Homepage = () => {
               <p className="text-white">Loading players...</p>
             ) : playersError ? (
               <p className="text-red-500">{playersError}</p>
-            ) : topBatsmen.length === 0 ? (
-              <p className="text-white">No batsmen found.</p>
+            ) : topBatsman.length === 0 ? (
+              <p className="text-white">No batsman found.</p>
             ) : (
-              topBatsmen.map((player, index) => (
+              topBatsman.map((player, index) => (
                 <motion.div
                   key={player.id}
                   initial={{ opacity: 0, y: 100 }}

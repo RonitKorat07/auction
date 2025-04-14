@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTeam } from "../store/teamslice";
 import { fetchPlayersByTeam } from "../store/playerslice";
+import { Link } from "react-router-dom";
+
 
 const Teamprofile = () => {
   const [selectedRole, setSelectedRole] = useState("All");
@@ -25,14 +27,16 @@ const Teamprofile = () => {
   }, [teams, id]);
 
   useEffect(() => {
-   
-      const teamName = selectedteam?.name
-      dispatch(fetchPlayersByTeam(teamName));
-    
-    console.log(players)
-  }, [dispatch,selectedteam]);
+    if (selectedteam?.name) {
+      dispatch(fetchPlayersByTeam(selectedteam.name))
+        .unwrap()
+        .catch((error) => {
+          console.error("Failed to fetch players:", error);
+        });
+    }
+  }, [dispatch, selectedteam]);
 
-  const batsmen = players.filter((p) => p.player_role === "Batsman"  );
+  const batsman = players.filter((p) => p.player_role === "Batsman"  );
   const allRounders = players.filter((p) => p.player_role === "All-rounder");
   const bowlers = players.filter((p) => p.player_role === "Bowler");
 
@@ -185,7 +189,17 @@ const Teamprofile = () => {
                 : "bg-[#B0E0E6]"
             }`}
           >
-            Batsmen
+            Batsman
+          </button>
+          <button
+            onClick={() => setSelectedRole("Wicket-keeper batsman")}
+            className={`px-4 py-2 text-sm sm:text-base rounded-button ${
+              selectedRole === "Wicket-keeper batsman"
+                ? "bg-[#0047AB] text-[#E8EAF6]"
+                : "bg-[#B0E0E6]"
+            }`}
+          >
+            Wk-batter
           </button>
           <button
             onClick={() => setSelectedRole("Bowler")}
@@ -214,11 +228,16 @@ const Teamprofile = () => {
               key={index}
               className="bg-[#202626] rounded-lg shadow-lg shadow-black/100 overflow-hidden"
             >
-              <img
-                src={player.image}
-                alt={player.name}
-                className="w-full h-full sm:h-56 md:h-64 object-contain"
-              />
+              <Link
+                  to={`/playerprofile/${player.id}`}
+                  className="text-[#0047AB] hover:text-[#B0E0E6] p-2 transition-colors"
+                  title="View Player">
+                <img
+                  src={player.image}
+                  alt={player.name}
+                  className="w-full h-full sm:h-56 md:h-64 object-contain"
+                />
+              </Link>
               <div className="p-4 sm:p-6">
                 <h3 className="text-lg sm:text-xl font-bold text-[#0047AB]">
                   {player.name}

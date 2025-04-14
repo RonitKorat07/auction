@@ -19,7 +19,7 @@ const Dashboard = () => {
     dispatch(fetchPlayers());
   }, [dispatch]);
 
-  const [topBatsmen, setTopBatsmen] = useState([]);
+  const [topBatsman, setTopBatsman] = useState([]);
   const { teams, loading, error } = useSelector((state) => state.team);
   const {
     players,
@@ -29,7 +29,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (players.length > 0) {
-      const sortedBatsmen = players
+      const sortedBatsman = players
         .filter(
           (player) =>
             (player.player_role === "Batsman" ||
@@ -38,7 +38,7 @@ const Dashboard = () => {
         )
         .sort((a, b) => b.state.ipl.batting.runs - a.state.ipl.batting.runs);
 
-      setTopBatsmen(sortedBatsmen.slice(0, 3));
+      setTopBatsman(sortedBatsman.slice(0, 3));
     }
   }, [players]);
 
@@ -199,10 +199,10 @@ const Dashboard = () => {
               <p className="text-white">Loading players...</p>
             ) : playersError ? (
               <p className="text-red-500">{playersError}</p>
-            ) : topBatsmen.length === 0 ? (
-              <p className="text-white">No batsmen found.</p>
+            ) : topBatsman.length === 0 ? (
+              <p className="text-white">No batsman found.</p>
             ) : (
-              topBatsmen.map((player, index) => (
+              topBatsman.map((player, index) => (
                 <motion.div
                   key={player.id}
                   initial={{ opacity: 0, y: 100 }}

@@ -1,66 +1,96 @@
+// auction_historyslice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../config/firebaseconfig'; 
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../config/firebaseconfig';
 
-
-export const history_fetchPlayers = createAsyncThunk(
-  'historyplayer/fetchPlayers',
-  async () => {
+export const history_fetchAuctionDetails = createAsyncThunk(
+  'historyplayer/fetchAuctionDetails',
+  async (auctionId) => {
     try {
-      const querySnapshot = await getDocs(collection(db, 'auction_history'));
+      const docRef = doc(db, 'auction_history', auctionId);
+      const docSnap = await getDoc(docRef);
       
-      let allPlayers = [];
-      querySnapshot.forEach((doc) => {
-        const playersArray = doc.data().players || []; // players array nikalna hoga
-        playersArray.forEach((player) => {
-          allPlayers.push({
-            id: player.playerId || doc.id,
-            name: player.name || 'Unknown Player',
-            role: player.role || 'Unknown Role',
-
-            team: player.auctionDetails?.team || 'No Team',
-            auctionStatus: player.auctionDetails?.auctionStatus || 'No status',
-            bidHistory: player.auctionDetails?.bidHistory || 'No bidHistory',
-            // basePrice: player.auctionDetails?.soldPrice || 0,
-            finalBid: player.auctionDetails?.soldPrice || 0,
-            imageUrl: player.image || 'default-player-image.jpg',
-          });
-        });
-      });
-
-      return allPlayers;
+      if (docSnap.exists()) {
+        const auctionData = docSnap.data();
+        
+        // Process players array
+        const players = auctionData.players || [];
+        const processedPlayers = players.map((player) => ({
+          id: player.playerId,
+          name: player.name || 'Unknown Player',
+          role: player.role || 'Unknown Role',
+          team: player.auctionDetails?.team || 'No Team',
+          auctionStatus: player.auctionDetails?.auctionStatus || 'No status',
+          bidHistory: player.auctionDetails?.bidHistory || [],
+          finalBid: player.auctionDetails?.soldPrice || 0,
+          imageUrl: player.image || 'default-player-image.jpg',
+          auctionId: auctionId
+        }));
+        
+        // Process teams array
+        const teams = auctionData.teams || [];
+        const processedTeams = teams.map((team) => ({
+          id: team.teamId || 'unknown-team-id',
+          name: team.name || 'Unknown Team',
+          owner: team.owner || 'Unknown Owner',
+          logo: team.logo || 'default-team-logo.jpg',
+          budget: team.budgetDetails?.initialBudget || 0,
+          remainingBudget: team.budgetDetails?.remainingBudget || 0,
+          totalSpent: team.budgetDetails?.totalSpent || 0 ,
+          playersCount: team.totalPlayers || 0,
+          roleCounts: {
+            "All-rounder": team.roleCounts?.allRounders || 0,
+            "Batsman": team.roleCounts?.batsman || 0,
+            "Bowler": team.roleCounts?.bowlers || 0
+          },
+          auctionId: auctionId
+        }));
+        
+        return {
+          id: auctionId,
+          ...auctionData,
+          players: processedPlayers,
+          teams: processedTeams  // Add the processed teams array to the returned object
+        };
+      } else {
+        throw new Error("Auction not found");
+      }
     } catch (error) {
-      console.error("Error fetching players:", error);
+      console.error("Error fetching auction details:", error);
       throw error;
     }
   }
 );
 
-
 const initialState = {
-  players: [],  // Changed from 'data' to 'players' to match your initial state
+  currentAuction: null,
   status: 'idle',
   error: null
 };
 
 const history_playerSlice = createSlice({
-  name: 'historyplayer',  // Changed from 'players' to 'historyplayer' to match your store
+  name: 'historyplayer',
   initialState,
-  reducers: {},
+  reducers: {
+    clearCurrentAuction: (state) => {
+      state.currentAuction = null;
+    }
+  },
   extraReducers: (builder) => {
     builder
-      .addCase(history_fetchPlayers.pending, (state) => {
+      .addCase(history_fetchAuctionDetails.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(history_fetchPlayers.fulfilled, (state, action) => {
+      .addCase(history_fetchAuctionDetails.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.players = action.payload;
+        state.currentAuction = action.payload;
       })
-      .addCase(history_fetchPlayers.rejected, (state, action) => {
+      .addCase(history_fetchAuctionDetails.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message;
       });
   }
 });
 
+export const { clearCurrentAuction } = history_playerSlice.actions;
 export default history_playerSlice.reducer;

@@ -5,11 +5,13 @@ import { fetchTeamemail } from "../store/teamslice";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { FaMapMarkerAlt, FaCalendar, FaRulerCombined } from "react-icons/fa";
 import { fetchPlayersByTeam } from "../store/playerslice";
+import { Link } from "react-router-dom";
+
 
 const Teamdashboard = () => {
   const dispatch = useDispatch();
   const { teams, loading, error } = useSelector((state) => state.team);
-  const [activeTab, setActiveTab] = useState("batsmen"); // Default to batsmen
+  const [activeTab, setActiveTab] = useState("All"); // Default to batsman
   const [userEmail, setUserEmail] = useState(null);
   const { players = [], loading: playerLoading, error: playerError } = useSelector((state) => state.players);
 
@@ -41,25 +43,26 @@ const Teamdashboard = () => {
   const teamColor = team?.color || "#0047AB";
 
   // Filter players based on role
-  const batsmen = players.filter((p) => p.player_role === "Batsman");
+  const batsman = players.filter((p) => p.player_role === "Batsman");
   const allRounders = players.filter((p) => p.player_role === "All-rounder");
   const bowlers = players.filter((p) => p.player_role === "Bowler");
-  const wicketKeepers = players.filter((p) => p.player_role === "Wicket-keeper");
+  const wicketKeepers = players.filter((p) => p.player_role === "Wicket-keeper batsman");
 
   // Get players to display based on active tab
   const getPlayersToDisplay = () => {
     switch (activeTab) {
-      case "batsmen":
-        return batsmen;
+      case "batsman":
+        return batsman;
       case "bowlers":
         return bowlers;
       case "all-rounders":
         return allRounders;
       case "wicket-keepers":
         return wicketKeepers;
-      default:
-        return batsmen;
-    }
+        case "All":
+          return players; // Return all players if "All" is selected
+        default:
+          return players;    }
   };
 
   const playersToDisplay = getPlayersToDisplay();
@@ -112,7 +115,7 @@ const Teamdashboard = () => {
                 <div>
                   <p className="text-sm">Remaining Budget</p>
                   <p className="text-2xl font-bold">
-                    ₹{(team.remainingBudget / 1000000).toFixed(1)}CR
+                    ₹{(team.remainingBudget / 10000000).toFixed(1)} CR
                   </p>
                 </div>
                 <div>
@@ -257,6 +260,63 @@ const Teamdashboard = () => {
           </div>
         </div>
 
+        
+        {/* Top Auction Buys */}
+        {/* <div className="mb-16">
+          <h2 className="text-2xl font-bold mb-8 text-[#E8EAF6]">
+            Top Auction Buys
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {team.players.slice(0, 3).map((player, index) => (
+              <div
+                key={index}
+                className="bg-[#202626] rounded-lg shadow-lg overflow-hidden border"
+                style={{ borderColor: teamColor }}
+              >
+                <img
+                  src={player.image}
+                  alt={`Player ${index + 1}`}
+                  className="w-full h-64 object-cover"
+                />
+                <div className="p-6">
+                  <h3 className="text-xl font-semibold text-[#E8EAF6]">
+                    {player.name}
+                  </h3>
+                  <p className="text-[#0047AB] font-bold text-lg">
+                    ${(player.price / 1000000).toFixed(1)}M
+                  </p>
+                  <p className="text-[#B0E0E6]">{player.role}</p>
+                  <p className="text-sm text-[#B0E0E6]">
+                    Previous: {player.previousTeam}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div> */}
+
+        {/* Team Gallery */}
+        <div className="mb-16">
+          <h2 className="text-2xl font-bold mb-8 text-[#E8EAF6]">
+            Team Gallery
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {team.teamGallery.map((image, index) => (
+              <div
+                key={index}
+                className="rounded-lg overflow-hidden shadow-lg border"
+                style={{ borderColor: teamColor }}
+              >
+                <img
+                  src={image}
+                  alt={`Gallery ${index + 1}`}
+                  className="w-full h-64 object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Complete Squad */}
         <div>
           <h2 className="text-2xl font-bold mb-8 text-[#E8EAF6]">
@@ -264,7 +324,8 @@ const Teamdashboard = () => {
           </h2>
           <div className="flex flex-wrap gap-4 mb-8 overflow-x-auto">
             {[
-              { label: "Batsmen", value: "batsmen" },
+              { label: "All", value: "All" },
+              { label: "Batsman", value: "batsman" },
               { label: "Bowlers", value: "bowlers" },
               { label: "All-rounders", value: "all-rounders" },
               { label: "Wicket-keepers", value: "wicket-keepers" }
@@ -296,6 +357,10 @@ const Teamdashboard = () => {
                   className="bg-[#202626] rounded-lg shadow-lg overflow-hidden border"
                   style={{ borderColor: teamColor }}
                 >
+                  <Link
+                      to={`/playerprofile/${player.id}`}
+                  >   
+                    
                   <img
                     src={player.image || "https://via.placeholder.com/300x200?text=Player"}
                     alt={player.name}
@@ -303,7 +368,8 @@ const Teamdashboard = () => {
                     onError={(e) => {
                       e.target.src = "https://via.placeholder.com/300x200?text=Player";
                     }}
-                  />
+                    />
+                  </Link>
                   <div className="p-4">
                     <h3 className="text-lg font-semibold text-[#E8EAF6]">
                       {player.name}

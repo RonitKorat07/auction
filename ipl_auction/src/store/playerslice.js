@@ -32,7 +32,7 @@ export const fetchPlayersByTeam = createAsyncThunk(
         const querySnapshot = await getDocs(q);
         
         // Debug logging
-        console.log(`Found ${querySnapshot.size} players for team: ${trimmedTeamName}`);
+        // console.log(`Found ${querySnapshot.size} players for team: ${trimmedTeamName}`);
         
         if (querySnapshot.empty) {
           console.warn(`No players found for team: ${trimmedTeamName}`);
