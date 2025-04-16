@@ -13,57 +13,7 @@ import { fetchPlayers, fetchPlayersByTeam } from "../store/playerslice";
 import { doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { db } from "../config/firebaseconfig";
 import TopBuyers from "../components/TopBuyer";
-
-// Timer Component
-const Timer = ({ auctionId, onTimeUpdate }) => {
-  const [timeLeft, setTimeLeft] = useState(30);
-  const [isTimerActive, setIsTimerActive] = useState(true);
-
-  useEffect(() => {
-    const currentPlayerRef = doc(db, "currentplayer", auctionId);
-    const unsubscribe = onSnapshot(currentPlayerRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setTimeLeft(data.timeLeft ?? 30);
-        setIsTimerActive(data.timeLeft > 0);
-        if (onTimeUpdate) onTimeUpdate(data.timeLeft ?? 30);
-      }
-    });
-    return () => unsubscribe();
-  }, [auctionId, onTimeUpdate]);
-
-  useEffect(() => {
-    if (!isTimerActive || timeLeft <= 0) return;
-
-    const timer = setInterval(async () => {
-      const newTime = timeLeft - 1;
-      const currentPlayerRef = doc(db, "currentplayer", auctionId);
-
-      if (newTime > 0) {
-        await updateDoc(currentPlayerRef, { timeLeft: newTime });
-      } else {
-        await updateDoc(currentPlayerRef, {
-          timeLeft: 0,
-          isTimerActive: false,
-        });
-        clearInterval(timer);
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [timeLeft, auctionId, isTimerActive]);
-
-  return (
-    <div className="flex items-center">
-      <div className="ml-2 bg-[#FF4500] text-white px-2 py-1 rounded-full flex items-center">
-        <i className="fas fa-clock mr-2"></i>
-        <span className="font-semibold">
-          {timeLeft > 0 ? `${timeLeft}s` : "0s"}
-        </span>
-      </div>
-    </div>
-  );
-};
+import Timer from "../components/Timer";
 
 // Memoized Bid History Component
 const BidHistory = React.memo(({ reversedBidHistory, userTeam }) => {
@@ -142,6 +92,7 @@ const Teamjoinauction = () => {
   const [isManualBid, setIsManualBid] = useState(false);
   const [timeLeft, setTimeLeft] = useState(30);
   const [teamData, setTeamData] = useState(null); // To store team data from Firebase
+  const [auctionStatus, setAuctionStatus] = useState("running");
 
   const dispatch = useDispatch();
   const { id } = useParams();
@@ -533,7 +484,7 @@ const playerCounts = {
                     <div className="flex flex-col sm:flex-row justify-between items-center">
                       <div className="flex items-center mb-4 sm:mb-0">
                         <span className="text-xl text-white">Current Bid</span>
-                        <Timer auctionId={id} onTimeUpdate={handleTimeUpdate} />
+                        <Timer auctionId={id} onTimeUpdate={handleTimeUpdate} isAuctionActive={auctionStatus === "running"} />
                       </div>
                       <span className="text-3xl font-bold text-[#B0E0E6]">
                       ₹

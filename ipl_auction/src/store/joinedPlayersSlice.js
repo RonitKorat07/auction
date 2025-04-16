@@ -11,7 +11,8 @@ const initialState = {
   currentPlayerIndex: 0,
   auctionId: null,
   upcomingPlayers: [],
-  soldStatus: "", // Add this new field
+  soldStatus: "",
+  currentBid: 0,
 };
 
 const joinedPlayersSlice = createSlice({
@@ -53,10 +54,10 @@ const joinedPlayersSlice = createSlice({
       state.currentPlayer = null;
       state.auctionStatus = "not-started";
       state.currentPlayerIndex = 0;
-      state.currentBid = 165000000;
+      state.currentBid = 0;
       state.auctionId = null;
       state.upcomingPlayers = [];
-      state.soldStatus = ""; // Reset this too
+      state.soldStatus = "";
     },
   },
 });
@@ -71,17 +72,14 @@ export const {
   setCurrentBid,
   setAuctionId,
   setUpcomingPlayers,
+  setSoldStatus,
   resetAuctionState,
-  setSoldStatus, // Add this
-
 } = joinedPlayersSlice.actions;
 
 const handleFirestoreError = (error, dispatch) => {
   console.error("Firestore error:", error);
   dispatch(setError(error.message));
 };
-
-
 
 export const updateSoldStatus = (auctionId) => async (dispatch, getState) => {
   try {
@@ -97,13 +95,9 @@ export const updateSoldStatus = (auctionId) => async (dispatch, getState) => {
     const lastBid = hasBids ? bidHistory[bidHistory.length - 1] : null;
     const status = hasBids ? "sold" : "unsold";
 
-    // Update Redux state
     dispatch(setSoldStatus(status));
 
-    // Firestore references
     const currentPlayerRef = doc(db, "currentplayer", auctionId);
-
-    // Find player document by querying the id field
     const playersQuery = query(
       collection(db, "players"),
       where("id", "==", currentPlayer.id)
@@ -115,11 +109,9 @@ export const updateSoldStatus = (auctionId) => async (dispatch, getState) => {
       return;
     }
 
-    // Get the player document reference
     const playerDoc = querySnapshot.docs[0];
     const playerRef = doc(db, "players", playerDoc.id);
 
-    // If unsold, update only the auction status
     if (status === "unsold") {
       await updateDoc(currentPlayerRef, {
         "currentPlayer.auction_detail.auction_status": status,
@@ -131,10 +123,6 @@ export const updateSoldStatus = (auctionId) => async (dispatch, getState) => {
 
       alert(`Player marked as UNSOLD.`);
     } else {
-      
-      // If sold, we need to update the team's budget
-      // First find the team that won the bid
-
       const teamsQuery = query(
         collection(db, "teams"),
         where("name", "==", lastBid.teamName)
@@ -149,17 +137,14 @@ export const updateSoldStatus = (auctionId) => async (dispatch, getState) => {
       const teamRef = doc(db, "teams", teamDoc.id);
       const teamData = teamDoc.data();
       
-      // Calculate new budget values
       const newTotalSpent = (teamData.totalSpent || 0) + lastBid.bidAmount;
       const newRemainingBudget = (teamData.budget || 0) - newTotalSpent;
 
-      // Update team's budget
       await updateDoc(teamRef, {
         totalSpent: newTotalSpent,
         remainingBudget: newRemainingBudget
       });
 
-      // If sold, update status, team, and bid amount
       await updateDoc(currentPlayerRef, {
         "currentPlayer.auction_detail.auction_status": status,
         "currentPlayer.auction_detail.sold_price": lastBid?.bidAmount || null,
@@ -172,9 +157,6 @@ export const updateSoldStatus = (auctionId) => async (dispatch, getState) => {
         "auction_detail.team": lastBid?.teamName || null,
       });
 
-  };
-
-      // Prepare player data for history
       const playerData = {
         playerId: currentPlayer.id,
         name: currentPlayer.name,
@@ -184,26 +166,22 @@ export const updateSoldStatus = (auctionId) => async (dispatch, getState) => {
           auctionStatus: status,
           soldPrice: status === "sold" ? lastBid?.bidAmount || null : null,
           team: status === "sold" ? lastBid?.teamName || null : null,
-          bidHistory:status === "sold" ? bidHistory || null : null,
+          bidHistory: status === "sold" ? bidHistory || null : null,
         }
-      }
-      // Step 3: Update auction_history by adding to the players array
-      const auctionHistoryRef = doc(db, "auction_history", auctionId);
+      };
 
-      // Use arrayUnion to add player data into the players field (this won't duplicate the player if already exists)
+      const auctionHistoryRef = doc(db, "auction_history", auctionId);
       await updateDoc(auctionHistoryRef, {
-        players: arrayUnion(playerData)  // Adds player data to the 'players' array
+        players: arrayUnion(playerData)
       });
 
       alert(`Player marked as SOLD and recorded in history.`);
-    
+    }
   } catch (error) {
     console.error("Error updating status:", error);
     alert(error.message || "Failed to update status. Please try again.");
   }
 };
-
-
 
 export const fetchJoinedPlayers = (auctionId, players = []) => (dispatch) => {
   dispatch(setLoading(true));
@@ -244,6 +222,7 @@ export const fetchCurrentPlayer = (auctionId) => (dispatch) => {
         dispatch(setCurrentPlayer(data.currentPlayer || null));
         dispatch(setCurrentBid(data?.currentPlayer?.auction_detail?.current_bid || data?.currentPlayer?.auction_detail?.base_price));
         dispatch(setAuctionStatus(data.auctionStatus || "not-started"));
+        dispatch(setCurrentPlayerIndex(data.currentPlayerIndex || 0));
       }
       dispatch(setLoading(false));
     },
@@ -279,7 +258,7 @@ export const updateCurrentBid = ({ auctionId, bidAmount, teamName, teamLogo }) =
     await updateDoc(currentPlayerRef, {
       "currentPlayer.auction_detail.current_bid": bidAmount,
       "currentPlayer.auction_detail.bid_history": [...currentBidHistory, newBidEntry],
-      timeLeft: 30, // Reset timer for the next player
+      timeLeft: 30,
       lastUpdated: Date.now()
     });
 
@@ -312,32 +291,27 @@ export const startAuction = (auctionId, initialPlayer, players = []) => async (d
     const upcomingPlayers = players.slice(1, 5);
     const currentPlayerRef = doc(db, "currentplayer", auctionId);
 
-    await setDoc( 
+    await setDoc(
       currentPlayerRef,
       {
         currentPlayer: initialPlayer,
         auctionStatus: "running",
         upcomingPlayers,
-        timeLeft : 30,
+        timeLeft: 30,
+        currentPlayerIndex: 0,
       },
       { merge: true }
     );
 
-     // Step 2: Create the auction history document with empty player and team arrays
-     const auctionHistoryRef = doc(db, "auction_history", auctionId);
-
-     // Create empty arrays for players and teams
-     const playersArray = [];
-     const teamsArray = [];
- 
-     await setDoc(
-       auctionHistoryRef,
-       {
-         players: playersArray,
-         teams: teamsArray,
-       },
-       { merge: true }
-     );
+    const auctionHistoryRef = doc(db, "auction_history", auctionId);
+    await setDoc(
+      auctionHistoryRef,
+      {
+        players: [],
+        teams: [],
+      },
+      { merge: true }
+    );
 
     dispatch(fetchJoinedPlayers(auctionId, players));
     dispatch(fetchCurrentPlayer(auctionId));
@@ -367,13 +341,14 @@ export const resumeAuction = (auctionId) => async (dispatch, getState) => {
     const currentPlayerRef = doc(db, "currentplayer", auctionId);
     await updateDoc(currentPlayerRef, { auctionStatus: "running" });
 
-    const { joinedPlayers, currentPlayerIndex, upcomingPlayers } = getState().joinedPlayers;
-
-    if (upcomingPlayers.length === 0) {
-      const newUpcomingPlayers = joinedPlayers.slice(currentPlayerIndex + 1, currentPlayerIndex + 5);
-      dispatch(setUpcomingPlayers(newUpcomingPlayers));
-      await updateDoc(currentPlayerRef, { upcomingPlayers: newUpcomingPlayers });
-    }
+    const { joinedPlayers, currentPlayerIndex } = getState().joinedPlayers;
+    const newUpcomingPlayers = joinedPlayers.slice(currentPlayerIndex + 1, currentPlayerIndex + 5);
+    
+    await updateDoc(currentPlayerRef, { 
+      upcomingPlayers: newUpcomingPlayers 
+    });
+    
+    dispatch(setUpcomingPlayers(newUpcomingPlayers));
   } catch (error) {
     handleFirestoreError(error, dispatch);
   } finally {
@@ -385,7 +360,6 @@ export const endAuction = (auctionId) => async (dispatch) => {
   try {
     dispatch(setLoading(true));
 
-    // 1. Get all teams participating in the auction
     const teamsQuery = query(collection(db, "teams"));
     const teamsSnapshot = await getDocs(teamsQuery);
     const auctionHistoryRef = doc(db, "auction_history", auctionId);
@@ -393,7 +367,6 @@ export const endAuction = (auctionId) => async (dispatch) => {
     for (const teamDoc of teamsSnapshot.docs) {
       const teamData = teamDoc.data();
       
-      // **Step 2: Count Players by Role**
       const playersQuery = query(collection(db, "players"), where("auction_detail.team", "==", teamData.name));
       const playerSnapshot = await getDocs(playersQuery);
 
@@ -434,7 +407,6 @@ export const endAuction = (auctionId) => async (dispatch) => {
       });
     }
 
-    // **Step 3: End Auction**
     const currentPlayerRef = doc(db, "currentplayer", auctionId);
     await updateDoc(currentPlayerRef, {
       auctionStatus: "ended",
@@ -443,7 +415,6 @@ export const endAuction = (auctionId) => async (dispatch) => {
       upcomingPlayers: [],
     });
 
-    // **Step 4: Mark Auction as Completed**
     const auctionRef = doc(db, "auctions", auctionId);
     await updateDoc(auctionRef, {
       status: "completed",
@@ -451,7 +422,6 @@ export const endAuction = (auctionId) => async (dispatch) => {
     });
 
     dispatch(resetAuctionState());
-
   } catch (error) {
     handleFirestoreError(error, dispatch);
   } finally {
@@ -460,30 +430,47 @@ export const endAuction = (auctionId) => async (dispatch) => {
 };
 
 export const nextPlayer = (auctionId) => async (dispatch, getState) => {
-  const { joinedPlayers, currentPlayerIndex } = getState().joinedPlayers;
+  try {
+    dispatch(setLoading(true));
+    
+    const { joinedPlayers, currentPlayerIndex } = getState().joinedPlayers;
 
-  if (currentPlayerIndex < joinedPlayers.length - 1) {
-    const newIndex = currentPlayerIndex + 1;
-    const nextPlayerData = joinedPlayers[newIndex];
+    if (!joinedPlayers || joinedPlayers.length === 0) {
+      dispatch(setError("No players available"));
+      return;
+    }
 
-    dispatch(setCurrentPlayerIndex(newIndex));
+    if (currentPlayerIndex >= joinedPlayers.length) {
+      dispatch(setError("Invalid player index"));
+      return;
+    }
 
-    const newUpcomingPlayers = joinedPlayers.slice(newIndex + 1, newIndex + 5);
-    const currentPlayerRef = doc(db, "currentplayer", auctionId);
+    if (currentPlayerIndex < joinedPlayers.length - 1) {
+      const newIndex = currentPlayerIndex + 1;
+      const nextPlayerData = joinedPlayers[newIndex];
+      
+      const newUpcomingPlayers = joinedPlayers.slice(newIndex + 1, newIndex + 5);
+      const currentPlayerRef = doc(db, "currentplayer", auctionId);
 
-    await updateDoc(currentPlayerRef, {
-      currentPlayer: nextPlayerData,
-      // "currentPlayer.auction_details.current_bid": nextPlayerData.auction_detail.base_price,
-      upcomingPlayers: newUpcomingPlayers,
-      timeLeft: 30, // Reset timer for the next player
-    });
+      await updateDoc(currentPlayerRef, {
+        currentPlayer: nextPlayerData,
+        "currentPlayer.auction_detail.current_bid": nextPlayerData.auction_detail.base_price,
+        upcomingPlayers: newUpcomingPlayers,
+        currentPlayerIndex: newIndex,
+        timeLeft: 30,
+      });
 
-    dispatch(setCurrentPlayer(nextPlayerData));
-    dispatch(setUpcomingPlayers(newUpcomingPlayers));
-
-  } else {
-    dispatch(endAuction(auctionId));
-
+      dispatch(setCurrentPlayerIndex(newIndex));
+      dispatch(setCurrentPlayer(nextPlayerData));
+      dispatch(setUpcomingPlayers(newUpcomingPlayers));
+      dispatch(setCurrentBid(nextPlayerData.auction_detail.base_price));
+    } else {
+      await dispatch(endAuction(auctionId));
+    }
+  } catch (error) {
+    handleFirestoreError(error, dispatch);
+  } finally {
+    dispatch(setLoading(false));
   }
 };
 
