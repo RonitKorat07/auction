@@ -299,8 +299,8 @@ const Auctionhandel = () => {
                         Current Bid
                       </span>
                       {/* Timer Component */}
-                      <Timer auctionId={id} />
-                    </div>
+                      <Timer auctionId={id} isAuctionActive={auctionStatus === "running"}/>
+                      </div>
                     <span className="text-2xl sm:text-3xl font-bold text-[#0047AB]">
                     ₹
                       {currentPlayer.auction_detail.current_bid < 10000000
