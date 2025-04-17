@@ -454,7 +454,7 @@ export const nextPlayer = (auctionId) => async (dispatch, getState) => {
 
       await updateDoc(currentPlayerRef, {
         currentPlayer: nextPlayerData,
-        "currentPlayer.auction_detail.current_bid": nextPlayerData.auction_detail.base_price,
+        "currentPlayer.auction_details.current_bid": nextPlayerData.auction_detail.base_price,
         upcomingPlayers: newUpcomingPlayers,
         currentPlayerIndex: newIndex,
         timeLeft: 30,
@@ -464,9 +464,7 @@ export const nextPlayer = (auctionId) => async (dispatch, getState) => {
       dispatch(setCurrentPlayer(nextPlayerData));
       dispatch(setUpcomingPlayers(newUpcomingPlayers));
       dispatch(setCurrentBid(nextPlayerData.auction_detail.base_price));
-    } else {
-      await dispatch(endAuction(auctionId));
-    }
+    } 
   } catch (error) {
     handleFirestoreError(error, dispatch);
   } finally {
