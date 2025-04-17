@@ -8,6 +8,8 @@ import { fetchCurrentPlayer } from "../store/joinedPlayersSlice";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import cricket_logo from "../assets/cricklogo.png";
 import TopBuyers from "../components/TopBuyer";
+import TeamStatus from "../components/TeamStatus";
+import { fetchPlayers } from "../store/playerslice";
 
 const Auction = () => {
   const [currentBid, setCurrentBid] = useState(165000000);
@@ -27,6 +29,11 @@ const Auction = () => {
     loading: teamsLoading,
     error: teamsError,
   } = useSelector((state) => state.team);
+  const {
+    players,
+    loading: playersLoading,
+    error: playersError,
+  } = useSelector((state) => state.player);
 
   const { currentPlayer } = useSelector((state) => state.joinedPlayers);
   const [userEmail, setUserEmail] = useState(null);
@@ -43,7 +50,13 @@ const Auction = () => {
     });
     return () => unsubscribe();
   }, []);
-  const userTeam = teams?.find((team) => team.email === userEmail);
+
+ const userTeam = teams?.find((team) => team.email === userEmail);
+  useEffect(() => {
+    dispatch(fetchPlayers());
+    dispatch(fetchAuctions());
+    dispatch(fetchTeam());
+  }, [dispatch, id]);
 
   // Find the selected auction based on the ID
   const selectedauction = auctions.find(
@@ -51,7 +64,8 @@ const Auction = () => {
   );
 
   // Compute joinedteams dynamically
-  const [joinedteams, setJoinedteams] = useState([]);
+
+  
 
   useEffect(() => {
     // Fetch teams, auctions, and current player when the component mounts or when the ID changes
@@ -62,16 +76,7 @@ const Auction = () => {
     }
   }, [dispatch, id]);
 
-  useEffect(() => {
-    if (selectedauction && teams.length > 0) {
-      // Recompute joinedteams whenever selectedauction or teams changes
-      const allteams = selectedauction.teams || [];
-      const updatedJoinedteams = allteams.map((teamname) =>
-        teams.find((team) => team.name === teamname)
-      );
-      setJoinedteams(updatedJoinedteams);
-    }
-  }, [selectedauction, teams]);
+
 
   // Timer logic
   useEffect(() => {
@@ -256,68 +261,11 @@ const Auction = () => {
 
 
         {/* Teams Status */}
-        <div className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-4 sm:p-6 border border-[#0047AB]">
-          <h3 className="text-2xl font-bold mb-6 flex items-center gap-3 text-white">
-            <FaShieldAlt className="text-[#0047AB]" />
-            Teams Status
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-            {joinedteams.map((team, index) => (
-              <div
-                key={index}
-                className={`flex flex-col items-center bg-[#2C2F32] rounded-lg p-4 border border-[#0047AB] cursor-pointer hover:bg-[#0047AB]/10 transition-all "ring-2 ring-[#0047AB]" : ""}`}
-              >
-                <img
-                  src={team?.logo}
-                  alt={team?.name}
-                  className="w-20 h-20 sm:w-24 sm:h-24 mb-4"
-                />
-                <h4 className="font-bold text-base sm:text-lg text-white text-center mb-4">
-                  {team.name}
-                </h4>
-                <div className="w-full space-y-2">
-                  {[
-                    {
-                      label: "Budget",
-                      value: team.budget,
-                      icon: <FaWallet className="text-[#0047AB]" />,
-                      color: "text-green-400",
-                    },
-                    {
-                      label: "Players",
-                      value: "0",
-                      icon: <FaUsers className="text-[#0047AB]" />,
-                    },
-                    {
-                      label: "Slots",
-                      value: team.slotsLeft,
-                      icon: <FaPuzzlePiece className="text-[#0047AB]" />,
-                    },
-                  ].map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between bg-[#2C2F32] rounded-lg p-2"
-                    >
-                      <div className="flex items-center gap-2">
-                        {item.icon}
-                        <span className="text-gray-300 text-sm">
-                          {item.label}
-                        </span>
-                      </div>
-                      <span
-                        className={`${
-                          item.color || "text-white"
-                        } font-semibold text-sm`}
-                      >
-                        {item.value}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <TeamStatus 
+          teams={teams} 
+          players={players} 
+          selectedauction={selectedauction} 
+        />
       </main>
     </div>
   );

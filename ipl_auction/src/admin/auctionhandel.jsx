@@ -24,6 +24,7 @@ import Timer from "../components/Timer"; // Import the Timer component
 import { fetchTeam } from "../store/teamslice";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import TopBuyers from "../components/TopBuyer";
+import TeamStatus from "../components/TeamStatus";
 
 const Auctionhandel = () => {
   const { id } = useParams();
@@ -72,7 +73,8 @@ const Auctionhandel = () => {
     loading: teamsLoading,
     error: teamsError,
   } = useSelector((state) => state.team);
-  const [joinedteams, setJoinedteams] = useState([]);
+
+
   const selectedauction = auctions.find(
     (auction) => auction.id.toString() === id
   );
@@ -84,16 +86,8 @@ const Auctionhandel = () => {
     dispatch(fetchTeam());
   }, [dispatch, id]);
 
-  useEffect(() => {
-    if (selectedauction && teams.length > 0) {
-      // Recompute joinedteams whenever selectedauction or teams changes
-      const allteams = selectedauction.teams || [];
-      const updatedJoinedteams = allteams.map((teamname) =>
-        teams.find((team) => team.name === teamname)
-      );
-      setJoinedteams(updatedJoinedteams);
-    }
-  }, [selectedauction, teams]);
+
+
   useEffect(() => {
     if (id && players.length > 0) {
       dispatch(fetchJoinedPlayers(id, players));
@@ -367,84 +361,11 @@ const Auctionhandel = () => {
         <TopBuyers/>
 
        {/* Teams Status */}
-          <div className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-4 sm:p-6 border border-[#0047AB]">
-            <h3 className="text-2xl font-bold mb-6 flex items-center gap-3 text-white">
-              <FaShieldAlt className="text-[#0047AB]" />
-              Teams Status
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-              {joinedteams.map((team, index) => {
-                // This will now re-run whenever players change
-                const teamPlayers = players.filter(player => 
-                  player.auction_detail?.team === team.name
-                );
-
-                  const playerCount = teamPlayers.length;
-
-                const formatCurrency = (amount) => {
-                  if (!amount) return "₹0";
-                  return amount < 10000000 
-                    ? `₹${(amount / 100000).toFixed(2)} L` 
-                    : `₹${(amount / 10000000).toFixed(2)} Cr`;
-                };
-
-                return (
-                  <div
-                    key={team.id || index}
-                    className="flex flex-col items-center bg-[#2C2F32] rounded-lg p-4 border border-[#0047AB] hover:bg-[#0047AB]/10 transition-all"
-                  >
-                    <img
-                      src={team?.logo}
-                      alt={team.name}
-                      className="w-20 h-20 sm:w-24 sm:h-24 mb-4 object-contain"
-                    />
-                    <h4 className="font-bold text-base sm:text-lg text-white text-center mb-4">
-                      {team.name}
-                    </h4>
-                    <div className="w-full space-y-2">
-                      {[
-                        {
-                          label: "Budget",
-                          value: formatCurrency(team.budget),
-                          icon: <FaWallet className="text-[#0047AB]" />,
-                          color: "text-green-400",
-                        },
-                        {
-                          label: "Players",
-                          value: `${playerCount}/25`,
-                          icon: <FaUsers className="text-[#0047AB]" />,
-                        },
-                        {
-                          label: "Total Spent",
-                          value: formatCurrency(team.totalSpent),
-                          icon: <FaPuzzlePiece className="text-[#0047AB]" />,
-                        },
-                      ].map((item, idx) => (
-                        <div
-                          key={idx}
-                          className="flex items-center justify-between bg-[#2C2F32] rounded-lg p-2"
-                        >
-                          <div className="flex items-center gap-2">
-                            {item.icon}
-                            <span className="text-gray-300 text-sm">
-                              {item.label}
-                            </span>
-                          </div>
-                          <span
-                            className={`${
-                              item.color || "text-white"
-                            } font-semibold text-sm`}
-                          >
-                            {item.value}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            </div>
+       <TeamStatus 
+          teams={teams} 
+          players={players} 
+          selectedauction={selectedauction} 
+        />
 
       </main>
 

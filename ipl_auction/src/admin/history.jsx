@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { FaTimes } from "react-icons/fa";
@@ -13,13 +13,13 @@ const AuctionHistory = () => {
   const dispatch = useDispatch();
   
   const { currentAuction, status, error } = useSelector((state) => state.historyplayer);
-  
-  // State for filters and UI
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("name");
   const [selectedRole, setSelectedRole] = useState("All");
-  const [selectedTeam, setSelectedTeam] = useState(null);
-  const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [selectedTeam, setSelectedTeam] = useState("All");
+  const [selectedStatus, setSelectedStatus] = useState("All");
 
   // Fetch auction details on mount
   useEffect(() => {
@@ -34,20 +34,32 @@ const AuctionHistory = () => {
     };
   }, [dispatch, id, navigate]);
 
-  // Filter and sort players
-  const filteredPlayers = (currentAuction?.players || [])
-    .filter((player) => {
-      const matchesSearch = player.name?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesRole = selectedRole === "All" || player.role === selectedRole;
-      const matchesTeam = selectedTeam === null || 
-        (currentAuction?.teams?.some(t => t.id === selectedTeam && t.name === player.team));
-      return matchesSearch && matchesRole && matchesTeam;
-    })
-    .sort((a, b) => {
-      if (sortBy === "name") return a.name.localeCompare(b.name);
-      if (sortBy === "finalBid") return b.finalBid - a.finalBid;
-      return 0;
-    });
+   // Filter and sort players
+   const filteredPlayers = useMemo(() => {
+    if (!currentAuction?.players) return [];
+    
+    return currentAuction.players
+      .filter((player) => {
+        const matchesSearch = player.name?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesRole = selectedRole === "All" || player.role === selectedRole;
+        const matchesTeam = selectedTeam === "All" || player.team === selectedTeam;
+        const matchesStatus = selectedStatus === "All" || player.auctionStatus === selectedStatus;
+        return matchesSearch && matchesRole && matchesTeam && matchesStatus;
+      })
+      .sort((a, b) => {
+        if (sortBy === "name") return a.name.localeCompare(b.name);
+        if (sortBy === "finalBid") return (b.finalBid || 0) - (a.finalBid || 0);
+        if (sortBy === "role") return a.role.localeCompare(b.role);
+        return 0;
+      });
+  }, [currentAuction, searchTerm, selectedRole, selectedTeam, selectedStatus, sortBy]);
+
+  // Get unique teams for filter dropdown
+  const uniqueTeams = useMemo(() => {
+    if (!currentAuction?.teams) return [];
+    const teams = currentAuction.teams.map(team => team.name);
+    return ["All", ...teams];
+  }, [currentAuction]);
 
   if (status === "loading") {
     return (
@@ -75,24 +87,10 @@ const AuctionHistory = () => {
   return (
     <div className="min-h-screen bg-[#202626] text-gray-100">
       <main className="pt-24 pb-12 max-w-7xl mx-auto px-4">
-        {/* Auction Header */}
-        <div className="bg-[#2A2F36] p-6 rounded-lg mb-8">
-          <h1 className="text-2xl font-bold">
-            {currentAuction ? `Auction: ${currentAuction.name}` : "Auction History"}
-          </h1>
-          {currentAuction?.timestamp && (
-            <p className="text-gray-400 mt-2">
-              {new Date(currentAuction.timestamp.toDate()).toLocaleString()}
-            </p>
-          )}
-        </div>
-
         {/* Team Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        {currentAuction?.teams?.length > 0 ? (
-          currentAuction.teams.map(team => {
-    
-            return (
+          {currentAuction?.teams?.length > 0 ? (
+            currentAuction.teams.map(team => (
               <div key={team.id} className="bg-[#202626] rounded-xl border border-[#0047AB] p-4 hover:shadow-lg transition-all">
                 {/* Team Header */}
                 <div className="flex items-center gap-4 mb-4">
@@ -112,7 +110,7 @@ const AuctionHistory = () => {
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-[#B0E0E6]">Total Budget:</span>
                     <span className="text-lg font-bold">
-                    ₹{
+                      ₹{
                         team.budget < 10000000
                           ? (team.budget / 100000).toFixed(2) + ' Lakh'
                           : (team.budget / 10000000).toFixed(2) + ' Cr'
@@ -122,17 +120,17 @@ const AuctionHistory = () => {
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-[#B0E0E6]">Remaining:</span>
                     <span className="text-lg font-bold text-emerald-400">
-                    ₹{
-                       team. remainingBudget < 10000000
-                          ? (team. remainingBudget / 100000).toFixed(2) + ' Lakh'
-                          : (team. remainingBudget/ 10000000).toFixed(2) + ' Cr'
+                      ₹{
+                        team.remainingBudget < 10000000
+                          ? (team.remainingBudget / 100000).toFixed(2) + ' Lakh'
+                          : (team.remainingBudget / 10000000).toFixed(2) + ' Cr'
                       }
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-[#B0E0E6]">Amount Spent:</span>
                     <span className="text-lg font-bold text-[#FF4500]">
-                    ₹{
+                      ₹{
                         team.totalSpent < 10000000
                           ? (team.totalSpent / 100000).toFixed(2) + ' Lakh'
                           : (team.totalSpent / 10000000).toFixed(2) + ' Cr'
@@ -158,114 +156,151 @@ const AuctionHistory = () => {
                   </div>
                 </div>
               </div>
-            );
-          })
-        ) : (
-          <div className="col-span-3 text-center py-8 text-gray-400">
-            No teams data available
-          </div>
-        )}
-      </div>
+            ))
+          ) : (
+            <div className="col-span-3 text-center py-8 text-gray-400">
+              No teams data available
+            </div>
+          )}
+        </div>
 
-        {/* Filters */}
-        <div className="bg-[#202626] rounded-lg p-6 mb-8 border border-[#0047AB]">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="relative">
+        {/* Player Table */}
+        <div className="bg-[#2A2F36] rounded-lg p-6 mb-8 border border-[#0047AB]">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            {/* Search Players */}
+            <div>
               <input
                 type="text"
-                placeholder="Search players..."
-                className="w-full pl-4 pr-4 py-2 border border-[#E8EAF6] rounded-lg bg-[#202626] text-[#E8EAF6]"
+                placeholder="Player name..."
+                className="w-full px-4 py-2 border border-[#E8EAF6] rounded-lg bg-[#202626] text-[#E8EAF6]"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <select
-              className="border border-[#E8EAF6] rounded-lg px-4 py-2 bg-[#202626] text-[#E8EAF6]"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-            >
-              <option value="name">Sort by Name</option>
-              <option value="finalBid">Sort by Final Bid</option>
-            </select>
-            <select
-              className="border border-[#E8EAF6] rounded-lg px-4 py-2 bg-[#202626] text-[#E8EAF6]"
-              value={selectedRole}
-              onChange={(e) => setSelectedRole(e.target.value)}
-            >
-              <option value="All">All Roles</option>
-              <option value="Batsman">Batsman</option>
-              <option value="Bowler">Bowler</option>
-              <option value="All-rounder">All-rounder</option>
-              <option value="Wicket-keeper">Wicket-keeper</option>
-            </select>
-            <select
-              className="border border-[#E8EAF6] rounded-lg px-4 py-2 bg-[#202626] text-[#E8EAF6]"
-              value={selectedTeam || ""}
-              onChange={(e) => setSelectedTeam(e.target.value ? Number(e.target.value) : null)}
-            >
-              <option value="">All Teams</option>
-              {currentAuction?.teams?.map((team) => (
-                <option key={team.id} value={team.id}>
-                  {team.name}
-                </option>
-              ))}
-            </select>
+
+            {/* Sort By */}
+            <div>
+              <select
+                className="w-full px-4 py-2 border border-[#E8EAF6] rounded-lg bg-[#202626] text-[#E8EAF6]"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <option value="name">Name</option>
+                <option value="finalBid">Final Bid</option>
+              </select>
+            </div>
+
+            {/* Filter by Role */}
+            <div>
+              <select
+                className="w-full px-4 py-2 border border-[#E8EAF6] rounded-lg bg-[#202626] text-[#E8EAF6]"
+                value={selectedRole}
+                onChange={(e) => setSelectedRole(e.target.value)}
+              >
+                <option value="All">All Roles</option>
+                <option value="Batsman">Batsman</option>
+                <option value="Bowler">Bowler</option>
+                <option value="All-rounder">All-rounder</option>
+                <option value="Wicket-keeper batsman">Wicket-keeper</option>
+              </select>
+            </div>
+
+            {/* Filter by Team */}
+            <div>
+              <select
+                className="w-full px-4 py-2 border border-[#E8EAF6] rounded-lg bg-[#202626] text-[#E8EAF6]"
+                value={selectedTeam}
+                onChange={(e) => setSelectedTeam(e.target.value)}
+              >
+                {uniqueTeams.map((team) => (
+                  <option key={team} value={team}>{team}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Filter by Status */}
+            <div>
+              <select
+                className="w-full px-4 py-2 border border-[#E8EAF6] rounded-lg bg-[#202626] text-[#E8EAF6]"
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+              >
+                <option value="All">All Status</option>
+                <option value="sold">Sold</option>
+                <option value="unsold">Unsold</option>
+              </select>
+            </div>
           </div>
         </div>
 
         {/* Player Table */}
-        <div className="bg-[#202626] rounded-lg shadow-md overflow-hidden border border-[#0047AB] max-h-[400px] overflow-y-auto">
-          <div className="overflow-x-auto">
-            <table className="min-w-full">
-              <thead className="bg-[#202626]">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase">Player</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase">Role</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase">Team</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase">Final Bid</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#0047AB]">
-                {filteredPlayers.map((player) => (
-                  <tr key={player.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <img className="h-10 w-10 rounded-full object-cover" src={player.imageUrl} alt={player.name} />
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-[#E8EAF6]">
-                            {player.name}
-                            <span className={`px-2 inline-flex text-xs rounded-full ${player.auctionStatus === "sold" ? "bg-green-700" : "bg-red-700"}`}>
-                              {player.auctionStatus}
-                            </span>
+        <div className="bg-[#202626] rounded-lg shadow-md overflow-hidden border border-[#0047AB] max-h-[400px] min-w-full h-full overflow-y-auto scrollbar-hide"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>  
+          
+          <div className="overflow-x-auto h-full scrollbar-hide">
+              <table className="min-w-full">
+                <thead className="bg-[#202626] sticky top-0">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase">Player</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase">Role</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase">Team</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase">Final Bid</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#E8EAF6] uppercase">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#0047AB]">
+                  {filteredPlayers.map((player) => (
+                    <tr key={`${player.id}-${player.team}`}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <img className="h-10 w-10 rounded-full object-cover" src={player.imageUrl} alt={player.name} />
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-[#E8EAF6]">
+                              {player.name}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 inline-flex text-xs rounded-full bg-[#0047AB]/10 text-[#0047AB]">
-                        {player.role}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#E8EAF6]">
-                      {player.team}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-emerald-400">
-                      {player.finalBid?.toLocaleString() || "0"} L
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                        onClick={() => setSelectedPlayer(player)}
-                        className="text-[#0047AB] hover:text-[#FF4500]"
-                      >
-                        View Bid History
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-2 inline-flex text-xs rounded-full bg-[#0047AB]/10 text-[#0047AB]">
+                          {player.role}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#E8EAF6]">
+                        {player.team || "Unsold"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-emerald-400">
+                        {player.finalBid ? (
+                          `₹${
+                            player.finalBid < 10000000
+                              ? (player.finalBid / 100000).toFixed(2) + ' L'
+                              : (player.finalBid / 10000000).toFixed(2) + ' Cr'
+                          }`
+                        ) : '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 inline-flex text-xs rounded-full ${
+                          player.auctionStatus === "sold" ? "bg-green-700" : "bg-red-700"
+                        }`}>
+                          {player.auctionStatus}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {player.auctionStatus === "sold" && (
+                          <button
+                            onClick={() => setSelectedPlayer(player)}
+                            className="text-[#0047AB] hover:text-[#FF4500]"
+                          >
+                            View Bid History
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
         </div>
 
         {/* Bid History Modal */}
@@ -289,10 +324,10 @@ const AuctionHistory = () => {
                 </div>
               </div>
 
-              <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-2">
+              <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-2 scrollbar-hide">
                 {!selectedPlayer?.bidHistory || selectedPlayer.bidHistory.length === 0 ? (
                   <div className="text-center p-4 bg-[#2A2F36] rounded-lg">
-                    <p className="text-lg font-bold text-red-400">Player Unsold</p>
+                    <p className="text-lg font-bold text-red-400">No Bid History</p>
                     <p className="text-sm text-[#B0E0E6] mt-2">
                       This player did not receive any bids during the auction.
                     </p>
@@ -310,7 +345,11 @@ const AuctionHistory = () => {
                         </div>
                       </div>
                       <div className="text-lg font-bold text-emerald-400">
-                        {bid.bidAmount?.toLocaleString() || "0"} L
+                        ₹{
+                          bid.bidAmount < 10000000
+                              ? (bid.bidAmount / 100000).toFixed(2) + ' L'
+                              : (bid.bidAmount / 10000000).toFixed(2) + ' Cr'
+                        }
                       </div>
                     </div>
                   ))
