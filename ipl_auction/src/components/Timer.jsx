@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { db } from "../config/firebaseconfig";
 
-const Timer = ({ auctionId }) => {
+const Timer = ({ auctionId, onTimeUpdate }) => {
   const [timeLeft, setTimeLeft] = useState(30);
   const [auctionStatus, setAuctionStatus] = useState("running");
   const [lastActiveTime, setLastActiveTime] = useState(Date.now());
@@ -45,19 +45,16 @@ const Timer = ({ auctionId }) => {
           setTimeLeft(newTime);
           setLastActiveTime(now);
 
+          // Call onTimeUpdate when time changes
+          if (onTimeUpdate) {
+            onTimeUpdate(newTime);
+          }
+
           try {
             const currentPlayerRef = doc(db, "currentplayer", auctionId);
-            
-            if (newTime > 0) {
-              await updateDoc(currentPlayerRef, { 
-                timeLeft: newTime 
-              });
-            } else {
-              await updateDoc(currentPlayerRef, { 
-                timeLeft: 0,
-                auctionStatus: "paused"
-              });
-            }
+            await updateDoc(currentPlayerRef, { 
+              timeLeft: newTime 
+            });
           } catch (error) {
             console.error("Timer update error:", error);
           }
@@ -70,7 +67,7 @@ const Timer = ({ auctionId }) => {
         clearInterval(timerRef.current);
       }
     };
-  }, [timeLeft, auctionStatus, auctionId, lastActiveTime]);
+  }, [timeLeft, auctionStatus, auctionId, lastActiveTime, onTimeUpdate]);
 
   // Calculate display time (handles pause/resume properly)
   const displayTime = auctionStatus === "paused" ? timeLeft : timeLeft;

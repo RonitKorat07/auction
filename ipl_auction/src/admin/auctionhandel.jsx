@@ -209,7 +209,7 @@ const Auctionhandel = () => {
         </div>
 
         {/* Player Profile */}
-        {auctionStatus === "running" && currentPlayer && (
+        {auctionStatus === "running"  && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div className="col-span-10 lg:col-span-8  h-full">
               <div className="bg-[#2C2F32] rounded-lg shadow-lg overflow-hidden border-2 border-[#0047AB] h-full">

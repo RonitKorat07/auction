@@ -91,7 +91,7 @@ const Teamjoinauction = () => {
   const [userEmail, setUserEmail] = useState(null);
   const [isManualBid, setIsManualBid] = useState(false);
   const [timeLeft, setTimeLeft] = useState(30);
-  const [teamData, setTeamData] = useState(null); // To store team data from Firebase
+  const [teamData, setTeamData] = useState(null);
   const [auctionStatus, setAuctionStatus] = useState("running");
 
   const dispatch = useDispatch();
@@ -103,6 +103,11 @@ const Teamjoinauction = () => {
     (state) => state.joinedPlayers
   );
 
+  // Check if bidding is allowed
+  const isBiddingAllowed = useMemo(() => {
+    return auctionStatus === "running" && timeLeft > 0;
+  }, [auctionStatus, timeLeft]);
+
   // Memoized derived data
   const reversedBidHistory = useMemo(() => {
     return [...(currentPlayer?.auction_detail?.bid_history || [])].reverse();
@@ -112,7 +117,6 @@ const Teamjoinauction = () => {
     return teams?.find((team) => team.email === userEmail);
   }, [teams, userEmail]);
 
-
   const totalBudget = useMemo(() => teamData?.budget || 0, [teamData]);
   const remainingBudget = useMemo(() => teamData?.remainingBudget || 0, [teamData]);
   const totalSpent = useMemo(() => teamData?.totalSpent || 0, [teamData]);
@@ -121,18 +125,30 @@ const Teamjoinauction = () => {
     setTimeLeft(newTime);
   }, []);
 
+  // Fetch team data and auction status
   useEffect(() => {
     if (userTeam) {
-      const teamRef = doc(db, "teams", userTeam.id); // Assuming team has an id field
-      const unsubscribe = onSnapshot(teamRef, (doc) => {
+      const teamRef = doc(db, "teams", userTeam.id);
+      const unsubscribeTeam = onSnapshot(teamRef, (doc) => {
         if (doc.exists()) {
-          const data = doc.data();
-          setTeamData(data);
+          setTeamData(doc.data());
         }
       });
-      return () => unsubscribe();
+
+      const auctionRef = doc(db, "currentplayer", id);
+      const unsubscribeAuction = onSnapshot(auctionRef, (doc) => {
+        if (doc.exists()) {
+          const data = doc.data();
+          setAuctionStatus(data.auctionStatus || "running");
+        }
+      });
+
+      return () => {
+        unsubscribeTeam();
+        unsubscribeAuction();
+      };
     }
-  }, [userTeam]);
+  }, [userTeam, id]);
 
   // Fetch logged-in user's email
   useEffect(() => {
@@ -160,9 +176,9 @@ const Teamjoinauction = () => {
     }
   }, [dispatch, userEmail, id]);
 
-    useEffect(() => {
+  useEffect(() => {
     setIsManualBid(false);
-  }, [currentPlayer?.id]); 
+  }, [currentPlayer?.id]);
 
   // Update bid amount when currentPlayer changes
   useEffect(() => {
@@ -183,13 +199,12 @@ const Teamjoinauction = () => {
     }
   }, [currentBid]);
   
-    useEffect(() => {
-      if (teams?.length > 0) {
-        const teamName = teams[0].name;
-        dispatch(fetchPlayersByTeam(teamName));
-      }
-    }, [dispatch, teams , players]);
-  // In the Teamdashboard component, update the player counting logic:
+  useEffect(() => {
+    if (teams?.length > 0) {
+      const teamName = teams[0].name;
+      dispatch(fetchPlayersByTeam(teamName));
+    }
+  }, [dispatch, teams, players]);
 
   const batsman = useMemo(() => 
     players.filter((p) => p.player_role === "Batsman" || p.player_role === "Wicket-keeper batsman"), 
@@ -206,18 +221,17 @@ const Teamjoinauction = () => {
     [players]
   );
 
-// Then create counts for each category
-const playerCounts = {
-  batsman: batsman.length,
-  bowlers: bowlers.length,
-  allRounders: allRounders.length,
-  total: players.length
-};
+  const playerCounts = {
+    batsman: batsman.length,
+    bowlers: bowlers.length,
+    allRounders: allRounders.length,
+    total: players.length
+  };
 
   // Handle bid submission
   const handleBid = useCallback(async () => {
-    if (timeLeft <= 0) {
-      alert("Auction time has ended. Bidding is closed.");
+    if (!isBiddingAllowed) {
+      alert("Bidding is currently not allowed. Auction may be paused or ended.");
       return;
     }
 
@@ -228,7 +242,6 @@ const playerCounts = {
 
     try {
       setCurrentBid(bidAmount);
-      // setTotalSpent((prevSpent) => prevSpent + bidAmount);
       setShowBidModal(false);
 
       await dispatch(
@@ -242,29 +255,28 @@ const playerCounts = {
     } catch (error) {
       console.error("Error updating bid:", error);
       setCurrentBid((prev) => prev - bidAmount);
-      // setTotalSpent((prevSpent) => prevSpent - bidAmount);
     }
-  }, [bidAmount, currentBid, dispatch, id, userTeam, timeLeft]);
+  }, [bidAmount, currentBid, dispatch, id, userTeam, isBiddingAllowed]);
 
   // Handle bid button clicks
   const handleBidButtonClick = useCallback(
     (amount) => {
-      if (timeLeft <= 0) return;
+      if (!isBiddingAllowed) return;
       setIsManualBid(true);
       setBidAmount((prevBidAmount) => prevBidAmount + amount);
     },
-    [timeLeft]
+    [isBiddingAllowed]
   );
 
   // Handle input change
   const handleBidInputChange = useCallback(
     (e) => {
-      if (timeLeft <= 0) return;
+      if (!isBiddingAllowed) return;
       setIsManualBid(true);
       setBidAmount(Number(e.target.value));
     },
-    [timeLeft]
-  );  
+    [isBiddingAllowed]
+  );
 
   if (loading) {
     return (
@@ -485,9 +497,10 @@ const playerCounts = {
                       <div className="flex items-center mb-4 sm:mb-0">
                         <span className="text-xl text-white">Current Bid</span>
                         <Timer auctionId={id} onTimeUpdate={handleTimeUpdate} isAuctionActive={auctionStatus === "running"} />
+                     
                       </div>
                       <span className="text-3xl font-bold text-[#B0E0E6]">
-                      ₹
+                        ₹
                         {currentPlayer.auction_detail.current_bid < 10000000
                           ? (currentPlayer.auction_detail.current_bid / 100000).toFixed(2) + ' L'
                           : (currentPlayer.auction_detail.current_bid / 10000000).toFixed(2) + ' Cr'
@@ -499,11 +512,13 @@ const playerCounts = {
                         type="number"
                         value={bidAmount}
                         onChange={handleBidInputChange}
-                        className="w-full p-4 border rounded-lg text-lg font-medium text-white bg-[#2C2F32] focus:outline-none focus:ring-2 focus:ring-[#0047AB] focus:border-transparent"
+                        className={`w-full p-4 border rounded-lg text-lg font-medium text-white bg-[#2C2F32] focus:outline-none focus:ring-2 focus:ring-[#0047AB] focus:border-transparent ${
+                          !isBiddingAllowed ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
                         style={{ borderColor: userTeam.color || "#0047AB" }}
                         min={currentBid + 50000}
                         step={50000}
-                        disabled={timeLeft <= 0}
+                        disabled={!isBiddingAllowed}
                       />
                       <div className="flex flex-wrap gap-2">
                         {[
@@ -512,17 +527,17 @@ const playerCounts = {
                           { amount: 5000000, label: "₹50L" },
                         ].map((button, index) =>
                           currentPlayer.auction_detail.base_price <=
-                            currentPlayer.auction_detail.current_bid &&
-                          timeLeft > 0 ? (
+                            currentPlayer.auction_detail.current_bid ? (
                             <button
                               key={index}
-                              onClick={() =>
-                                handleBidButtonClick(button.amount)
-                              }
-                              className="flex-1 px-4 py-2 text-base font-semibold text-black rounded-lg transition-colors"
+                              onClick={() => handleBidButtonClick(button.amount)}
+                              className={`flex-1 px-4 py-2 text-base font-semibold text-black rounded-lg transition-colors ${
+                                !isBiddingAllowed ? 'opacity-50 cursor-not-allowed' : ''
+                              }`}
                               style={{
-                                backgroundColor: userTeam.color || "#B0E0E6",
+                                backgroundColor: isBiddingAllowed ? (userTeam.color || "#B0E0E6") : "#808080",
                               }}
+                              disabled={!isBiddingAllowed}
                             >
                               <i className="fas fa-plus-circle mr-1"></i>
                               {button.label}
@@ -530,16 +545,18 @@ const playerCounts = {
                           ) : null
                         )}
                         <button
-                          onClick={() => timeLeft > 0 && setShowBidModal(true)}
-                          disabled={timeLeft <= 0}
+                          onClick={() => isBiddingAllowed && setShowBidModal(true)}
+                          disabled={!isBiddingAllowed}
                           className={`flex-1 px-4 py-2 text-base font-semibold rounded-lg transition-colors flex items-center justify-center ${
-                            timeLeft <= 0
-                              ? "bg-gray-500 cursor-not-allowed"
+                            !isBiddingAllowed
+                              ? "bg-gray-500 cursor-not-allowed opacity-50"
                               : "bg-[#0047AB] text-white hover:bg-[#003A8C] cursor-pointer"
                           }`}
                         >
                           <i className="fas fa-gavel mr-2"></i>
-                          {timeLeft <= 0 ? "Bid Closed" : "Place Bid"}
+                          {!isBiddingAllowed ? (
+                            auctionStatus === "paused" ? "Auction Paused" : "Bid Closed"
+                          ) : "Place Bid"}
                         </button>
                       </div>
                     </div>
