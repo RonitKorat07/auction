@@ -13,6 +13,7 @@ import { fetchPlayers, fetchPlayersByTeam } from "../store/playerslice";
 import { doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { db } from "../config/firebaseconfig";
 import TopBuyers from "../components/TopBuyer";
+
 import Timer from "../components/Timer";
 
 // Memoized Bid History Component
@@ -53,7 +54,6 @@ const BidHistory = React.memo(({ reversedBidHistory, userTeam }) => {
                     ? (bid.bidAmount / 100000).toFixed(2) + ' Lakh'
                     : (bid.bidAmount / 10000000).toFixed(2) + ' Cr'
                 }
-
               </span>
             </div>
           ))
@@ -93,6 +93,7 @@ const Teamjoinauction = () => {
   const [timeLeft, setTimeLeft] = useState(30);
   const [teamData, setTeamData] = useState(null);
   const [auctionStatus, setAuctionStatus] = useState("running");
+  const [isBiddingAllowed, setIsBiddingAllowed] = useState(false);
 
   const dispatch = useDispatch();
   const { id } = useParams();
@@ -103,10 +104,20 @@ const Teamjoinauction = () => {
     (state) => state.joinedPlayers
   );
 
-  // Check if bidding is allowed
-  const isBiddingAllowed = useMemo(() => {
-    return auctionStatus === "running" && timeLeft > 0;
-  }, [auctionStatus, timeLeft]);
+  // Update bidding allowed status whenever auctionStatus or timeLeft changes
+  useEffect(() => {
+    const currentPlayerRef = doc(db, "currentplayer", id);
+    const unsubscribe = onSnapshot(currentPlayerRef, (doc) => {
+      if (doc.exists()) {
+        const data = doc.data();
+        const timeLeft = data.timeLeft || 0;
+        const status = data.auctionStatus;
+        setIsBiddingAllowed(status === "running" && timeLeft > 0);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [id]);
 
   // Memoized derived data
   const reversedBidHistory = useMemo(() => {
@@ -125,7 +136,7 @@ const Teamjoinauction = () => {
     setTimeLeft(newTime);
   }, []);
 
-  // Fetch team data and auction status
+  // Fetch team data and auction status with real-time updates
   useEffect(() => {
     if (userTeam) {
       const teamRef = doc(db, "teams", userTeam.id);
@@ -140,6 +151,10 @@ const Teamjoinauction = () => {
         if (doc.exists()) {
           const data = doc.data();
           setAuctionStatus(data.auctionStatus || "running");
+          // Update current bid from real-time data
+          if (data.current_bid !== currentBid) {
+            setCurrentBid(data.current_bid);
+          }
         }
       });
 
@@ -148,7 +163,7 @@ const Teamjoinauction = () => {
         unsubscribeAuction();
       };
     }
-  }, [userTeam, id]);
+  }, [userTeam, id, currentBid]);
 
   // Fetch logged-in user's email
   useEffect(() => {
@@ -240,8 +255,12 @@ const Teamjoinauction = () => {
       return;
     }
 
+    if (bidAmount > remainingBudget) {
+      alert("You don't have enough budget to place this bid.");
+      return;
+    }
+
     try {
-      setCurrentBid(bidAmount);
       setShowBidModal(false);
 
       await dispatch(
@@ -254,9 +273,8 @@ const Teamjoinauction = () => {
       );
     } catch (error) {
       console.error("Error updating bid:", error);
-      setCurrentBid((prev) => prev - bidAmount);
     }
-  }, [bidAmount, currentBid, dispatch, id, userTeam, isBiddingAllowed]);
+  }, [bidAmount, currentBid, dispatch, id, userTeam, isBiddingAllowed, remainingBudget]);
 
   // Handle bid button clicks
   const handleBidButtonClick = useCallback(
@@ -304,7 +322,6 @@ const Teamjoinauction = () => {
       </div>
     );
   }
-
 
   return (
     <div className="min-h-screen bg-[#202626] pt-20">
@@ -496,8 +513,11 @@ const Teamjoinauction = () => {
                     <div className="flex flex-col sm:flex-row justify-between items-center">
                       <div className="flex items-center mb-4 sm:mb-0">
                         <span className="text-xl text-white">Current Bid</span>
-                        <Timer auctionId={id} onTimeUpdate={handleTimeUpdate} isAuctionActive={auctionStatus === "running"} />
-                     
+                        <Timer 
+                          auctionId={id} 
+                          onTimeUpdate={handleTimeUpdate} 
+                          isAuctionActive={auctionStatus === "running"} 
+                        />
                       </div>
                       <span className="text-3xl font-bold text-[#B0E0E6]">
                         ₹
@@ -525,27 +545,24 @@ const Teamjoinauction = () => {
                           { amount: 1000000, label: "₹10L" },
                           { amount: 2500000, label: "₹25L" },
                           { amount: 5000000, label: "₹50L" },
-                        ].map((button, index) =>
-                          currentPlayer.auction_detail.base_price <=
-                            currentPlayer.auction_detail.current_bid ? (
-                            <button
-                              key={index}
-                              onClick={() => handleBidButtonClick(button.amount)}
-                              className={`flex-1 px-4 py-2 text-base font-semibold text-black rounded-lg transition-colors ${
-                                !isBiddingAllowed ? 'opacity-50 cursor-not-allowed' : ''
-                              }`}
-                              style={{
-                                backgroundColor: isBiddingAllowed ? (userTeam.color || "#B0E0E6") : "#808080",
-                              }}
-                              disabled={!isBiddingAllowed}
-                            >
-                              <i className="fas fa-plus-circle mr-1"></i>
-                              {button.label}
-                            </button>
-                          ) : null
-                        )}
+                        ].map((button, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleBidButtonClick(button.amount)}
+                            className={`flex-1 px-4 py-2 text-base font-semibold text-black rounded-lg transition-colors ${
+                              !isBiddingAllowed ? 'opacity-50 cursor-not-allowed' : ''
+                            }`}
+                            style={{
+                              backgroundColor: isBiddingAllowed ? (userTeam.color || "#B0E0E6") : "#808080",
+                            }}
+                            disabled={!isBiddingAllowed}
+                          >
+                            <i className="fas fa-plus-circle mr-1"></i>
+                            {button.label}
+                          </button>
+                        ))}
                         <button
-                          onClick={() => isBiddingAllowed && setShowBidModal(true)}
+                          onClick={() => isBiddingAllowed ? setShowBidModal(true) : null}
                           disabled={!isBiddingAllowed}
                           className={`flex-1 px-4 py-2 text-base font-semibold rounded-lg transition-colors flex items-center justify-center ${
                             !isBiddingAllowed
@@ -603,7 +620,6 @@ const Teamjoinauction = () => {
                               ? (player.auction_detail.base_price  / 100000).toFixed(2) + ' Lakh'
                               : (player.auction_detail.base_price  / 10000000).toFixed(2) + ' Cr'
                           }
-
                       </div>
                     </div>
                   </div>
@@ -614,100 +630,98 @@ const Teamjoinauction = () => {
         </div>
 
         {/* Recent Purchases Section */}
-      
         <TopBuyers userTeam={userTeam} />
 
         {/* Team Squad Section */}
-          <div
-            className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-6 border"
-            style={{ borderColor: userTeam?.color || "#0047AB" }}
-          >
-            <h2 className="text-2xl font-semibold mb-6 text-white">
-              Current Auction Squad
-            </h2>
-            <div className="overflow-x-auto">
-              <table
-                className="w-full text-lg border"
-                style={{ borderColor: userTeam?.color || "#0047AB" }}
-              >
-                <thead>
-                  <tr
-                    className="bg-[#2C2F32] border"
-                    style={{ borderColor: userTeam?.color || "#0047AB" }}
-                  >
-                    <th className="px-6 py-5 text-left text-white">Player</th>
-                    <th className="px-6 py-5 text-left text-white">Role</th>
-                    <th className="px-6 py-5 text-left text-white">Price</th>
-                    <th className="px-6 py-5 text-left text-white">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {players
-                    .filter((player) => {
-                      // Check if player has auction details and is sold to current team
-                      return (
-                        player.auction_detail && 
-                        player.auction_detail.team === userTeam?.name &&
-                        player.auction_detail.auction_status === "sold"
-                      );
-                    })
-                    .map((player) => (
-                      <tr
-                        key={`${player.id}-${player.auction_detail?.sold_price}`}
-                        className="border-b"
-                        style={{ borderColor: userTeam?.color || "#0047AB" }}
-                      >
-                        <td className="px-6 py-5">
-                          <div className="flex items-center space-x-4">
-                            <img
-                              src={player.image || "https://via.placeholder.com/150"}
-                              alt={player.name}
-                              className="w-12 h-12 rounded-full object-cover border-2"
-                              style={{ borderColor: userTeam?.color || "#0047AB" }}
-                              onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = "https://via.placeholder.com/150";
-                              }}
-                            />
-                            <div>
-                              <span className="font-medium text-white">
-                                {player.name}
-                              </span>
-                              <p className="text-sm text-gray-400">
-                                {player.country || "N/A"}
-                              </p>
-                            </div>
+        <div
+          className="mt-8 bg-[#2C2F32] rounded-lg shadow-lg p-6 border"
+          style={{ borderColor: userTeam?.color || "#0047AB" }}
+        >
+          <h2 className="text-2xl font-semibold mb-6 text-white">
+            Current Auction Squad
+          </h2>
+          <div className="overflow-x-auto">
+            <table
+              className="w-full text-lg border"
+              style={{ borderColor: userTeam?.color || "#0047AB" }}
+            >
+              <thead>
+                <tr
+                  className="bg-[#2C2F32] border"
+                  style={{ borderColor: userTeam?.color || "#0047AB" }}
+                >
+                  <th className="px-6 py-5 text-left text-white">Player</th>
+                  <th className="px-6 py-5 text-left text-white">Role</th>
+                  <th className="px-6 py-5 text-left text-white">Price</th>
+                  <th className="px-6 py-5 text-left text-white">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {players
+                  .filter((player) => {
+                    return (
+                      player.auction_detail && 
+                      player.auction_detail.team === userTeam?.name &&
+                      player.auction_detail.auction_status === "sold"
+                    );
+                  })
+                  .map((player) => (
+                    <tr
+                      key={`${player.id}-${player.auction_detail?.sold_price}`}
+                      className="border-b"
+                      style={{ borderColor: userTeam?.color || "#0047AB" }}
+                    >
+                      <td className="px-6 py-5">
+                        <div className="flex items-center space-x-4">
+                          <img
+                            src={player.image || "https://via.placeholder.com/150"}
+                            alt={player.name}
+                            className="w-12 h-12 rounded-full object-cover border-2"
+                            style={{ borderColor: userTeam?.color || "#0047AB" }}
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = "https://via.placeholder.com/150";
+                            }}
+                          />
+                          <div>
+                            <span className="font-medium text-white">
+                              {player.name}
+                            </span>
+                            <p className="text-sm text-gray-400">
+                              {player.country || "N/A"}
+                            </p>
                           </div>
-                        </td>
-                        <td className="px-6 py-5 text-white capitalize">
-                          {player.player_role?.toLowerCase() || "N/A"}
-                        </td>
-                        <td className="px-6 py-5 text-white">
-                          {player.auction_detail?.sold_price < 10000000
-                            ? `₹${(player.auction_detail?.sold_price / 100000).toFixed(2)} L`
-                            : `₹${(player.auction_detail?.sold_price / 10000000).toFixed(2)} Cr`}
-                        </td>
-                        <td className="px-6 py-5">
-                          <span className="px-3 py-1 rounded-full bg-green-500/20 text-green-500 text-xs">
-                            Purchased
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  {players.filter(player => 
-                    player.auction_detail?.team === userTeam?.name &&
-                    player.auction_detail?.auction_status === "sold"
-                  ).length === 0 && (
-                    <tr>
-                      <td colSpan="4" className="px-6 py-5 text-center text-white">
-                        No players purchased in current auction
+                        </div>
+                      </td>
+                      <td className="px-6 py-5 text-white capitalize">
+                        {player.player_role?.toLowerCase() || "N/A"}
+                      </td>
+                      <td className="px-6 py-5 text-white">
+                        {player.auction_detail?.sold_price < 10000000
+                          ? `₹${(player.auction_detail?.sold_price / 100000).toFixed(2)} L`
+                          : `₹${(player.auction_detail?.sold_price / 10000000).toFixed(2)} Cr`}
+                      </td>
+                      <td className="px-6 py-5">
+                        <span className="px-3 py-1 rounded-full bg-green-500/20 text-green-500 text-xs">
+                          Purchased
+                        </span>
                       </td>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  ))}
+                {players.filter(player => 
+                  player.auction_detail?.team === userTeam?.name &&
+                  player.auction_detail?.auction_status === "sold"
+                ).length === 0 && (
+                  <tr>
+                    <td colSpan="4" className="px-6 py-5 text-center text-white">
+                      No players purchased in current auction
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
+        </div>
       </main>
 
       {/* Bid Confirmation Modal */}
