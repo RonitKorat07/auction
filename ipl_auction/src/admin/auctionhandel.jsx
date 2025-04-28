@@ -314,7 +314,7 @@ const Auctionhandel = () => {
                 Bid History
               </h2>
               <div
-                className="max-h-140 overflow-y-auto scrollbar-hide space-y-3"
+                className="max-h-120 overflow-y-auto scrollbar-hide space-y-3"
                 style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
               >
                 {reversedBidHistory.length === 0 ? (
