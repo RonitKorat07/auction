@@ -157,6 +157,10 @@ export const updateSoldStatus = (auctionId) => async (dispatch, getState) => {
         "auction_detail.team": lastBid?.teamName || null,
       });
 
+      alert(`Player marked as SOLD and recorded in history.`);
+
+    }
+
       const playerData = {
         playerId: currentPlayer.id,
         name: currentPlayer.name,
@@ -175,8 +179,7 @@ export const updateSoldStatus = (auctionId) => async (dispatch, getState) => {
         players: arrayUnion(playerData)
       });
 
-      alert(`Player marked as SOLD and recorded in history.`);
-    }
+    
   } catch (error) {
     console.error("Error updating status:", error);
     alert(error.message || "Failed to update status. Please try again.");
